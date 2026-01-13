@@ -334,7 +334,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
         <div className="modal-content">
           <img
             className="modalImage"
-            src={`/assets/${item.image}`}
+            src={`./assets/${item.image}`}
             alt={item.image}
           />
           <h3>Tilpas din {item.name}</h3>
@@ -736,7 +736,7 @@ export default function Menu() {
                     className="bg-white rounded shadow flex items-center menu-item"
                     onClick={() => openModal(item)}
                   >
-                    <img src={`/assets/${item.image}`} alt={item.image} />
+                    <img src={`./assets/${item.image}`} alt={item.image} />
                     <div className="menu-item-content">
                       <div>
                         <h4 className="menu-item-name">{item.name}</h4>
@@ -776,7 +776,7 @@ export default function Menu() {
                       className="bg-white rounded shadow flex items-center menu-item"
                       onClick={() => openModal(item)}
                     >
-                      <img src={`/assets/${item.image}`} alt={item.image} />
+                      <img src={`./assets/${item.image}`} alt={item.image} />
                       <div className="menu-item-content">
                         <div>
                           <h4 className="menu-item-name">{item.name}</h4>
