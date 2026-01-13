@@ -4,7 +4,11 @@ import { MENU, MenuCard } from "./Menu";
 import { PizzaIcon, ArrowRightIcon } from "./Icons";
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { getAllReviews, getReviewsMetadata, type Review } from "../services/reviewsService";
+import {
+  getAllReviews,
+  getReviewsMetadata,
+  type Review,
+} from "../services/reviewsService";
 
 // localStorage keys
 const REVIEWS_STORAGE_KEY = "xanthos_reviews";
@@ -33,9 +37,10 @@ function setStoredReviews(reviews: Review[]): void {
     // Convert Date objects to ISO strings for storage
     const serializable = reviews.map((review) => ({
       ...review,
-      createdAt: review.createdAt instanceof Date 
-        ? review.createdAt.toISOString() 
-        : review.createdAt,
+      createdAt:
+        review.createdAt instanceof Date
+          ? review.createdAt.toISOString()
+          : review.createdAt,
     }));
     localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(serializable));
   } catch (error) {
@@ -50,7 +55,10 @@ function getStoredReviewsLastUpdated(): Date | null {
       return new Date(stored);
     }
   } catch (error) {
-    console.error("Error reading reviews lastUpdated from localStorage:", error);
+    console.error(
+      "Error reading reviews lastUpdated from localStorage:",
+      error
+    );
   }
   return null;
 }
@@ -69,21 +77,21 @@ const SPECIALS = [
     title: "BBQ Ribs Combo",
     description: "Saftiga ribs med vår hemlagade BBQ-sås + liten Cola",
     price: "159,-",
-    image: "/assets/pepperoni.jpg",
+    image: "/xantos-pizza-grill/assets/pepperoni.jpg",
   },
   {
     id: 2,
     title: "Pepperoni Pizza Deal",
     description: "Stor pepperoni pizza + valgfri dip",
     price: "119,-",
-    image: "/assets/pepperoni.jpg",
+    image: "/xantos-pizza-grill/assets/pepperoni.jpg",
   },
   {
     id: 3,
     title: "Mixed Grill Plate",
     description: "Kebabspyd, pølser & pommes frites",
     price: "169,-",
-    image: "/assets/pepperoni.jpg",
+    image: "/xantos-pizza-grill/assets/pepperoni.jpg",
   },
 ];
 
@@ -109,12 +117,10 @@ export default function Home() {
     const openTime = 11;
     const closeTime = 22;
 
-
-//     const day = now.getDay();
-// const [open, close] = hours[day];
+    //     const day = now.getDay();
+    // const [open, close] = hours[day];
 
     return currentTime >= openTime && currentTime < closeTime;
-
   }
 
   function handleContactSubmit(e: FormEvent<HTMLFormElement>) {
@@ -137,34 +143,39 @@ export default function Home() {
         if (storedReviews && storedReviews.length > 0) {
           // Set reviews from cache immediately for fast UI
           setReviews(storedReviews);
-          
+
           // Calculate average rating from cached reviews
-          const avg = storedReviews.reduce((sum, r) => sum + r.rating, 0) / storedReviews.length;
+          const avg =
+            storedReviews.reduce((sum, r) => sum + r.rating, 0) /
+            storedReviews.length;
           setAverageRating(Math.round(avg * 10) / 10);
           setTotalReviews(storedReviews.length);
-          
+
           setReviewsLoading(false);
 
           // Check if we need to update from Firebase
           const firebaseLastUpdated = await getReviewsMetadata();
-          
+
           if (firebaseLastUpdated) {
             // Compare timestamps
-            const needsUpdate = !storedLastUpdated || 
+            const needsUpdate =
+              !storedLastUpdated ||
               firebaseLastUpdated.getTime() > storedLastUpdated.getTime();
 
             if (needsUpdate) {
               // Fetch fresh data from Firebase
               const fetchedReviews = await getAllReviews(6);
-              
+
               // Update state and localStorage
               setReviews(fetchedReviews);
               setStoredReviews(fetchedReviews);
               setStoredReviewsLastUpdated(firebaseLastUpdated);
-              
+
               // Recalculate average rating
               if (fetchedReviews.length > 0) {
-                const avg = fetchedReviews.reduce((sum, r) => sum + r.rating, 0) / fetchedReviews.length;
+                const avg =
+                  fetchedReviews.reduce((sum, r) => sum + r.rating, 0) /
+                  fetchedReviews.length;
                 setAverageRating(Math.round(avg * 10) / 10);
                 setTotalReviews(fetchedReviews.length);
               }
@@ -173,17 +184,19 @@ export default function Home() {
         } else {
           // No cached data, fetch from Firebase
           const fetchedReviews = await getAllReviews(6);
-          
+
           setReviews(fetchedReviews);
           setStoredReviews(fetchedReviews);
-          
+
           // Calculate average rating
           if (fetchedReviews.length > 0) {
-            const avg = fetchedReviews.reduce((sum, r) => sum + r.rating, 0) / fetchedReviews.length;
+            const avg =
+              fetchedReviews.reduce((sum, r) => sum + r.rating, 0) /
+              fetchedReviews.length;
             setAverageRating(Math.round(avg * 10) / 10);
             setTotalReviews(fetchedReviews.length);
           }
-          
+
           const firebaseLastUpdated = await getReviewsMetadata();
           if (firebaseLastUpdated) {
             setStoredReviewsLastUpdated(firebaseLastUpdated);
@@ -191,12 +204,14 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Error loading reviews:", err);
-        
+
         // Fallback to cached data if available
         const storedReviews = getStoredReviews();
         if (storedReviews && storedReviews.length > 0) {
           setReviews(storedReviews);
-          const avg = storedReviews.reduce((sum, r) => sum + r.rating, 0) / storedReviews.length;
+          const avg =
+            storedReviews.reduce((sum, r) => sum + r.rating, 0) /
+            storedReviews.length;
           setAverageRating(Math.round(avg * 10) / 10);
           setTotalReviews(storedReviews.length);
         }
@@ -212,7 +227,7 @@ export default function Home() {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
+
     return (
       <>
         {"★".repeat(fullStars)}
@@ -324,8 +339,8 @@ export default function Home() {
               </p>
               <p>
                 Du kan både spise hjemme, hente selv eller få leveret. Bestil
-                online, og vi gør din mad klar, mens du er på vej – eller
-                sørger for hurtig udbringning i lokalområdet.
+                online, og vi gør din mad klar, mens du er på vej – eller sørger
+                for hurtig udbringning i lokalområdet.
               </p>
               <p>
                 Har du ønsker til allergener, vegetariske muligheder eller
@@ -371,7 +386,9 @@ export default function Home() {
                   <span className="hours-time">11:00 – 23:00</span>
                 </div>
               </div>
-              <div className={`hours-status ${isOpenNow() ? "open" : "closed"}`}>
+              <div
+                className={`hours-status ${isOpenNow() ? "open" : "closed"}`}
+              >
                 <span className="status-dot"></span>
                 {isOpenNow() ? "Åben nu" : "Lukket"}
               </div>
@@ -404,7 +421,9 @@ export default function Home() {
         <section className="section reviews-section">
           <div className="section-header">
             <h2 className="section-title">Hvad vores kunder siger</h2>
-            <p className="section-subtitle">Anmeldelser fra vores glade kunder</p>
+            <p className="section-subtitle">
+              Anmeldelser fra vores glade kunder
+            </p>
           </div>
           {reviewsLoading ? (
             <div className="reviews-loading">Indlæser anmeldelser...</div>
@@ -426,7 +445,8 @@ export default function Home() {
                 ))}
               </div>
               <p className="reviews-average">
-                ⭐ {averageRating.toFixed(1)} gennemsnitlig vurdering fra {totalReviews} anmeldelse{totalReviews !== 1 ? "r" : ""}
+                ⭐ {averageRating.toFixed(1)} gennemsnitlig vurdering fra{" "}
+                {totalReviews} anmeldelse{totalReviews !== 1 ? "r" : ""}
               </p>
             </>
           )}
@@ -437,9 +457,9 @@ export default function Home() {
           <div className="section-header">
             <h2 className="section-title">Skriv til os</h2>
             <p className="section-subtitle">
-              Har du spørgsmål til allergener, levering, større bestillinger eller
-              bare lyst til at bestille over telefonen? Du er altid velkommen til at
-              kontakte os.
+              Har du spørgsmål til allergener, levering, større bestillinger
+              eller bare lyst til at bestille over telefonen? Du er altid
+              velkommen til at kontakte os.
             </p>
           </div>
           <form className="contact-form" onSubmit={handleContactSubmit}>
