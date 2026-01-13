@@ -7,7 +7,6 @@ import {
   query,
   orderBy,
   Timestamp,
-  type DocumentData,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
@@ -33,7 +32,9 @@ export interface Order {
 }
 
 // Create a new order
-export async function createOrder(orderData: Omit<Order, "id" | "createdAt">): Promise<string> {
+export async function createOrder(
+  orderData: Omit<Order, "id" | "createdAt">
+): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, "orders"), {
       ...orderData,
@@ -84,9 +85,9 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
     const q = query(collection(db, "orders"));
     const querySnapshot = await getDocs(q);
     const order = querySnapshot.docs.find((doc) => doc.id === orderId);
-    
+
     if (!order) return null;
-    
+
     return {
       id: order.id,
       ...order.data(),

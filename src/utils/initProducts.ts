@@ -3,12 +3,11 @@
 
 import { createProduct } from "../services/productsService";
 import { MENU } from "../components/Menu";
-import { createReview } from "../services/reviewsService";
 
 export async function initializeProducts() {
   try {
     console.log("Initializing products in Firebase...");
-    
+
     for (const product of MENU) {
       await createProduct({
         category: product.category,
@@ -20,7 +19,7 @@ export async function initializeProducts() {
       });
       console.log(`Created product: ${product.name}`);
     }
-    
+
     console.log("All products initialized successfully!");
   } catch (error) {
     console.error("Error initializing products:", error);

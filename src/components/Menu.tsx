@@ -3,9 +3,11 @@ import { useCart, type MenuItem } from "../contexts/CartContext";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { IngredientOption, Product } from "../hooks/types";
-import FloatingCartButton from "./FloatingCartButton";
 import { CloseIcon } from "../hooks/icons";
-import { getAllProducts, getProductsMetadata } from "../services/productsService";
+import {
+  getAllProducts,
+  getProductsMetadata,
+} from "../services/productsService";
 
 // localStorage keys
 const PRODUCTS_STORAGE_KEY = "xanthos_products";
@@ -425,10 +427,11 @@ export default function Menu() {
 
           // Check if we need to update from Firebase
           const firebaseLastUpdated = await getProductsMetadata();
-          
+
           if (firebaseLastUpdated) {
             // Compare timestamps
-            const needsUpdate = !storedLastUpdated || 
+            const needsUpdate =
+              !storedLastUpdated ||
               firebaseLastUpdated.getTime() > storedLastUpdated.getTime();
 
             if (needsUpdate) {
@@ -438,7 +441,7 @@ export default function Menu() {
                 ...p,
                 id: p.id || "",
               })) as Product[];
-              
+
               // Update state and localStorage
               setProducts(freshProductsWithId);
               setStoredProducts(freshProductsWithId);
@@ -452,10 +455,10 @@ export default function Menu() {
             ...p,
             id: p.id || "",
           })) as Product[];
-          
+
           setProducts(productsWithId);
           setStoredProducts(productsWithId);
-          
+
           const firebaseLastUpdated = await getProductsMetadata();
           if (firebaseLastUpdated) {
             setStoredLastUpdated(firebaseLastUpdated);
@@ -464,7 +467,7 @@ export default function Menu() {
       } catch (err) {
         console.error("Error loading products:", err);
         setError("Kunne ikke indlæse produkter. Prøv venligst igen.");
-        
+
         // Fallback to cached data if available
         const storedProducts = getStoredProducts();
         if (storedProducts && storedProducts.length > 0) {
@@ -514,7 +517,9 @@ export default function Menu() {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      item.tags?.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      ) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesSearch;
@@ -558,7 +563,9 @@ export default function Menu() {
       {/* <FloatingCartButton /> */}
       <div className="menu-header">
         <div>
-          <p className="menu-subtitle">Vælg en kategori for at se vores retter.</p>
+          <p className="menu-subtitle">
+            Vælg en kategori for at se vores retter.
+          </p>
           <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
             <span role="img" aria-label="bestik" className="menu-header-icon">
               🍽️
@@ -782,7 +789,14 @@ export default function Menu() {
                             </span>
                           ))}
                         </div>
-                        <div className={"menu-item-price" + (item.tags?.length && item.tags.length > 0 ? " moveDown" : "")}>
+                        <div
+                          className={
+                            "menu-item-price" +
+                            (item.tags?.length && item.tags.length > 0
+                              ? " moveDown"
+                              : "")
+                          }
+                        >
                           <div className="font-bold">
                             DKK {Number(item.price).toFixed(2)}
                           </div>
@@ -834,7 +848,9 @@ export default function Menu() {
                     </div>
                     <div className="menu-cart-controls">
                       <button
-                        onClick={() => updateQty(item.id, Math.max(1, item.qty - 1))}
+                        onClick={() =>
+                          updateQty(item.id, Math.max(1, item.qty - 1))
+                        }
                         aria-label="Fjern en"
                       >
                         −

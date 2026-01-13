@@ -10,8 +10,6 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
-  type DocumentData,
-  Timestamp,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
@@ -45,7 +43,9 @@ export async function getAllProducts(): Promise<Product[]> {
 }
 
 // Create a new product
-export async function createProduct(productData: Omit<Product, "id">): Promise<string> {
+export async function createProduct(
+  productData: Omit<Product, "id">
+): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, "products"), productData);
     await updateProductsMetadata();
@@ -61,7 +61,7 @@ export async function updateProduct(
   productId: string,
   productData: Partial<Product>
 ): Promise<void> {
-  try {    
+  try {
     const productRef = doc(db, "products", productId);
     await updateDoc(productRef, productData);
     await updateProductsMetadata();
@@ -88,7 +88,7 @@ export async function getProductsMetadata(): Promise<Date | null> {
   try {
     const metadataRef = doc(db, "metadata", "products");
     const metadataSnap = await getDoc(metadataRef);
-    
+
     if (metadataSnap.exists()) {
       const data = metadataSnap.data();
       const lastUpdated = data.lastUpdated;
@@ -111,9 +111,13 @@ export async function getProductsMetadata(): Promise<Date | null> {
 export async function updateProductsMetadata(): Promise<void> {
   try {
     const metadataRef = doc(db, "metadata", "products");
-    await setDoc(metadataRef, {
-      lastUpdated: serverTimestamp(),
-    }, { merge: true });
+    await setDoc(
+      metadataRef,
+      {
+        lastUpdated: serverTimestamp(),
+      },
+      { merge: true }
+    );
   } catch (error) {
     console.error("Error updating products metadata:", error);
   }
