@@ -77,21 +77,21 @@ const SPECIALS = [
     title: "BBQ Ribs Combo",
     description: "Saftiga ribs med vår hemlagade BBQ-sås + liten Cola",
     price: "159,-",
-    image: "/xantos-pizza-grill/assets/pepperoni.jpg",
+    image: "./assets/pepperoni.jpg",
   },
   {
     id: 2,
     title: "Pepperoni Pizza Deal",
     description: "Stor pepperoni pizza + valgfri dip",
     price: "119,-",
-    image: "/xantos-pizza-grill/assets/pepperoni.jpg",
+    image: "./assets/pepperoni.jpg",
   },
   {
     id: 3,
     title: "Mixed Grill Plate",
     description: "Kebabspyd, pølser & pommes frites",
     price: "169,-",
-    image: "/xantos-pizza-grill/assets/pepperoni.jpg",
+    image: "./assets/pepperoni.jpg",
   },
 ];
 
