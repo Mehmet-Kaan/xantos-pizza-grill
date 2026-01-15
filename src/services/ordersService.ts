@@ -6,7 +6,10 @@ import {
   updateDoc,
   query,
   orderBy,
+  where,
   Timestamp,
+  onSnapshot,
+  type Unsubscribe,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
@@ -47,16 +50,36 @@ export async function createOrder(
   }
 }
 
-// Get all orders
-export async function getAllOrders(): Promise<Order[]> {
+// Get all orders (with optional filters for today's orders and excluding ready status)
+export async function getAllOrders(onlyToday = false, excludeReady = false): Promise<Order[]> {
   try {
-    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    let q = query(collection(db, "orders"));
+    
+    // Filter: only today's orders
+    if (onlyToday) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTimestamp = Timestamp.fromDate(today);
+      q = query(q, where("createdAt", ">=", todayTimestamp));
+    }
+    
+    // Note: We filter by status client-side to avoid composite index requirement
+    // Always order by createdAt descending (newest first)
+    q = query(q, orderBy("createdAt", "desc"));
+    
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    let orders = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate() || new Date(),
     })) as Order[];
+    
+    // Filter: exclude orders with "ready" status (client-side to avoid index requirement)
+    if (excludeReady) {
+      orders = orders.filter(order => order.status !== "ready");
+    }
+    
+    return orders;
   } catch (error) {
     console.error("Error fetching orders:", error);
     throw error;
@@ -96,5 +119,62 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
   } catch (error) {
     console.error("Error fetching order:", error);
     throw error;
+  }
+}
+
+// Subscribe to real-time order updates (with optional filters for today's orders and excluding ready status)
+export function subscribeToOrders(
+  onUpdate: (orders: Order[]) => void,
+  onError?: (error: Error) => void,
+  onlyToday = false,
+  excludeReady = false
+): Unsubscribe {
+  try {
+    let q = query(collection(db, "orders"));
+    
+    // Filter: only today's orders
+    if (onlyToday) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTimestamp = Timestamp.fromDate(today);
+      q = query(q, where("createdAt", ">=", todayTimestamp));
+    }
+    
+    // Note: We filter by status client-side to avoid composite index requirement
+    // Always order by createdAt descending (newest first)
+    q = query(q, orderBy("createdAt", "desc"));
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        let orders = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+        })) as Order[];
+        
+        // Filter: exclude orders with "ready" status (client-side to avoid index requirement)
+        if (excludeReady) {
+          orders = orders.filter(order => order.status !== "ready");
+        }
+        
+        onUpdate(orders);
+      },
+      (error) => {
+        console.error("Error in orders subscription:", error);
+        if (onError) {
+          onError(error as Error);
+        }
+      }
+    );
+
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error setting up orders subscription:", error);
+    if (onError) {
+      onError(error as Error);
+    }
+    // Return a no-op unsubscribe function
+    return () => {};
   }
 }

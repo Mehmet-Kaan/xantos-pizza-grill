@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { getAllOrders, updateOrderStatus, type Order } from "../services/ordersService";
+import { getAllOrders, updateOrderStatus, subscribeToOrders, type Order } from "../services/ordersService";
 import { initializeProducts } from "../utils/initProducts";
 import { getAllProducts, updateProduct, deleteProduct, type Product } from "../services/productsService";
 import { getAllReviews, updateReview, type Review } from "../services/reviewsService";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../config/firebase";
+import type { Unsubscribe } from "firebase/firestore";
 import "../styles/Admin.css";
 
 type Tab = "orders" | "products" | "reviews";
@@ -43,7 +44,13 @@ export default function Admin() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
   const seenOrderIdsRef = useRef<Set<string>>(new Set());
-  const pollingIntervalRef = useRef<number | null>(null);
+  const unsubscribeRef = useRef<Unsubscribe | null>(null);
+  const isInitialLoadRef = useRef<boolean>(true);
+  
+  // All today's orders state (for subsection)
+  const [allTodaysOrders, setAllTodaysOrders] = useState<Order[]>([]);
+  const [allTodaysOrdersLoading, setAllTodaysOrdersLoading] = useState(false);
+  const [showAllTodaysOrders, setShowAllTodaysOrders] = useState(false);
   
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
@@ -58,50 +65,109 @@ export default function Admin() {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
 
-  async function loadOrders(playSoundOnNew = false) {
+  // LocalStorage functions for all today's orders
+  const getStoredTodaysOrders = (): Order[] | null => {
+    try {
+      const stored = localStorage.getItem("admin_todays_orders");
+      if (!stored) return null;
+      const data = JSON.parse(stored);
+      // Check if data is from today
+      const storedDate = new Date(data.date);
+      const today = new Date();
+      if (
+        storedDate.getDate() !== today.getDate() ||
+        storedDate.getMonth() !== today.getMonth() ||
+        storedDate.getFullYear() !== today.getFullYear()
+      ) {
+        return null; // Data is from a different day
+      }
+      return data.orders;
+    } catch (error) {
+      console.error("Error reading today's orders from localStorage:", error);
+      return null;
+    }
+  };
+
+  const setStoredTodaysOrders = (orders: Order[]) => {
+    try {
+      localStorage.setItem(
+        "admin_todays_orders",
+        JSON.stringify({
+          date: new Date().toISOString(),
+          orders: orders,
+        })
+      );
+    } catch (error) {
+      console.error("Error saving today's orders to localStorage:", error);
+    }
+  };
+
+  const updateStoredTodaysOrderStatus = (orderId: string, newStatus: Order["status"]) => {
+    try {
+      const stored = getStoredTodaysOrders();
+      if (stored) {
+        const updated = stored.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        );
+        setStoredTodaysOrders(updated);
+        // Also update the state if the subsection is visible
+        if (showAllTodaysOrders) {
+          setAllTodaysOrders(updated);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating stored order status:", error);
+    }
+  };
+
+  async function loadOrders(resetSeenOrders = false) {
     try {
       setOrdersLoading(true);
       setOrdersError(null);
-      const fetchedOrders = await getAllOrders();
+      // Only fetch today's orders that are not "ready" (klar)
+      const fetchedOrders = await getAllOrders(true, true);
+      setOrders(fetchedOrders);
       
-      // Check for new orders
-      if (playSoundOnNew && activeTab === "orders") {
-        const previousOrderIds = seenOrderIdsRef.current;
-        
-        // Find new orders
-        const newOrders = fetchedOrders.filter(
-          o => o.id && !previousOrderIds.has(o.id)
-        );
-        
-        if (newOrders.length > 0) {
-          // Only play sound if page is visible
-          if (!document.hidden) {
-            // Play notification sound for new orders
-            playNotificationSound();
-          }
-          
-          // Update seen orders
-          fetchedOrders.forEach(o => {
-            if (o.id) {
-              seenOrderIdsRef.current.add(o.id);
-            }
-          });
-        }
-      } else {
-        // Initialize seen orders on first load
-        fetchedOrders.forEach(o => {
-          if (o.id) {
-            seenOrderIdsRef.current.add(o.id);
-          }
-        });
+      // Reset seen orders if manual refresh
+      if (resetSeenOrders) {
+        seenOrderIdsRef.current.clear();
       }
       
-      setOrders(fetchedOrders);
+      // Initialize seen orders
+      fetchedOrders.forEach(o => {
+        if (o.id) {
+          seenOrderIdsRef.current.add(o.id);
+        }
+      });
     } catch (err) {
       console.error("Error loading orders:", err);
       setOrdersError("Kunne ikke indlæse ordrer. Prøv venligst igen.");
     } finally {
       setOrdersLoading(false);
+    }
+  }
+
+  async function loadAllTodaysOrders() {
+    try {
+      setAllTodaysOrdersLoading(true);
+      
+      // First, try to load from localStorage
+      const storedOrders = getStoredTodaysOrders();
+      if (storedOrders && storedOrders.length > 0) {
+        setAllTodaysOrders(storedOrders);
+        setAllTodaysOrdersLoading(false);
+        return; // Use cached data, don't fetch from Firebase
+      }
+      
+      // If no cached data, fetch from Firebase
+      const fetchedOrders = await getAllOrders(true, false); // Get all today's orders including "ready"
+      setAllTodaysOrders(fetchedOrders);
+      setStoredTodaysOrders(fetchedOrders);
+    } catch (err) {
+      console.error("Error loading all today's orders:", err);
+      alert("Kunne ikke indlæse alle dagens ordrer. Prøv venligst igen.");
+    } finally {
+      setAllTodaysOrdersLoading(false);
     }
   }
 
@@ -136,33 +202,104 @@ export default function Admin() {
 
   useEffect(() => {
     if (activeTab === "orders") {
+      // Initial load
       loadOrders();
+      isInitialLoadRef.current = true;
       
-      // Set up polling for new orders (check every 5 seconds)
-      pollingIntervalRef.current = setInterval(() => {
-        loadOrders(true); // Pass true to enable sound on new orders
-      }, 5000);
-      
-      return () => {
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
-        }
-      };
+      // Set up real-time listener for orders (only today's orders, excluding "ready" status)
+      unsubscribeRef.current = subscribeToOrders(
+        (fetchedOrders) => {
+          if (isInitialLoadRef.current) {
+            // First load: just set orders and mark as seen
+            setOrders(fetchedOrders);
+            fetchedOrders.forEach(o => {
+              if (o.id) {
+                seenOrderIdsRef.current.add(o.id);
+              }
+            });
+            isInitialLoadRef.current = false;
+            setOrdersLoading(false);
+          } else {
+            // Subsequent updates: check for new orders
+            const previousOrderIds = seenOrderIdsRef.current;
+            
+            // Find new orders that we haven't seen before
+            const newOrders = fetchedOrders.filter(
+              o => o.id && !previousOrderIds.has(o.id)
+            );
+            
+            if (newOrders.length > 0) {
+              // Only play sound if page is visible
+              if (!document.hidden) {
+                // Play notification sound for new orders
+                playNotificationSound();
+              }
+              
+              // Append new orders to existing list (prepend since sorted by date desc)
+              setOrders(prevOrders => {
+                // Get existing order IDs to avoid duplicates
+                const existingIds = new Set(prevOrders.map(o => o.id));
+                const uniqueNewOrders = newOrders.filter(o => o.id && !existingIds.has(o.id));
+                
+                // Prepend new orders to existing ones (newest first)
+                const updatedOrders = [...uniqueNewOrders, ...prevOrders];
+                
+                // Sort by createdAt descending to maintain order (newest first)
+                return updatedOrders.sort((a, b) => {
+                  const getTime = (order: Order) => {
+                    if (order.createdAt instanceof Date) {
+                      return order.createdAt.getTime();
+                    }
+                    if (order.createdAt && typeof order.createdAt === 'object' && 'toDate' in order.createdAt) {
+                      return (order.createdAt as any).toDate().getTime();
+                    }
+                    return new Date(order.createdAt as any).getTime();
+                  };
+                  return getTime(b) - getTime(a);
+                });
+              });
+              
+              // Update seen orders - mark new orders as seen
+              newOrders.forEach(o => {
+                if (o.id) {
+                  seenOrderIdsRef.current.add(o.id);
+                }
+              });
+            }
+            // If no new orders, don't update state - leave existing orders on screen
+          }
+        },
+        (error) => {
+          console.error("Error in orders subscription:", error);
+          setOrdersError("Fejl ved real-time opdatering af ordrer.");
+        },
+        true, // onlyToday: only fetch today's orders
+        true  // excludeReady: exclude orders with "ready" status
+      );
     } else if (activeTab === "products") {
       loadProducts();
     } else if (activeTab === "reviews") {
       loadReviews();
     }
     
-    // Cleanup polling when tab changes
+    // Cleanup: unsubscribe when tab changes or component unmounts
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
       }
     };
   }, [activeTab]);
+
+  // Additional cleanup on component unmount (when user navigates away from admin page)
+  useEffect(() => {
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+    };
+  }, []);
 
   async function handleInitializeProducts() {
     if (!confirm("Er du sikker på, at du vil initialisere alle produkter? Dette kan oprette dubletter hvis produkter allerede findes.")) {
@@ -206,6 +343,11 @@ export default function Admin() {
       setOrders((prev) =>
         prev.map((o) => (o.id === id ? { ...o, status } : o))
       );
+      
+      // Update localStorage cache when order status changes to "ready"
+      if (status === "ready") {
+        updateStoredTodaysOrderStatus(id, status);
+      }
     } catch (err) {
       console.error("Error updating order status:", err);
       alert("Kunne ikke opdatere ordrestatus. Prøv venligst igen.");
@@ -320,12 +462,121 @@ export default function Admin() {
             <div className="section-header">
               <h2 className="section-title">Ordre Administration</h2>
               <button
-                onClick={() => loadOrders(false)}
+                onClick={() => loadOrders(true)}
                 className="btn-refresh"
                 disabled={ordersLoading}
               >
                 {ordersLoading ? "Indlæser..." : "🔄 Opdater"}
               </button>
+            </div>
+
+            {/* All Today's Orders Subsection */}
+            <div style={{ marginBottom: "2rem", padding: "1rem", background: "var(--color-bg-light, #f5f5f5)", borderRadius: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Alle Dagens Ordrer ({allTodaysOrders.length})</h3>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {showAllTodaysOrders && (
+                    <button
+                      onClick={() => {
+                        // Clear cache and reload from Firebase
+                        localStorage.removeItem("admin_todays_orders");
+                        loadAllTodaysOrders();
+                      }}
+                      className="btn-refresh"
+                      disabled={allTodaysOrdersLoading}
+                      style={{ fontSize: "0.9rem", padding: "0.5rem 1rem" }}
+                    >
+                      {allTodaysOrdersLoading ? "Indlæser..." : "🔄 Opdater"}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (!showAllTodaysOrders) {
+                        setShowAllTodaysOrders(true);
+                        loadAllTodaysOrders();
+                      } else {
+                        setShowAllTodaysOrders(false);
+                      }
+                    }}
+                    className="btn-refresh"
+                    disabled={allTodaysOrdersLoading}
+                    style={{ fontSize: "0.9rem", padding: "0.5rem 1rem" }}
+                  >
+                    {showAllTodaysOrders ? "⬆️ Skjul" : "⬇️ Vis Alle Dagens Ordrer"}
+                  </button>
+                </div>
+              </div>
+
+              {showAllTodaysOrders && (
+                <div>
+                  {allTodaysOrdersLoading ? (
+                    <div className="loading-state">Indlæser alle dagens ordrer...</div>
+                  ) : allTodaysOrders.length === 0 ? (
+                    <div className="empty-state">Ingen ordrer i dag endnu.</div>
+                  ) : (
+                    <div className="orders-list">
+                      {allTodaysOrders.map((o) => (
+                        <div key={o.id} className="order-card">
+                          <div className="order-header">
+                            <div>
+                              <div className="order-name">{o.name}</div>
+                              <div className="order-meta">
+                                {o.method === "delivery" ? "🚴 Levering" : "🚗 Afhentning"}
+                                {" • "}
+                                {(() => {
+                                  if (o.createdAt instanceof Date) {
+                                    return o.createdAt.toLocaleString("da-DK");
+                                  }
+                                  if (o.createdAt && typeof o.createdAt === 'object' && 'toDate' in o.createdAt) {
+                                    return (o.createdAt as any).toDate().toLocaleString("da-DK");
+                                  }
+                                  // Handle string dates from localStorage
+                                  return new Date(o.createdAt as string | Date).toLocaleString("da-DK");
+                                })()}
+                              </div>
+                              <div className="order-phone">📞 {o.phone}</div>
+                              {o.address && (
+                                <div className="order-address">📍 {o.address}</div>
+                              )}
+                            </div>
+                            <div className="order-actions">
+                              <div className="order-total">DKK {o.total.toFixed(2)}</div>
+                              <select
+                                value={o.status}
+                                onChange={(e) =>
+                                  handleUpdateOrderStatus(o.id!, e.target.value as Order["status"])
+                                }
+                                className="status-select"
+                              >
+                                <option value="pending">⏳ Afventer</option>
+                                <option value="paid">💳 Betalt</option>
+                                <option value="making">👨‍🍳 Tilbereder</option>
+                                <option value="ready">✅ Klar</option>
+                                <option value="collected">📦 Afhentet</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="order-items">
+                            <strong>Varer:</strong>
+                            <ul>
+                              {o.items.map((i: any) => (
+                                <li key={i.id}>
+                                  {i.qty} × {i.name} — DKK {(i.price * i.qty).toFixed(2)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          {o.note && (
+                            <div className="order-note">
+                              <strong>Bemærkning:</strong> {o.note}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {ordersError && (
@@ -346,11 +597,16 @@ export default function Admin() {
                         <div className="order-meta">
                           {o.method === "delivery" ? "🚴 Levering" : "🚗 Afhentning"}
                           {" • "}
-                          {o.createdAt instanceof Date
-                            ? o.createdAt.toLocaleString("da-DK")
-                            : o.createdAt && "toDate" in o.createdAt
-                            ? (o.createdAt as any).toDate().toLocaleString("da-DK")
-                            : new Date(o.createdAt as any).toLocaleString("da-DK")}
+                          {(() => {
+                            if (o.createdAt instanceof Date) {
+                              return o.createdAt.toLocaleString("da-DK");
+                            }
+                            if (o.createdAt && typeof o.createdAt === 'object' && 'toDate' in o.createdAt) {
+                              return (o.createdAt as any).toDate().toLocaleString("da-DK");
+                            }
+                            // Handle string dates from localStorage
+                            return new Date(o.createdAt as string | Date).toLocaleString("da-DK");
+                          })()}
                         </div>
                         <div className="order-phone">📞 {o.phone}</div>
                         {o.address && (
@@ -557,11 +813,16 @@ export default function Admin() {
                           {"☆".repeat(5 - review.rating)}
                         </div>
                         <div className="review-date">
-                          {review.createdAt instanceof Date
-                            ? review.createdAt.toLocaleString("da-DK")
-                            : review.createdAt && "toDate" in review.createdAt
-                            ? (review.createdAt as any).toDate().toLocaleString("da-DK")
-                            : new Date(review.createdAt as any).toLocaleString("da-DK")}
+                          {(() => {
+                            if (review.createdAt instanceof Date) {
+                              return review.createdAt.toLocaleString("da-DK");
+                            }
+                            if (review.createdAt && typeof review.createdAt === 'object' && 'toDate' in review.createdAt) {
+                              return (review.createdAt as any).toDate().toLocaleString("da-DK");
+                            }
+                            // Handle string dates from localStorage
+                            return new Date(review.createdAt as string | Date).toLocaleString("da-DK");
+                          })()}
                         </div>
                       </div>
                       <div className="review-status">
