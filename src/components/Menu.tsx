@@ -385,6 +385,7 @@ export default function Menu() {
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const popularRef = useRef<HTMLElement | null>(null);
+  const categoryTitleRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const { addItem, items, updateQty, removeItem, clear, total } = useCart();
   const prevItemsCountRef = useRef(items.length);
@@ -538,6 +539,38 @@ export default function Menu() {
       document.body.classList.remove("modal-open");
     };
   }, [showAllergens]);
+
+  // Scroll listener for sticky category titles background
+  useEffect(() => {
+    const checkStickyTitles = () => {
+      Object.values(categoryTitleRefs.current).forEach((titleElement) => {
+        if (!titleElement) return;
+        
+        const rect = titleElement.getBoundingClientRect();
+        // Check if the title is at the top (sticky position) and still visible
+        const isSticky = rect.top <= 0 && rect.bottom > 0;
+        
+        if (isSticky) {
+          titleElement.classList.add('is-sticky');
+        } else {
+          titleElement.classList.remove('is-sticky');
+        }
+      });
+    };
+
+    // Check on mount and when products change
+    const timeoutId = setTimeout(() => {
+      checkStickyTitles();
+    }, 100); // Small delay to ensure refs are set
+
+    // Add scroll listener
+    window.addEventListener('scroll', checkStickyTitles, { passive: true });
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', checkStickyTitles);
+    };
+  }, [products]);
 
   const filteredItems = products.filter((item) => {
     const matchesSearch =
@@ -760,7 +793,14 @@ export default function Menu() {
                 popularRef.current = el;
               }}
             >
-              <h3 className="menu-category-title">Most Popular</h3>
+              <h3 
+                className="menu-category-title"
+                ref={(el) => {
+                  categoryTitleRefs.current['Most Popular'] = el;
+                }}
+              >
+                Most Popular
+              </h3>
               <div className="menu-products-grid">
                 {popularItems.map((item) => (
                   <div
@@ -817,7 +857,14 @@ export default function Menu() {
                   sectionRefs.current[cat] = el;
                 }}
               >
-                <h3 className="menu-category-title">{cat}</h3>
+                <h3 
+                  className="menu-category-title"
+                  ref={(el) => {
+                    categoryTitleRefs.current[cat] = el;
+                  }}
+                >
+                  {cat}
+                </h3>
                 <div className="menu-products-grid">
                   {itemsInCategory.map((item) => (
                     <div

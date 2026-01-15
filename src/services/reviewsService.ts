@@ -110,7 +110,7 @@ export async function getReviewsMetadata(): Promise<Date | null> {
   }
 }
 
-// Update reviews metadata (called when reviews are created/updated)
+// Update reviews metadata (called when reviews are created/updated/deleted)
 export async function updateReviewsMetadata(): Promise<void> {
   try {
     const metadataRef = doc(db, "metadata", "reviews");
@@ -119,6 +119,18 @@ export async function updateReviewsMetadata(): Promise<void> {
     }, { merge: true });
   } catch (error) {
     console.error("Error updating reviews metadata:", error);
+  }
+}
+
+// Delete a review
+export async function deleteReview(reviewId: string): Promise<void> {
+  try {
+    const reviewRef = doc(db, "reviews", reviewId);
+    await deleteDoc(reviewRef);
+    await updateReviewsMetadata();
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    throw error;
   }
 }
 

@@ -102,12 +102,10 @@ export default function CartPage() {
                   const basePrice = i.price - extrasTotal;
                   const itemPrice = i.price;
                   const rowTotal = itemPrice * i.qty;
-                  const itemVat = Math.round(
-                    (rowTotal * vatRate) / (1 + vatRate)
-                  );
-                  const itemSubtotal = rowTotal - itemVat;
-
-                  console.log(itemSubtotal);
+                  // const itemVat = Math.round(
+                  //   (rowTotal * vatRate) / (1 + vatRate)
+                  // );
+                  // const itemSubtotal = rowTotal - itemVat;
 
                   return (
                     <div key={i.id} className="cart-item-card">

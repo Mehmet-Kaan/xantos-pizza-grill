@@ -1,12 +1,103 @@
 import { useState, useEffect, useRef } from "react";
 import { getAllOrders, updateOrderStatus, subscribeToOrders, type Order } from "../services/ordersService";
 import { initializeProducts } from "../utils/initProducts";
-import { getAllProducts, updateProduct, deleteProduct, type Product } from "../services/productsService";
-import { getAllReviews, updateReview, type Review } from "../services/reviewsService";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { getAllProducts, updateProduct, deleteProduct, getProductsMetadata, type Product } from "../services/productsService";
+import { getAllReviews, updateReview, getReviewsMetadata, deleteReview, type Review } from "../services/reviewsService";
 import type { Unsubscribe } from "firebase/firestore";
 import "../styles/Admin.css";
+
+// localStorage keys
+const PRODUCTS_STORAGE_KEY = "admin_products";
+const PRODUCTS_LAST_UPDATED_KEY = "admin_products_lastUpdated";
+const REVIEWS_STORAGE_KEY = "admin_reviews";
+const REVIEWS_LAST_UPDATED_KEY = "admin_reviews_lastUpdated";
+
+// Products localStorage helpers
+function getStoredProducts(): Product[] | null {
+  try {
+    const stored = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error("Error reading products from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredProducts(products: Product[]): void {
+  try {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+  } catch (error) {
+    console.error("Error saving products to localStorage:", error);
+  }
+}
+
+function getStoredProductsLastUpdated(): Date | null {
+  try {
+    const stored = localStorage.getItem(PRODUCTS_LAST_UPDATED_KEY);
+    if (stored) {
+      return new Date(stored);
+    }
+  } catch (error) {
+    console.error("Error reading products lastUpdated from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredProductsLastUpdated(date: Date): void {
+  try {
+    localStorage.setItem(PRODUCTS_LAST_UPDATED_KEY, date.toISOString());
+  } catch (error) {
+    console.error("Error saving products lastUpdated to localStorage:", error);
+  }
+}
+
+// Reviews localStorage helpers
+function getStoredReviews(): Review[] | null {
+  try {
+    const stored = localStorage.getItem(REVIEWS_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Convert createdAt strings back to Date objects
+      return parsed.map((review: any) => ({
+        ...review,
+        createdAt: new Date(review.createdAt),
+      }));
+    }
+  } catch (error) {
+    console.error("Error reading reviews from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredReviews(reviews: Review[]): void {
+  try {
+    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
+  } catch (error) {
+    console.error("Error saving reviews to localStorage:", error);
+  }
+}
+
+function getStoredReviewsLastUpdated(): Date | null {
+  try {
+    const stored = localStorage.getItem(REVIEWS_LAST_UPDATED_KEY);
+    if (stored) {
+      return new Date(stored);
+    }
+  } catch (error) {
+    console.error("Error reading reviews lastUpdated from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredReviewsLastUpdated(date: Date): void {
+  try {
+    localStorage.setItem(REVIEWS_LAST_UPDATED_KEY, date.toISOString());
+  } catch (error) {
+    console.error("Error saving reviews lastUpdated to localStorage:", error);
+  }
+}
 
 type Tab = "orders" | "products" | "reviews";
 
@@ -56,6 +147,7 @@ export default function Admin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [productSearchQuery, setProductSearchQuery] = useState<string>("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [initializing, setInitializing] = useState(false);
   const [initSuccess, setInitSuccess] = useState(false);
@@ -175,11 +267,44 @@ export default function Admin() {
     try {
       setProductsLoading(true);
       setProductsError(null);
+      
+      // Check metadata first
+      const serverMetadata = await getProductsMetadata();
+      const storedLastUpdated = getStoredProductsLastUpdated();
+      const storedProducts = getStoredProducts();
+      
+      // If we have cached data and metadata hasn't changed, use cache
+      if (storedProducts && storedLastUpdated && serverMetadata) {
+        // Compare timestamps (allowing for small differences due to serialization)
+        const timeDiff = Math.abs(serverMetadata.getTime() - storedLastUpdated.getTime());
+        if (timeDiff < 1000) { // Less than 1 second difference
+          console.log("Using cached products (metadata unchanged)");
+          setProducts(storedProducts);
+          setProductsLoading(false);
+          return;
+        }
+      }
+      
+      // Metadata changed or no cache - fetch from Firebase
+      console.log("Fetching products from Firebase (metadata changed or no cache)");
       const fetchedProducts = await getAllProducts();
       setProducts(fetchedProducts);
+      
+      // Update cache
+      setStoredProducts(fetchedProducts);
+      if (serverMetadata) {
+        setStoredProductsLastUpdated(serverMetadata);
+      }
     } catch (err) {
       console.error("Error loading products:", err);
       setProductsError("Kunne ikke indlæse produkter. Prøv venligst igen.");
+      
+      // Try to use cached data as fallback
+      const storedProducts = getStoredProducts();
+      if (storedProducts) {
+        console.log("Using cached products as fallback");
+        setProducts(storedProducts);
+      }
     } finally {
       setProductsLoading(false);
     }
@@ -189,12 +314,45 @@ export default function Admin() {
     try {
       setReviewsLoading(true);
       setReviewsError(null);
+      
+      // Check metadata first
+      const serverMetadata = await getReviewsMetadata();
+      const storedLastUpdated = getStoredReviewsLastUpdated();
+      const storedReviews = getStoredReviews();
+      
+      // If we have cached data and metadata hasn't changed, use cache
+      if (storedReviews && storedLastUpdated && serverMetadata) {
+        // Compare timestamps (allowing for small differences due to serialization)
+        const timeDiff = Math.abs(serverMetadata.getTime() - storedLastUpdated.getTime());
+        if (timeDiff < 1000) { // Less than 1 second difference
+          console.log("Using cached reviews (metadata unchanged)");
+          setReviews(storedReviews);
+          setReviewsLoading(false);
+          return;
+        }
+      }
+      
+      // Metadata changed or no cache - fetch from Firebase
+      console.log("Fetching reviews from Firebase (metadata changed or no cache)");
       // Get all reviews including unapproved ones for admin
       const fetchedReviews = await getAllReviews(undefined, true);
       setReviews(fetchedReviews);
+      
+      // Update cache
+      setStoredReviews(fetchedReviews);
+      if (serverMetadata) {
+        setStoredReviewsLastUpdated(serverMetadata);
+      }
     } catch (err) {
       console.error("Error loading reviews:", err);
       setReviewsError("Kunne ikke indlæse anmeldelser. Prøv venligst igen.");
+      
+      // Try to use cached data as fallback
+      const storedReviews = getStoredReviews();
+      if (storedReviews) {
+        console.log("Using cached reviews as fallback");
+        setReviews(storedReviews);
+      }
     } finally {
       setReviewsLoading(false);
     }
@@ -313,6 +471,9 @@ export default function Admin() {
     try {
       await initializeProducts();
       setInitSuccess(true);
+      // Clear products cache and reload
+      localStorage.removeItem(PRODUCTS_STORAGE_KEY);
+      localStorage.removeItem(PRODUCTS_LAST_UPDATED_KEY);
       await loadProducts();
       setTimeout(() => setInitSuccess(false), 5000);
     } catch (err) {
@@ -369,9 +530,16 @@ export default function Admin() {
   async function handleUpdateProduct(productId: string, updates: Partial<Product>) {
     try {
       await updateProduct(productId, updates);
-      setProducts((prev) =>
-        prev.map((p) => (p.id === productId ? { ...p, ...updates } : p))
-      );
+      const updatedProducts = products.map((p) => (p.id === productId ? { ...p, ...updates } : p));
+      setProducts(updatedProducts);
+      
+      // Update localStorage cache
+      setStoredProducts(updatedProducts);
+      const newMetadata = await getProductsMetadata();
+      if (newMetadata) {
+        setStoredProductsLastUpdated(newMetadata);
+      }
+      
       setEditingProduct(null);
       alert("Produkt opdateret med succes!");
     } catch (err) {
@@ -387,7 +555,16 @@ export default function Admin() {
 
     try {
       await deleteProduct(productId);
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      const updatedProducts = products.filter((p) => p.id !== productId);
+      setProducts(updatedProducts);
+      
+      // Update localStorage cache
+      setStoredProducts(updatedProducts);
+      const newMetadata = await getProductsMetadata();
+      if (newMetadata) {
+        setStoredProductsLastUpdated(newMetadata);
+      }
+      
       alert("Produkt slettet!");
     } catch (err) {
       console.error("Error deleting product:", err);
@@ -398,9 +575,16 @@ export default function Admin() {
   async function handleApproveReview(reviewId: string) {
     try {
       await updateReview(reviewId, { approved: true });
-      setReviews((prev) =>
-        prev.map((r) => (r.id === reviewId ? { ...r, approved: true } : r))
-      );
+      const updatedReviews = reviews.map((r) => (r.id === reviewId ? { ...r, approved: true } : r));
+      setReviews(updatedReviews);
+      
+      // Update localStorage cache
+      setStoredReviews(updatedReviews);
+      const newMetadata = await getReviewsMetadata();
+      if (newMetadata) {
+        setStoredReviewsLastUpdated(newMetadata);
+      }
+      
       alert("Anmeldelse godkendt!");
     } catch (err) {
       console.error("Error approving review:", err);
@@ -415,9 +599,16 @@ export default function Admin() {
 
     try {
       await updateReview(reviewId, { approved: false });
-      setReviews((prev) =>
-        prev.map((r) => (r.id === reviewId ? { ...r, approved: false } : r))
-      );
+      const updatedReviews = reviews.map((r) => (r.id === reviewId ? { ...r, approved: false } : r));
+      setReviews(updatedReviews);
+      
+      // Update localStorage cache
+      setStoredReviews(updatedReviews);
+      const newMetadata = await getReviewsMetadata();
+      if (newMetadata) {
+        setStoredReviewsLastUpdated(newMetadata);
+      }
+      
       alert("Anmeldelse afvist!");
     } catch (err) {
       console.error("Error rejecting review:", err);
@@ -431,9 +622,17 @@ export default function Admin() {
     }
 
     try {
-      const reviewRef = doc(db, "reviews", reviewId);
-      await deleteDoc(reviewRef);
-      setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      await deleteReview(reviewId);
+      const updatedReviews = reviews.filter((r) => r.id !== reviewId);
+      setReviews(updatedReviews);
+      
+      // Update localStorage cache
+      setStoredReviews(updatedReviews);
+      const newMetadata = await getReviewsMetadata();
+      if (newMetadata) {
+        setStoredReviewsLastUpdated(newMetadata);
+      }
+      
       alert("Anmeldelse slettet!");
     } catch (err) {
       console.error("Error deleting review:", err);
@@ -483,10 +682,10 @@ export default function Admin() {
             </div>
 
             {/* All Today's Orders Subsection */}
-            <div style={{ marginBottom: "2rem", padding: "1rem", background: "var(--color-bg-light, #f5f5f5)", borderRadius: "8px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
-                <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Alle Dagens Ordrer ({allTodaysOrders.length})</h3>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div className="todays-orders-subsection">
+              <div className="todays-orders-header">
+                <h3 className="todays-orders-title">Alle Dagens Ordrer ({allTodaysOrders.length})</h3>
+                <div className="todays-orders-actions">
                   {showAllTodaysOrders && (
                     <button
                       onClick={() => {
@@ -494,9 +693,8 @@ export default function Admin() {
                         localStorage.removeItem("admin_todays_orders");
                         loadAllTodaysOrders();
                       }}
-                      className="btn-refresh"
+                      className="btn-refresh btn-small"
                       disabled={allTodaysOrdersLoading}
-                      style={{ fontSize: "0.9rem", padding: "0.5rem 1rem" }}
                     >
                       {allTodaysOrdersLoading ? "Indlæser..." : "🔄 Opdater"}
                     </button>
@@ -510,9 +708,8 @@ export default function Admin() {
                         setShowAllTodaysOrders(false);
                       }
                     }}
-                    className="btn-refresh"
+                    className="btn-refresh btn-small"
                     disabled={allTodaysOrdersLoading}
-                    style={{ fontSize: "0.9rem", padding: "0.5rem 1rem" }}
                   >
                     {showAllTodaysOrders ? "⬆️ Skjul" : "⬇️ Vis Alle Dagens Ordrer"}
                   </button>
@@ -677,13 +874,13 @@ export default function Admin() {
                 >
                   {productsLoading ? "Indlæser..." : "🔄 Opdater"}
                 </button>
-                <button
+                {/* <button
                   onClick={handleInitializeProducts}
                   className="btn-init"
                   disabled={initializing}
                 >
                   {initializing ? "Initialiserer..." : "➕ Initialiser Produkter"}
-                </button>
+                </button> */}
                 {/* <button
                   onClick={handleInitializeReviews}
                   className="btn-init"
@@ -727,8 +924,60 @@ export default function Admin() {
                   />
                 )}
 
-                <div className="products-grid">
-                  {products.map((product) => (
+                {/* Search Bar */}
+                <div className="products-search-container">
+                  <input
+                    type="text"
+                    placeholder="🔍 Søg efter produkter (navn, kategori, beskrivelse, tags, ingredienser)..."
+                    value={productSearchQuery}
+                    onChange={(e) => setProductSearchQuery(e.target.value)}
+                    className="products-search-input"
+                  />
+                  {productSearchQuery && (
+                    <button
+                      onClick={() => setProductSearchQuery("")}
+                      className="products-search-clear"
+                      title="Ryd søgning"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtered Products */}
+                {(() => {
+                  const filteredProducts = products.filter((product) => {
+                    if (!productSearchQuery.trim()) return true;
+                    
+                    const query = productSearchQuery.toLowerCase();
+                    const searchableText = [
+                      product.name,
+                      product.category,
+                      product.desc,
+                      ...(product.tags || []),
+                      ...(product.ingredients?.map(ing => ing.name) || []),
+                    ].join(" ").toLowerCase();
+                    
+                    return searchableText.includes(query);
+                  });
+
+                  if (filteredProducts.length === 0 && productSearchQuery) {
+                    return (
+                      <div className="empty-state">
+                        <p>Ingen produkter fundet for "{productSearchQuery}"</p>
+                        <button
+                          onClick={() => setProductSearchQuery("")}
+                          className="btn-refresh"
+                        >
+                          Ryd søgning
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="products-grid">
+                      {filteredProducts.map((product) => (
                     <div key={product.id} className="product-card">
                       <div className="product-header">
 
@@ -779,8 +1028,25 @@ export default function Admin() {
                         </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+                {productSearchQuery && (
+                  <div className="products-search-results-info">
+                    Viser {products.filter((product) => {
+                      const query = productSearchQuery.toLowerCase();
+                      const searchableText = [
+                        product.name,
+                        product.category,
+                        product.desc,
+                        ...(product.tags || []),
+                        ...(product.ingredients?.map(ing => ing.name) || []),
+                      ].join(" ").toLowerCase();
+                      return searchableText.includes(query);
+                    }).length} af {products.length} produkter
+                  </div>
+                )}
               </>
             )}
           </section>
