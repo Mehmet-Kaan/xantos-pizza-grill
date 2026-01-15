@@ -1,67 +1,167 @@
+import "../styles/global.css";
+
 export default function PrivacyPolicy() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16 text-gray-800">
-      <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-
-      <p className="mb-4 text-sm text-gray-500">
-        Last updated: {new Date().toLocaleDateString()}
-      </p>
-
-      <section className="space-y-4">
-        <p>
-          This Privacy Policy explains how Xantos Pizza & Grill (“we”, “us”, or
-          “our”) collects and uses personal data when you use our website.
+    <main className="privacy-policy-page">
+      <div className="privacy-policy-container">
+        <h1 className="privacy-policy-title">Privatlivspolitik</h1>
+        
+        <p className="privacy-policy-updated">
+          Sidst opdateret: {new Date().toLocaleDateString("da-DK", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          })}
         </p>
 
-        <h2 className="text-xl font-semibold">1. Information We Collect</h2>
-        <p>
-          We only collect information necessary to process your order, such as
-          your name, phone number, address, and order details.
-        </p>
-        <p>
-          Payment information is handled securely by our payment provider and is
-          never stored on our servers.
-        </p>
+        <div className="privacy-policy-content">
+          <section className="privacy-section">
+            <p className="privacy-intro">
+              Denne privatlivspolitik forklarer, hvordan Xanthos Pizza & Grill ("vi", "os" eller "vores") 
+              indsamler, bruger og beskytter dine personoplysninger, når du bruger vores hjemmeside og 
+              bestiller gennem vores tjenester. Vi respekterer dit privatliv og er forpligtet til at 
+              beskytte dine personoplysninger i overensstemmelse med GDPR (Generel Dataforordning).
+            </p>
+          </section>
 
-        <h2 className="text-xl font-semibold">
-          2. How We Use Your Information
-        </h2>
-        <p>
-          Your information is used only to process and deliver your order or to
-          contact you if there is an issue with your order.
-        </p>
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">1. Hvilke oplysninger indsamler vi?</h2>
+            <p>Vi indsamler kun de oplysninger, der er nødvendige for at behandle og levere din bestilling:</p>
+            <ul className="privacy-list">
+              <li><strong>Kontaktoplysninger:</strong> Navn, telefonnummer, e-mailadresse og leveringsadresse</li>
+              <li><strong>Bestillingsoplysninger:</strong> Detaljer om dine bestilte produkter, antal og særlige instruktioner</li>
+              <li><strong>Betalingsoplysninger:</strong> Betalingsmetode (kort eller MobilePay) - betalingsoplysninger behandles sikkert af vores betalingsudbyder og gemmes aldrig på vores servere</li>
+              <li><strong>Tekniske oplysninger:</strong> IP-adresse, browser-type og enhedsoplysninger (automatisk indsamlet)</li>
+            </ul>
+          </section>
 
-        <h2 className="text-xl font-semibold">3. Cookies and Local Storage</h2>
-        <p>
-          We do not use tracking or marketing cookies. Local storage may be used
-          to store necessary information such as your cart contents to ensure
-          the website functions correctly.
-        </p>
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">2. Hvordan bruger vi dine oplysninger?</h2>
+            <p>Vi bruger dine personoplysninger til følgende formål:</p>
+            <ul className="privacy-list">
+              <li>At behandle og levere din bestilling</li>
+              <li>At kommunikere med dig vedrørende din bestilling (bekræftelse, opdateringer, problemer)</li>
+              <li>At håndtere betalinger gennem vores betalingsudbydere</li>
+              <li>At opfylde juridiske forpligtelser (f.eks. regnskabsføring)</li>
+              <li>At forbedre vores tjenester og brugeroplevelse</li>
+              <li>At håndtere klager og henvendelser</li>
+            </ul>
+          </section>
 
-        <h2 className="text-xl font-semibold">4. Data Sharing</h2>
-        <p>
-          We only share data with trusted third parties when necessary to
-          complete your order, such as payment providers.
-        </p>
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">3. Cookies og lokal lagring</h2>
+            <p>
+              Vi bruger ikke tracking- eller marketingcookies. Vi bruger kun nødvendige cookies og 
+              lokal lagring for at sikre, at hjemmesiden fungerer korrekt:
+            </p>
+            <ul className="privacy-list">
+              <li><strong>Session cookies:</strong> For at huske din indkøbskurv under din besøg</li>
+              <li><strong>Lokal lagring:</strong> For at gemme din kurv, så den ikke forsvinder, hvis du lukker browseren</li>
+              <li><strong>Produktcache:</strong> For at forbedre indlæsningstiden ved at cache produktdata lokalt</li>
+            </ul>
+            <p>
+              Du kan til enhver tid slette cookies og lokal lagring gennem dine browserindstillinger. 
+              Dette kan påvirke funktionaliteten af hjemmesiden.
+            </p>
+          </section>
 
-        <h2 className="text-xl font-semibold">5. Data Retention</h2>
-        <p>
-          Personal data is kept only for as long as necessary to fulfill your
-          order and comply with legal obligations.
-        </p>
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">4. Deling af oplysninger</h2>
+            <p>Vi deler kun dine oplysninger med:</p>
+            <ul className="privacy-list">
+              <li><strong>Betalingsudbydere:</strong> For at behandle betalinger (kortoplysninger behandles sikkert og gemmes ikke hos os)</li>
+              <li><strong>Leveringspartnere:</strong> Hvis du vælger levering, deler vi din adresse med vores leveringspartner</li>
+              <li><strong>Juridiske myndigheder:</strong> Hvis det er påkrævet ved lov eller retslig ordre</li>
+            </ul>
+            <p>
+              Vi sælger eller udlejer aldrig dine personoplysninger til tredjeparter til markedsføringsformål.
+            </p>
+          </section>
 
-        <h2 className="text-xl font-semibold">6. Your Rights</h2>
-        <p>
-          You have the right to access, correct, or request deletion of your
-          personal data in accordance with GDPR.
-        </p>
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">5. Databehandling og opbevaring</h2>
+            <p>
+              Vi opbevarer dine personoplysninger kun så længe, det er nødvendigt for at:
+            </p>
+            <ul className="privacy-list">
+              <li>Opfylde din bestilling og levere tjenesten</li>
+              <li>Opfylde juridiske forpligtelser (f.eks. regnskabsføring i 5 år)</li>
+              <li>Håndtere eventuelle klager eller retskrav</li>
+            </ul>
+            <p>
+              Efter opbevaringsperioden slettes eller anonymiseres dine personoplysninger sikkert.
+            </p>
+          </section>
 
-        <h2 className="text-xl font-semibold">7. Contact</h2>
-        <p>
-          If you have questions about this Privacy Policy, please contact us at:
-        </p>
-        <p className="font-medium">info@xantospizza.se</p>
-      </section>
-    </div>
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">6. Dine rettigheder</h2>
+            <p>I henhold til GDPR har du følgende rettigheder:</p>
+            <ul className="privacy-list">
+              <li><strong>Ret til indsigt:</strong> Du kan anmode om at se, hvilke personoplysninger vi har om dig</li>
+              <li><strong>Ret til berigtigelse:</strong> Du kan anmode om rettelse af forkerte eller ufuldstændige oplysninger</li>
+              <li><strong>Ret til sletning:</strong> Du kan anmode om sletning af dine personoplysninger (med visse undtagelser)</li>
+              <li><strong>Ret til dataportabilitet:</strong> Du kan anmode om at modtage dine data i et struktureret format</li>
+              <li><strong>Ret til indsigelse:</strong> Du kan gøre indsigelse mod behandling af dine personoplysninger</li>
+              <li><strong>Ret til begrænsning:</strong> Du kan anmode om begrænsning af behandlingen af dine oplysninger</li>
+            </ul>
+            <p>
+              For at udøve disse rettigheder, kontakt os på{" "}
+              <a href="mailto:info@xanthospizza.dk" className="privacy-link">
+                info@xanthospizza.dk
+              </a>
+            </p>
+          </section>
+
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">7. Datasikkerhed</h2>
+            <p>
+              Vi implementerer passende tekniske og organisatoriske foranstaltninger for at beskytte 
+              dine personoplysninger mod uautoriseret adgang, tab, ødelæggelse eller ændring:
+            </p>
+            <ul className="privacy-list">
+              <li>Krypteret datatransmission (HTTPS/SSL)</li>
+              <li>Sikker betalingsbehandling gennem certificerede betalingsudbydere</li>
+              <li>Begrænset adgang til personoplysninger (kun autoriseret personale)</li>
+              <li>Regelmæssige sikkerhedsopdateringer og -revisioner</li>
+            </ul>
+          </section>
+
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">8. Børns privatliv</h2>
+            <p>
+              Vores tjenester er ikke målrettet børn under 18 år. Vi indsamler bevidst ikke 
+              personoplysninger fra børn. Hvis du er forælder eller værge og opdager, at dit barn 
+              har givet os personoplysninger, kontakt os, så vi kan slette disse oplysninger.
+            </p>
+          </section>
+
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">9. Ændringer i privatlivspolitikken</h2>
+            <p>
+              Vi kan opdatere denne privatlivspolitik fra tid til tid. Væsentlige ændringer vil 
+              blive meddelt på hjemmesiden eller via e-mail. Vi opfordrer dig til at gennemgå 
+              denne side jævnligt for at holde dig informeret om, hvordan vi beskytter dine oplysninger.
+            </p>
+          </section>
+
+          <section className="privacy-section">
+            <h2 className="privacy-section-title">10. Kontakt os</h2>
+            <p>
+              Hvis du har spørgsmål, bekymringer eller ønsker at udøve dine rettigheder vedrørende 
+              denne privatlivspolitik, kan du kontakte os:
+            </p>
+            <div className="privacy-contact">
+              <p><strong>Xanthos Pizza & Grill</strong></p>
+              <p>E-mail: <a href="mailto:info@xanthospizza.dk" className="privacy-link">info@xanthospizza.dk</a></p>
+              <p>Telefon: <a href="tel:+4570123456" className="privacy-link">70 12 34 56</a></p>
+            </div>
+            <p>
+              Du har også ret til at klage til Datatilsynet, hvis du mener, at vi behandler dine 
+              personoplysninger i strid med gældende lovgivning.
+            </p>
+          </section>
+        </div>
+      </div>
+    </main>
   );
 }

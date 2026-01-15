@@ -17,7 +17,7 @@ import ScrollToTop from "../components/ScrollToTop";
 
 export default function App() {
   return (
-    <Router basename="/xantos-pizza-grill">
+    <Router basename="/xantos-pizza-grill/">
       <CartProvider>
         <div className="min-h-screen flex flex-col">
           <Nav />

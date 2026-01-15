@@ -12,155 +12,239 @@ export default function CartPage() {
   const vatRate = 0.25;
   const vat = Math.round((total * vatRate) / (1 + vatRate));
   const subtotal = total - vat;
+  const itemCount = items.reduce((sum, item) => sum + item.qty, 0);
 
   return (
-    <main className="cart-page max-w-4xl mx-auto p-6">
-      <div className="titleBox">
-        <h2 className="cart-page-title">
-          <CartIcon className="cart-page-icon" />
-          Din kurv
-        </h2>
-
-        {items.length > 0 && (
-          <button
-            className={confirmClear ? "cart-clear active" : "cart-clear"}
-            disabled={confirmClear}
-            onClick={() => setConfirmClear(true)}
-            aria-label="Tøm kurv"
-          >
-            <TrashIcon className="cart-clear-icon" />
-          </button>
-        )}
-      </div>
-
-      {confirmClear && (
-        <div className="cart-confirm-box">
-          <div className="cart-confirm-text">
-            <span className="cart-confirm-title">Tøm kurven?</span>
-            <span className="cart-confirm-desc">
-              Alle varer fjernes permanent.
-            </span>
+    <main className="cart-page">
+      <div className="cart-page-container">
+        <div className="cart-page-header">
+          <div className="cart-page-title-section">
+            <h1 className="cart-page-title">
+              <CartIcon className="cart-page-icon" />
+              Din kurv
+            </h1>
+            {items.length > 0 && (
+              <p className="cart-page-subtitle">
+                {itemCount} {itemCount === 1 ? "vare" : "varer"}
+              </p>
+            )}
           </div>
 
-          <div className="cart-confirm-actions">
+          {items.length > 0 && (
             <button
-              className="cart-confirm-cancel"
-              onClick={() => setConfirmClear(false)}
+              className={`cart-clear-btn ${confirmClear ? "active" : ""}`}
+              onClick={() => setConfirmClear(true)}
+              aria-label="Tøm kurv"
             >
-              Annuller
+              <TrashIcon className="cart-clear-icon" />
+              <span>Tøm kurv</span>
             </button>
-
-            <button
-              className="cart-confirm-danger"
-              onClick={() => {
-                clear();
-                setConfirmClear(false);
-              }}
-            >
-              Ja, tøm
-            </button>
-          </div>
+          )}
         </div>
-      )}
 
-      {items.length === 0 ? (
-        <div className="cart-empty">
-          Din kurv er tom —{" "}
-          <Link to="/menu" className="cart-empty-link">
-            browse the menu
-          </Link>
-        </div>
-      ) : (
-        <div className="cart-list">
-          {items.map((i) => {
-            const extrasTotal =
-              i.selectedIngredients?.reduce(
-                (s: number, ing: any) => s + (ing.extraPrice || 0),
-                0
-              ) || 0;
-
-            const rawPrice = i.price - extrasTotal;
-            const itemPrice = i.price;
-            const rowTotal = itemPrice * i.qty;
-
-            return (
-              <div key={i.id} className="cart-item">
-                <div className="cart-item-main">
-                  <img
-                    src={`/assets/${i.image}`}
-                    alt={i.name}
-                    className="cart-item-img"
-                  />
-
-                  <div className="cart-item-details">
-                    <h4 className="cart-item-title">{i.name}</h4>
-                    <div className="cart-unit-price">{rawPrice},- / stk</div>
-
-                    {i.selectedIngredients &&
-                      i.selectedIngredients.length > 0 && (
-                        <ul className="cart-ingredients">
-                          {i.selectedIngredients.map((ing: any) => (
-                            <li key={ing.name}>
-                              + {ing.name}
-                              {ing.extraPrice ? ` (${ing.extraPrice} kr)` : ""}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                  </div>
-
-                  <button
-                    className="cart-remove"
-                    onClick={() => removeItem(i.id)}
-                    aria-label="Remove item"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="cart-item-controls">
-                  <div className="cart-qty">
-                    <button onClick={() => updateQty(i.id, i.qty - 1)}>
-                      -
-                    </button>
-                    <span>{i.qty}</span>
-                    <button onClick={() => updateQty(i.id, i.qty + 1)}>
-                      +
-                    </button>
-                  </div>
-
-                  <div className="cart-price">{rowTotal},-</div>
-                </div>
-              </div>
-            );
-          })}
-
-          <div className="cart-summary">
-            <div className="cart-breakdown">
-              <div>
-                Subtotal <span>{subtotal},-</span>
-              </div>
-              <div>
-                Moms (25%) <span>{vat},-</span>
+        {confirmClear && (
+          <div className="cart-confirm-box">
+            <div className="cart-confirm-content">
+              <div className="cart-confirm-icon">⚠️</div>
+              <div className="cart-confirm-text">
+                <h3 className="cart-confirm-title">Tøm kurven?</h3>
+                <p className="cart-confirm-desc">
+                  Alle varer fjernes permanent. Denne handling kan ikke fortrydes.
+                </p>
               </div>
             </div>
 
-            <div className="cart-total">
-              <span>Total</span>
-              <strong>{total},-</strong>
-            </div>
-
-            <div className="cart-actions">
+            <div className="cart-confirm-actions">
               <button
-                onClick={() => navigate("/checkout")}
-                className="cart-checkout"
+                className="cart-confirm-cancel"
+                onClick={() => setConfirmClear(false)}
               >
-                Gå til betaling
+                Annuller
+              </button>
+
+              <button
+                className="cart-confirm-danger"
+                onClick={() => {
+                  clear();
+                  setConfirmClear(false);
+                }}
+              >
+                Ja, tøm kurv
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {items.length === 0 ? (
+          <div className="cart-empty-state">
+            <div className="cart-empty-icon">🛒</div>
+            <h2 className="cart-empty-title">Din kurv er tom</h2>
+            <p className="cart-empty-text">
+              Tilføj lækre retter fra menuen for at komme i gang
+            </p>
+            <Link to="/menu" className="cart-empty-cta">
+              Se menu
+            </Link>
+          </div>
+        ) : (
+          <div className="cart-content">
+            <div className="cart-items-section">
+              <h2 className="cart-section-title">Varer</h2>
+              <div className="cart-items-list">
+                {items.map((i) => {
+                  const extrasTotal =
+                    i.selectedIngredients?.reduce(
+                      (s: number, ing: any) => s + (ing.extraPrice || 0),
+                      0
+                    ) || 0;
+
+                  const basePrice = i.price - extrasTotal;
+                  const itemPrice = i.price;
+                  const rowTotal = itemPrice * i.qty;
+                  const itemVat = Math.round((rowTotal * vatRate) / (1 + vatRate));
+                  const itemSubtotal = rowTotal - itemVat;
+
+                  return (
+                    <div key={i.id} className="cart-item-card">
+                      <div className="cart-item-image-wrapper">
+                        {(i as any).image && (
+                          <img
+                            src={`./assets/${(i as any).image}`}
+                            alt={i.name}
+                            className="cart-item-image"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = './assets/pizza-placeholder.jpg';
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      <div className="cart-item-info">
+                        <div className="cart-item-header">
+                          <h3 className="cart-item-name">{i.name}</h3>
+                          <button
+                            className="cart-item-remove"
+                            onClick={() => removeItem(i.id)}
+                            aria-label="Fjern vare"
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
+
+                        {(i as any).desc && (
+                          <p className="cart-item-description">{(i as any).desc}</p>
+                        )}
+
+                        <div className="cart-item-pricing">
+                          <div className="cart-item-base-price">
+                            <span>Basispris:</span>
+                            <span>{basePrice} kr</span>
+                          </div>
+                          {extrasTotal > 0 && (
+                            <div className="cart-item-extras-price">
+                              <span>Tilvalg:</span>
+                              <span>+{extrasTotal} kr</span>
+                            </div>
+                          )}
+                          <div className="cart-item-unit-price">
+                            <span>Pris pr. stk:</span>
+                            <strong>{itemPrice} kr</strong>
+                          </div>
+                        </div>
+
+                        {i.selectedIngredients &&
+                          i.selectedIngredients.length > 0 && (
+                            <div className="cart-item-ingredients">
+                              <p className="cart-ingredients-label">Tilvalg:</p>
+                              <div className="cart-ingredients-list">
+                                {i.selectedIngredients.map((ing: any, idx: number) => (
+                                  <span key={idx} className="cart-ingredient-tag">
+                                    {ing.name}
+                                    {ing.extraPrice && (
+                                      <span className="cart-ingredient-price">
+                                        +{ing.extraPrice} kr
+                                      </span>
+                                    )}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                        <div className="cart-item-footer">
+                          <div className="cart-item-qty">
+                            <button
+                              className="cart-qty-btn"
+                              onClick={() => updateQty(i.id, Math.max(1, i.qty - 1))}
+                              disabled={i.qty <= 1}
+                              aria-label="Reducer antal"
+                            >
+                              −
+                            </button>
+                            <span className="cart-qty-value">{i.qty}</span>
+                            <button
+                              className="cart-qty-btn"
+                              onClick={() => updateQty(i.id, i.qty + 1)}
+                              aria-label="Øg antal"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <div className="cart-item-total">
+                            <span className="cart-item-total-label">I alt:</span>
+                            <span className="cart-item-total-price">{rowTotal} kr</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="cart-summary-section">
+              <h2 className="cart-section-title">Ordreoversigt</h2>
+              <div className="cart-summary-card">
+                <div className="cart-summary-details">
+                  <div className="cart-summary-row">
+                    <span>Antal varer</span>
+                    <span>{itemCount} {itemCount === 1 ? "vare" : "varer"}</span>
+                  </div>
+                  <div className="cart-summary-row">
+                    <span>Subtotal (ekskl. moms)</span>
+                    <span>{subtotal} kr</span>
+                  </div>
+                  <div className="cart-summary-row cart-summary-vat">
+                    <span>Moms (25%)</span>
+                    <span>{vat} kr</span>
+                  </div>
+                  <div className="cart-summary-divider"></div>
+                  <div className="cart-summary-total">
+                    <span>Total inkl. moms</span>
+                    <strong>{total} kr</strong>
+                  </div>
+                </div>
+
+                <div className="cart-summary-actions">
+                  <Link to="/menu" className="cart-continue-shopping">
+                    Fortsæt shopping
+                  </Link>
+                  <button
+                    onClick={() => navigate("/checkout")}
+                    className="cart-checkout-btn"
+                  >
+                    Gå til betaling
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

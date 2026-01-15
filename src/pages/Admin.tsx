@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getAllOrders, updateOrderStatus, type Order } from "../services/ordersService";
 import { initializeProducts } from "../utils/initProducts";
 import { getAllProducts, updateProduct, deleteProduct, type Product } from "../services/productsService";
@@ -9,6 +9,32 @@ import "../styles/Admin.css";
 
 type Tab = "orders" | "products" | "reviews";
 
+// Function to play notification sound
+function playNotificationSound() {
+  try {
+    // Create a simple notification sound using Web Audio API
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Pleasant notification tone (two-tone chime)
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+    oscillator.type = "sine";
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (error) {
+    console.error("Error playing notification sound:", error);
+  }
+}
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("orders");
   
@@ -16,6 +42,8 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
+  const seenOrderIdsRef = useRef<Set<string>>(new Set());
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
@@ -30,11 +58,45 @@ export default function Admin() {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
 
-  async function loadOrders() {
+  async function loadOrders(playSoundOnNew = false) {
     try {
       setOrdersLoading(true);
       setOrdersError(null);
       const fetchedOrders = await getAllOrders();
+      
+      // Check for new orders
+      if (playSoundOnNew && activeTab === "orders") {
+        const currentOrderIds = new Set(fetchedOrders.map(o => o.id || ""));
+        const previousOrderIds = seenOrderIdsRef.current;
+        
+        // Find new orders
+        const newOrders = fetchedOrders.filter(
+          o => o.id && !previousOrderIds.has(o.id)
+        );
+        
+        if (newOrders.length > 0) {
+          // Only play sound if page is visible
+          if (!document.hidden) {
+            // Play notification sound for new orders
+            playNotificationSound();
+          }
+          
+          // Update seen orders
+          fetchedOrders.forEach(o => {
+            if (o.id) {
+              seenOrderIdsRef.current.add(o.id);
+            }
+          });
+        }
+      } else {
+        // Initialize seen orders on first load
+        fetchedOrders.forEach(o => {
+          if (o.id) {
+            seenOrderIdsRef.current.add(o.id);
+          }
+        });
+      }
+      
       setOrders(fetchedOrders);
     } catch (err) {
       console.error("Error loading orders:", err);
@@ -76,11 +138,31 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "orders") {
       loadOrders();
+      
+      // Set up polling for new orders (check every 5 seconds)
+      pollingIntervalRef.current = setInterval(() => {
+        loadOrders(true); // Pass true to enable sound on new orders
+      }, 5000);
+      
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+      };
     } else if (activeTab === "products") {
       loadProducts();
     } else if (activeTab === "reviews") {
       loadReviews();
     }
+    
+    // Cleanup polling when tab changes
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
   }, [activeTab]);
 
   async function handleInitializeProducts() {

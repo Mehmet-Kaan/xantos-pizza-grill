@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "../styles/footer.css";
 
 export default function Footer() {
@@ -9,9 +10,9 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} Starpack APS — MKaan</p>
         </div>
         <div className="glass-links">
-          <a href="/om-os">Om os</a>
-          <a href="/kontakt">Kontakt</a>
-          <a href="/privacy">Privacy Policy</a>
+          <Link to="/om-os">Om os</Link>
+          <Link to="/kontakt">Kontakt</Link>
+          <Link to="/privacy">Privacy Policy</Link>
         </div>
       </div>
     </footer>

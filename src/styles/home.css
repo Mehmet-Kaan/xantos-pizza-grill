@@ -60,6 +60,10 @@
   z-index: 1;
 }
 
+[data-theme="dark"] .hero-overlay {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.99) 100%);
+}
+
 .hero-container {
   position: relative;
   z-index: 2;
@@ -95,6 +99,13 @@
   background: var(--color-success);
   border-radius: 50%;
   animation: pulse 2s infinite;
+}
+
+.closed-dot {
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
 }
 
 @keyframes pulse {

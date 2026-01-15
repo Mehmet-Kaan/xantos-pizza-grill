@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { IngredientOption, Product } from "../hooks/types";
 import { CloseIcon } from "../hooks/icons";
+import { CartIcon } from "./Icons";
 import {
   getAllProducts,
   getProductsMetadata,
@@ -269,25 +270,6 @@ export function MenuCard({ item }: { item: MenuItem }) {
   );
 }
 
-function AddButton({
-  item,
-  onAdd,
-}: {
-  item: Product;
-  onAdd: (item: Product) => void;
-}) {
-  return (
-    <button
-      className="add-button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onAdd(item);
-      }}
-    >
-      +
-    </button>
-  );
-}
 
 interface ModifyModalProps {
   item: Product;
@@ -400,10 +382,24 @@ export default function Menu() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const popularRef = useRef<HTMLElement | null>(null);
 
-  const { addItem, items, updateQty, removeItem, total } = useCart();
+  const { addItem, items, updateQty, removeItem, clear, total } = useCart();
+  const prevItemsCountRef = useRef(items.length);
+
+  // Open cart drawer when item is added (mobile only)
+  useEffect(() => {
+    const isMobile = window.innerWidth < 720;
+    const itemsIncreased = items.length > prevItemsCountRef.current;
+    
+    if (isMobile && itemsIncreased && items.length > 0 && !cartDrawerOpen) {
+      setCartDrawerOpen(true);
+    }
+    
+    prevItemsCountRef.current = items.length;
+  }, [items.length, cartDrawerOpen]);
 
   // Load products with caching logic
   useEffect(() => {
@@ -508,10 +504,40 @@ export default function Menu() {
 
   useEffect(() => {
     document.body.style.overflow = activeItem ? "hidden" : "auto";
+    if (activeItem) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
     return () => {
       document.body.style.overflow = "auto";
+      document.body.classList.remove("modal-open");
     };
   }, [activeItem]);
+
+  useEffect(() => {
+    document.body.style.overflow = cartDrawerOpen ? "hidden" : "auto";
+    if (cartDrawerOpen) {
+      document.body.classList.add("cart-drawer-open");
+    } else {
+      document.body.classList.remove("cart-drawer-open");
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+      document.body.classList.remove("cart-drawer-open");
+    };
+  }, [cartDrawerOpen]);
+
+  useEffect(() => {
+    if (showAllergens) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [showAllergens]);
 
   const filteredItems = products.filter((item) => {
     const matchesSearch =
@@ -592,8 +618,14 @@ export default function Menu() {
         </button>
       </div>
       {showAllergens && (
-        <div className="allergen-modal">
-          <div className="max-w-6xl modal-content">
+        <div 
+          className="allergen-modal"
+          onClick={() => setShowAllergens(false)}
+        >
+          <div 
+            className="max-w-6xl modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="modal-title">Allergener & Kontakt</h3>
 
             <p className="modal-text">
@@ -733,22 +765,39 @@ export default function Menu() {
                 {popularItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded shadow flex items-center menu-item"
+                    className="menu-item-simple"
                     onClick={() => openModal(item)}
                   >
-                    <img src={`./assets/${item.image}`} alt={item.image} />
-                    <div className="menu-item-content">
-                      <div>
-                        <h4 className="menu-item-name">{item.name}</h4>
-                        <p className="text-sm text-gray-600">{item.desc}</p>
+                    <img 
+                      src={`./assets/${item.image}`} 
+                      alt={item.name}
+                      className="menu-item-simple-img"
+                    />
+                    <div className="menu-item-simple-content">
+                      <div className="menu-item-simple-header">
+                        <h4 className="menu-item-simple-name">{item.name}</h4>
+                        <span className="menu-item-simple-price">{item.price} kr</span>
                       </div>
-                      <div className="menu-item-price">
-                        <div className="font-bold">
-                          DKK {Number(item.price).toFixed(2)}
+                      <p className="menu-item-simple-desc">{item.desc}</p>
+                      {item.tags && item.tags.length > 0 && (
+                        <div className="menu-item-simple-tags">
+                          {item.tags.slice(0, 2).map((tag) => (
+                            <span key={tag} className="menu-item-simple-tag">
+                              {tag}
+                            </span>
+                          ))}
                         </div>
-                      </div>
-                      <AddButton item={item} onAdd={openModal} />
+                      )}
                     </div>
+                    <button
+                      className="menu-item-simple-add"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openModal(item);
+                      }}
+                    >
+                      +
+                    </button>
                   </div>
                 ))}
               </div>
@@ -773,36 +822,39 @@ export default function Menu() {
                   {itemsInCategory.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white rounded shadow flex items-center menu-item"
+                      className="menu-item-simple"
                       onClick={() => openModal(item)}
                     >
-                      <img src={`./assets/${item.image}`} alt={item.image} />
-                      <div className="menu-item-content">
-                        <div>
-                          <h4 className="menu-item-name">{item.name}</h4>
-                          <p className="text-sm text-gray-600">{item.desc}</p>
+                      <img 
+                        src={`./assets/${item.image}`} 
+                        alt={item.name}
+                        className="menu-item-simple-img"
+                      />
+                      <div className="menu-item-simple-content">
+                        <div className="menu-item-simple-header">
+                          <h4 className="menu-item-simple-name">{item.name}</h4>
+                          <span className="menu-item-simple-price">{item.price} kr</span>
                         </div>
-                        <div className="menu-item-tags">
-                          {item.tags?.map((tag) => (
-                            <span key={tag} className="menu-item-tag">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <div
-                          className={
-                            "menu-item-price" +
-                            (item.tags?.length && item.tags.length > 0
-                              ? " moveDown"
-                              : "")
-                          }
-                        >
-                          <div className="font-bold">
-                            DKK {Number(item.price).toFixed(2)}
+                        <p className="menu-item-simple-desc">{item.desc}</p>
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="menu-item-simple-tags">
+                            {item.tags.slice(0, 2).map((tag) => (
+                              <span key={tag} className="menu-item-simple-tag">
+                                {tag}
+                              </span>
+                            ))}
                           </div>
-                        </div>
-                        <AddButton item={item} onAdd={openModal} />
+                        )}
                       </div>
+                      <button
+                        className="menu-item-simple-add"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(item);
+                        }}
+                      >
+                        +
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -825,10 +877,140 @@ export default function Menu() {
           )}
         </section>
 
+        {/* Mobile Cart Drawer */}
+        <div 
+          className={`cart-drawer-overlay ${cartDrawerOpen ? "cart-drawer-open" : ""}`}
+          onClick={() => setCartDrawerOpen(false)}
+        >
+          <div 
+            className={`cart-drawer ${cartDrawerOpen ? "cart-drawer-open" : ""}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="cart-drawer-header">
+              <h3>Din kurv</h3>
+              <div className="cart-drawer-header-actions">
+                {items.length > 0 && (
+                  <button 
+                    className="cart-drawer-clear"
+                    onClick={() => {
+                      if (window.confirm("Er du sikker på, at du vil fjerne alle varer fra kurven?")) {
+                        clear();
+                      }
+                    }}
+                    aria-label="Fjern alle varer"
+                  >
+                    Tøm kurv
+                  </button>
+                )}
+                <button 
+                  className="cart-drawer-close"
+                  onClick={() => setCartDrawerOpen(false)}
+                  aria-label="Luk kurv"
+                >
+                  <CloseIcon width={24} height={24} />
+                </button>
+              </div>
+            </div>
+
+            {items.length === 0 ? (
+              <p className="menu-cart-empty">
+                Din kurv er tom. Tilføj lækre retter fra menuen.
+              </p>
+            ) : (
+              <>
+                <div className="menu-cart-items">
+                  {items.map((item) => (
+                    <div key={item.id} className="menu-cart-item">
+                      <div>
+                        <p className="menu-cart-item-name">{item.name}</p>
+                        {item.selectedIngredients && item.selectedIngredients.length > 0 && (
+                          <p className="menu-cart-item-ingredients">
+                            {item.selectedIngredients.map((ing, idx) => (
+                              <span key={idx}>
+                                {ing.name}
+                                {ing.extraPrice ? ` (+${ing.extraPrice} kr)` : ""}
+                                {idx < item.selectedIngredients!.length - 1 ? ", " : ""}
+                              </span>
+                            ))}
+                          </p>
+                        )}
+                        <p className="menu-cart-item-price">
+                          DKK {(item.price * item.qty).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="menu-cart-controls">
+                        <button
+                          onClick={() =>
+                            updateQty(item.id, Math.max(1, item.qty - 1))
+                          }
+                          aria-label="Fjern en"
+                        >
+                          −
+                        </button>
+                        <span>{item.qty}</span>
+                        <button
+                          onClick={() => updateQty(item.id, item.qty + 1)}
+                          aria-label="Tilføj en"
+                        >
+                          +
+                        </button>
+                        <button
+                          className="menu-cart-remove"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          Fjern
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="menu-cart-total">
+                  <span>Total</span>
+                  <strong>DKK {total.toFixed(2)}</strong>
+                </div>
+                <Link 
+                  to="/checkout" 
+                  className="nav-cta menu-cart-cta"
+                  onClick={() => setCartDrawerOpen(false)}
+                >
+                  Gå til checkout
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Floating Cart Button */}
+        <button 
+          className="mobile-cart-button"
+          onClick={() => setCartDrawerOpen(true)}
+          aria-label="Åbn kurv"
+        >
+          <CartIcon />
+          {items.length > 0 && (
+            <span className="mobile-cart-badge">{items.reduce((sum, i) => sum + i.qty, 0)}</span>
+          )}
+        </button>
+
         <aside className="menu-cart-panel">
           <div className="menu-cart-header">
-            <h3>Din kurv</h3>
-            <span className="menu-cart-count">{items.length} varer</span>
+            <div>
+              <h3>Din kurv</h3>
+              <span className="menu-cart-count">{items.length} varer</span>
+            </div>
+            {items.length > 0 && (
+              <button 
+                className="menu-cart-clear"
+                onClick={() => {
+                  if (window.confirm("Er du sikker på, at du vil fjerne alle varer fra kurven?")) {
+                    clear();
+                  }
+                }}
+                aria-label="Fjern alle varer"
+              >
+                Tøm kurv
+              </button>
+            )}
           </div>
 
           {items.length === 0 ? (
@@ -842,6 +1024,17 @@ export default function Menu() {
                   <div key={item.id} className="menu-cart-item">
                     <div>
                       <p className="menu-cart-item-name">{item.name}</p>
+                      {item.selectedIngredients && item.selectedIngredients.length > 0 && (
+                        <p className="menu-cart-item-ingredients">
+                          {item.selectedIngredients.map((ing, idx) => (
+                            <span key={idx}>
+                              {ing.name}
+                              {ing.extraPrice ? ` (+${ing.extraPrice} kr)` : ""}
+                              {idx < item.selectedIngredients!.length - 1 ? ", " : ""}
+                            </span>
+                          ))}
+                        </p>
+                      )}
                       <p className="menu-cart-item-price">
                         DKK {(item.price * item.qty).toFixed(2)}
                       </p>

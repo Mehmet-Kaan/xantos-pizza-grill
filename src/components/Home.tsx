@@ -246,8 +246,8 @@ export default function Home() {
         <div className="hero-container">
           <div className="hero-content">
             <div className="hero-badge">
-              <span className="open-dot"></span>
-              {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00 i morgen"}
+              <span className={isOpenNow() ? "open-dot" : "closed-dot"}></span>
+              {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00"}
             </div>
             <h1 className="hero-title">
               <PizzaIcon />
