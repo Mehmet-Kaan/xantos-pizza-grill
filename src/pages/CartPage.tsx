@@ -49,7 +49,8 @@ export default function CartPage() {
               <div className="cart-confirm-text">
                 <h3 className="cart-confirm-title">Tøm kurven?</h3>
                 <p className="cart-confirm-desc">
-                  Alle varer fjernes permanent. Denne handling kan ikke fortrydes.
+                  Alle varer fjernes permanent. Denne handling kan ikke
+                  fortrydes.
                 </p>
               </div>
             </div>
@@ -101,8 +102,12 @@ export default function CartPage() {
                   const basePrice = i.price - extrasTotal;
                   const itemPrice = i.price;
                   const rowTotal = itemPrice * i.qty;
-                  const itemVat = Math.round((rowTotal * vatRate) / (1 + vatRate));
+                  const itemVat = Math.round(
+                    (rowTotal * vatRate) / (1 + vatRate)
+                  );
                   const itemSubtotal = rowTotal - itemVat;
+
+                  console.log(itemSubtotal);
 
                   return (
                     <div key={i.id} className="cart-item-card">
@@ -113,7 +118,8 @@ export default function CartPage() {
                             alt={i.name}
                             className="cart-item-image"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = './assets/pizza-placeholder.jpg';
+                              (e.target as HTMLImageElement).src =
+                                "./assets/pizza-placeholder.jpg";
                             }}
                           />
                         )}
@@ -132,7 +138,9 @@ export default function CartPage() {
                         </div>
 
                         {(i as any).desc && (
-                          <p className="cart-item-description">{(i as any).desc}</p>
+                          <p className="cart-item-description">
+                            {(i as any).desc}
+                          </p>
                         )}
 
                         <div className="cart-item-pricing">
@@ -157,16 +165,21 @@ export default function CartPage() {
                             <div className="cart-item-ingredients">
                               <p className="cart-ingredients-label">Tilvalg:</p>
                               <div className="cart-ingredients-list">
-                                {i.selectedIngredients.map((ing: any, idx: number) => (
-                                  <span key={idx} className="cart-ingredient-tag">
-                                    {ing.name}
-                                    {ing.extraPrice && (
-                                      <span className="cart-ingredient-price">
-                                        +{ing.extraPrice} kr
-                                      </span>
-                                    )}
-                                  </span>
-                                ))}
+                                {i.selectedIngredients.map(
+                                  (ing: any, idx: number) => (
+                                    <span
+                                      key={idx}
+                                      className="cart-ingredient-tag"
+                                    >
+                                      {ing.name}
+                                      {ing.extraPrice && (
+                                        <span className="cart-ingredient-price">
+                                          +{ing.extraPrice} kr
+                                        </span>
+                                      )}
+                                    </span>
+                                  )
+                                )}
                               </div>
                             </div>
                           )}
@@ -175,7 +188,9 @@ export default function CartPage() {
                           <div className="cart-item-qty">
                             <button
                               className="cart-qty-btn"
-                              onClick={() => updateQty(i.id, Math.max(1, i.qty - 1))}
+                              onClick={() =>
+                                updateQty(i.id, Math.max(1, i.qty - 1))
+                              }
                               disabled={i.qty <= 1}
                               aria-label="Reducer antal"
                             >
@@ -192,8 +207,12 @@ export default function CartPage() {
                           </div>
 
                           <div className="cart-item-total">
-                            <span className="cart-item-total-label">I alt:</span>
-                            <span className="cart-item-total-price">{rowTotal} kr</span>
+                            <span className="cart-item-total-label">
+                              I alt:
+                            </span>
+                            <span className="cart-item-total-price">
+                              {rowTotal} kr
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -209,7 +228,9 @@ export default function CartPage() {
                 <div className="cart-summary-details">
                   <div className="cart-summary-row">
                     <span>Antal varer</span>
-                    <span>{itemCount} {itemCount === 1 ? "vare" : "varer"}</span>
+                    <span>
+                      {itemCount} {itemCount === 1 ? "vare" : "varer"}
+                    </span>
                   </div>
                   <div className="cart-summary-row">
                     <span>Subtotal (ekskl. moms)</span>
@@ -235,8 +256,15 @@ export default function CartPage() {
                     className="cart-checkout-btn"
                   >
                     Gå til betaling
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                   </button>
                 </div>

@@ -43,7 +43,7 @@ export default function Admin() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
   const seenOrderIdsRef = useRef<Set<string>>(new Set());
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingIntervalRef = useRef<number | null>(null);
   
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
@@ -66,7 +66,6 @@ export default function Admin() {
       
       // Check for new orders
       if (playSoundOnNew && activeTab === "orders") {
-        const currentOrderIds = new Set(fetchedOrders.map(o => o.id || ""));
         const previousOrderIds = seenOrderIdsRef.current;
         
         // Find new orders
@@ -321,7 +320,7 @@ export default function Admin() {
             <div className="section-header">
               <h2 className="section-title">Ordre Administration</h2>
               <button
-                onClick={loadOrders}
+                onClick={() => loadOrders(false)}
                 className="btn-refresh"
                 disabled={ordersLoading}
               >
