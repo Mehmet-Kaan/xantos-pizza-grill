@@ -1,9 +1,6 @@
-import FloatingCart from "../components/FloatingCartButton";
-
 export default function OmOs() {
   return (
     <main className="max-w-4xl mx-auto p-6">
-      <FloatingCart />
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-3xl font-bold mb-4">Om os</h1>
         <p className="mb-3 text-gray-700">

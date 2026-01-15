@@ -110,7 +110,7 @@ export default function Admin() {
           order.id === orderId ? { ...order, status: newStatus } : order
         );
         setStoredTodaysOrders(updated);
-        // Also update the state if the subsection is visible
+        // Always update the state if the subsection is visible
         if (showAllTodaysOrders) {
           setAllTodaysOrders(updated);
         }
@@ -340,13 +340,25 @@ export default function Admin() {
   async function handleUpdateOrderStatus(id: string, status: Order["status"]) {
     try {
       await updateOrderStatus(id, status);
-      setOrders((prev) =>
-        prev.map((o) => (o.id === id ? { ...o, status } : o))
-      );
       
-      // Update localStorage cache when order status changes to "ready"
+      // If status is "ready", remove from main orders list (since we filter out "ready" orders)
       if (status === "ready") {
-        updateStoredTodaysOrderStatus(id, status);
+        setOrders((prev) => prev.filter((o) => o.id !== id));
+      } else {
+        // Otherwise, just update the status
+        setOrders((prev) =>
+          prev.map((o) => (o.id === id ? { ...o, status } : o))
+        );
+      }
+      
+      // Always update localStorage cache and "All Today's Orders" state
+      updateStoredTodaysOrderStatus(id, status);
+      
+      // Also update the "All Today's Orders" state directly if visible
+      if (showAllTodaysOrders) {
+        setAllTodaysOrders((prev) =>
+          prev.map((o) => (o.id === id ? { ...o, status } : o))
+        );
       }
     } catch (err) {
       console.error("Error updating order status:", err);
