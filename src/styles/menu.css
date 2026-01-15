@@ -1810,6 +1810,10 @@ body.cart-drawer-open header {
   z-index: 0;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 /* Lower header z-index when modals are open */
 body.modal-open header {
   z-index: 40;
@@ -2052,20 +2056,24 @@ body.modal-open header {
   }
 
   .menu-filters {
-    padding: 0.875rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     gap: 0.875rem;
-    border-radius: 12px;
+    border: none;
+    background: none;
+    box-shadow: none;
+    padding: 0;
   }
 
   .menu-filters .categoriesContainer {
     gap: 0.5rem;
+    padding-bottom: 1rem;
   }
 
   .menu-filters .menu-search {
     padding: 0.75rem 0.875rem;
     padding-left: 2.5rem;
     font-size: 0.875rem;
+    margin: 0;
   }
 
   .menu-filters .search-icon {
@@ -2159,12 +2167,14 @@ body.modal-open header {
     max-width: unset;
   }
   .allergen-btn {
-    position: relative;
+    position: absolute;
     top: unset;
-    right: unset;
-    margin-bottom: 1.2rem;
+    right: 1rem;
     background: var(--secondary-color);
     color: white;
+  }
+  .allergen-btn-text {
+    display: none;
   }
 
   .contact-btn {
@@ -2362,6 +2372,14 @@ body.modal-open header {
     flex: 1;
     display: flex;
     justify-content: flex-end;
+  }
+
+  .allergen-modal .modal-content {
+    position: absolute;
+    bottom: 0;
+
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
   }
 
   /* Subtle gradient overlay on image for depth */

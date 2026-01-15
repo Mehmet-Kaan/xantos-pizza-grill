@@ -242,6 +242,9 @@ body:hover {
   margin-top: 2rem;
 }
 
+.mb-0 {
+  margin-bottom: 0rem;
+}
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -410,7 +413,7 @@ body:hover {
 .modern-header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  /* padding: 1rem 2rem; */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -739,9 +742,13 @@ body:hover {
   transform: translateY(-2px) !important;
 }
 
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .modern-header-container {
-    padding: 1rem 1.25rem;
+    padding: 1rem;
     gap: 1rem;
   }
 

@@ -9,6 +9,7 @@ import {
   getReviewsMetadata,
   type Review,
 } from "../services/reviewsService";
+import ScrollReveal from "../utils/ScrollReveal";
 
 // localStorage keys
 const REVIEWS_STORAGE_KEY = "xanthos_reviews";
@@ -243,92 +244,109 @@ export default function Home() {
       {/* HERO SECTION */}
       <section className="hero-section">
         <div className="hero-overlay"></div>
-        <div className="hero-container">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <span className={isOpenNow() ? "open-dot" : "closed-dot"}></span>
-              {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00"}
-            </div>
-            <h1 className="hero-title">
-              <PizzaIcon />
-              Velkommen til Xanthos Pizza & Grill
-            </h1>
-            <p className="hero-subtitle">
-              Autentiske pizzor och grillfavoriter. Beställ enkelt online och
-              hämta eller få hemleverans.
-            </p>
-            <div className="hero-features">
-              <span className="hero-feature">
-                <span className="hero-icon">🔥</span>
-                Pickup
-              </span>
-              <span className="hero-feature">
-                <span className="hero-icon">🚚</span>
-                Levering
-              </span>
-              <span className="hero-feature">
-                <span className="hero-icon">⭐</span>
-                4.6/5 (500+ anmeldelser)
-              </span>
-            </div>
-            <div className="hero-cta">
-              <Link to="/bestil" className="btn-primary">
-                Bestil takeaway
-                <ArrowRightIcon />
-              </Link>
-              <Link to="/menu" className="btn-secondary">
-                Se menu
-              </Link>
-            </div>
-          </div>
-          <div className="hero-special">
-            <div className="special-card">
-              <span className="special-badge">Dagens tilbud</span>
-              <div className="special-image">
-                <img src={special.image} alt={special.title} />
+        {/* <ScrollReveal> */}
+          <div className="hero-container">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <span
+                  className={isOpenNow() ? "open-dot" : "closed-dot"}
+                ></span>
+                {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00"}
               </div>
-              <h3 className="special-title">{special.title}</h3>
-              <p className="special-desc">{special.description}</p>
-              <p className="special-price">{special.price}</p>
+              <h1 className="hero-title">
+                <PizzaIcon />
+                Velkommen til Xanthos Pizza & Grill
+              </h1>
+              <p className="hero-subtitle">
+                Autentiske pizzor och grillfavoriter. Beställ enkelt online och
+                hämta eller få hemleverans.
+              </p>
+              <div className="hero-features">
+                <span className="hero-feature">
+                  <span className="hero-icon">🔥</span>
+                  Pickup
+                </span>
+                <span className="hero-feature">
+                  <span className="hero-icon">🚚</span>
+                  Levering
+                </span>
+                <span className="hero-feature">
+                  <span className="hero-icon">⭐</span>
+                  4.6/5 (500+ anmeldelser)
+                </span>
+              </div>
+              <div className="hero-cta">
+                <Link to="/bestil" className="btn-primary">
+                  Bestil takeaway
+                  <ArrowRightIcon />
+                </Link>
+                <Link to="/menu" className="btn-secondary">
+                  Se menu
+                </Link>
+              </div>
             </div>
+            <ScrollReveal>  
+            <div className="hero-special">
+              <div className="special-card">
+                <span className="special-badge">Dagens tilbud</span>
+                <div className="special-image">
+                  <img src={special.image} alt={special.title} />
+                </div>
+                <h3 className="special-title">{special.title}</h3>
+                <p className="special-desc">{special.description}</p>
+                <p className="special-price">{special.price}</p>
+              </div>
+            </div>
+            </ScrollReveal>
           </div>
-        </div>
+        {/* </ScrollReveal> */}
       </section>
 
       <main className="home-main">
         {/* TRUST BAR */}
         <section className="trust-section">
           <div className="trust-grid">
+            <ScrollReveal>  
             <div className="trust-card">
               <div className="trust-icon">🚚</div>
               <h3>Levering</h3>
               <p>Hurtig & varm</p>
               <p>30–45 min · Op til 5 km</p>
             </div>
+            </ScrollReveal>
+            <ScrollReveal>  
             <div className="trust-card">
               <div className="trust-icon">🛍️</div>
               <h3>Afhentning</h3>
               <p>Klar på 15 min</p>
             </div>
+            </ScrollReveal>
+            <ScrollReveal>
             <div className="trust-card">
               <div className="trust-icon">💳</div>
               <h3>Sikker betaling</h3>
               <p>Kort & MobilePay</p>
             </div>
+            </ScrollReveal>
+            <ScrollReveal>
             <div className="trust-card">
               <div className="trust-icon">⭐</div>
               <h3>4.6 stjerner</h3>
               <p>500+ anmeldelser</p>
             </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* ABOUT US SECTION */}
         <section className="section about-section">
+          <ScrollReveal>
           <div className="section-header">
             <h2 className="section-title">Om os</h2>
             <p className="section-subtitle">Din lokale pizzabar og grill</p>
           </div>
+          </ScrollReveal>
+          <ScrollReveal>
           <div className="about-content">
             <div className="about-text">
               <p>
@@ -353,6 +371,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+          </ScrollReveal>
         </section>
 
         {/* POPULAR ITEMS */}

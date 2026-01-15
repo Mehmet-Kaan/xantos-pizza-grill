@@ -1,5 +1,5 @@
 import "../App.css";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import Home from "../components/Home";
@@ -13,38 +13,125 @@ import Kontakt from "./Kontakt";
 import Privacy from "./PrivacyPolicy";
 import { CartProvider } from "../contexts/CartContext";
 import ScrollToTop from "../components/ScrollToTop";
+import { AnimatePresence } from "framer-motion";
+import PageTransition from "../utils/PageTransition";
+
 // import CookieBanner from "../components/CookieBanner";
+
+function AppContent() {
+  const location = useLocation();
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Nav />
+
+      <div className="flex-1 app-bg">
+        <ScrollToTop />
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={
+                <PageTransition>
+                  <Home />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/menu"
+              element={
+                <PageTransition>
+                  <Menu />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/bestil"
+              element={
+                <PageTransition>
+                  <Menu />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/om-os"
+              element={
+                <PageTransition>
+                  <OmOs />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/kontakt"
+              element={
+                <PageTransition>
+                  <Kontakt />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/privacy"
+              element={
+                <PageTransition>
+                  <Privacy />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/cart"
+              element={
+                <PageTransition>
+                  <CartPage />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <PageTransition>
+                  <Checkout />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/confirmation/:orderId"
+              element={
+                <PageTransition>
+                  <ConfirmationWrapper />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PageTransition>
+                  <Admin />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <PageTransition>
+                  <NotFound />
+                </PageTransition>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
+      </div>
+
+      <Footer />
+      {/* <CookieBanner /> */}
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <Router basename="/xantos-pizza-grill/">
       <CartProvider>
-        <div className="min-h-screen flex flex-col">
-          <Nav />
-
-          <div className="flex-1 app-bg">
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/menu" element={<Menu />} />
-              <Route path="/bestil" element={<Menu />} />
-              <Route path="/om-os" element={<OmOs />} />
-              <Route path="/kontakt" element={<Kontakt />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route
-                path="/confirmation/:orderId"
-                element={<ConfirmationWrapper />}
-              />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-
-          <Footer />
-          {/* <CookieBanner /> */}
-        </div>
+        <AppContent />
       </CartProvider>
     </Router>
   );

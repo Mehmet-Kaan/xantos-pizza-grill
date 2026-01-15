@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { CartIcon, PhoneIcon, ArrowRightIcon } from "./Icons";
@@ -8,6 +8,8 @@ function Nav() {
   const [open, setOpen] = useState(false);
   const { items } = useCart();
   const count = items.reduce((s: number, i: any) => s + i.qty, 0);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
@@ -24,9 +26,40 @@ function Nav() {
   }, [darkMode]);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "auto";
+    if (open) {
+      document.body.classList.add("mobile-menu-open");
+    } else {
+      document.body.classList.remove("mobile-menu-open");
+    }
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.classList.remove("mobile-menu-open");
+    };
+  }, [open]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!open) return;
+      
+      const target = event.target as Node;
+      
+      // Don't close if clicking inside the menu or on the toggle button
+      if (
+        menuRef.current?.contains(target) ||
+        toggleRef.current?.contains(target)
+      ) {
+        return;
+      }
+      
+      setOpen(false);
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [open]);
 
@@ -75,6 +108,7 @@ function Nav() {
           </button>
 
           <button
+            ref={toggleRef}
             className={`modern-mobile-toggle ${open ? "open" : ""}`}
             onClick={() => setOpen((v) => !v)}
             aria-label="Åbn/luk menu"
@@ -87,7 +121,10 @@ function Nav() {
         </div>
       </div>
 
-      <div className={`modern-mobile-menu ${open ? "open" : ""}`}>
+      <div 
+        ref={menuRef}
+        className={`modern-mobile-menu ${open ? "open" : ""}`}
+      >
         <nav className="modern-mobile-nav">
           <Link to="/menu" onClick={() => setOpen(false)}>Menu</Link>
           <Link to="/om-os" onClick={() => setOpen(false)}>Om os</Link>

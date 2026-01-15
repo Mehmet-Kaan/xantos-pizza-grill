@@ -504,27 +504,27 @@ export default function Menu() {
   };
 
   useEffect(() => {
-    document.body.style.overflow = activeItem ? "hidden" : "auto";
+    // document.body.style.overflow = activeItem ? "hidden" : "auto";
     if (activeItem) {
       document.body.classList.add("modal-open");
     } else {
       document.body.classList.remove("modal-open");
     }
     return () => {
-      document.body.style.overflow = "auto";
+      // document.body.style.overflow = "auto";
       document.body.classList.remove("modal-open");
     };
   }, [activeItem]);
 
   useEffect(() => {
-    document.body.style.overflow = cartDrawerOpen ? "hidden" : "auto";
+    // document.body.style.overflow = cartDrawerOpen ? "hidden" : "auto";
     if (cartDrawerOpen) {
       document.body.classList.add("cart-drawer-open");
     } else {
       document.body.classList.remove("cart-drawer-open");
     }
     return () => {
-      document.body.style.overflow = "auto";
+      // document.body.style.overflow = "auto";
       document.body.classList.remove("cart-drawer-open");
     };
   }, [cartDrawerOpen]);
@@ -625,7 +625,7 @@ export default function Menu() {
           <p className="menu-subtitle">
             Vælg en kategori for at se vores retter.
           </p>
-          <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
+          <h2 className="text-3xl font-bold flex items-center gap-2 mb-0">
             <span role="img" aria-label="bestik" className="menu-header-icon">
               🍽️
             </span>
@@ -633,7 +633,7 @@ export default function Menu() {
           </h2>
         </div>
         <button className="allergen-btn" onClick={() => setShowAllergens(true)}>
-          Allergener
+          <span className="allergen-btn-text">Allergener</span>
           <svg
             width="20"
             height="20"
