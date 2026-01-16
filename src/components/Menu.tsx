@@ -690,7 +690,8 @@ export default function Menu() {
 
     const updateActiveCategory = () => {
       // Don't update if user just clicked a category
-      if (isUserClickingRef.current) return;
+
+      // if (isUserClickingRef.current) return;
 
       const scrollY = window.scrollY || window.pageYOffset;
       const viewportHeight = window.innerHeight;
@@ -705,7 +706,11 @@ export default function Menu() {
         const sectionTop = rect.top + scrollY;
         const distance = Math.abs(scrollY + threshold - sectionTop);
 
-        if (rect.top <= threshold && rect.bottom > 0 && distance < minDistance) {
+        if (
+          rect.top <= threshold &&
+          rect.bottom > 0 &&
+          distance < minDistance
+        ) {
           minDistance = distance;
           activeCategory = "Most Popular";
         }
@@ -719,7 +724,11 @@ export default function Menu() {
         const sectionTop = rect.top + scrollY;
         const distance = Math.abs(scrollY + threshold - sectionTop);
 
-        if (rect.top <= threshold && rect.bottom > 0 && distance < minDistance) {
+        if (
+          rect.top <= threshold &&
+          rect.bottom > 0 &&
+          distance < minDistance
+        ) {
           minDistance = distance;
           activeCategory = cat;
         }
