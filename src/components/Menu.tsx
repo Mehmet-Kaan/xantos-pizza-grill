@@ -280,6 +280,7 @@ interface ModifyModalProps {
 function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
   const [selected, setSelected] = useState<IngredientOption[]>([]);
   const [animate, setAnimate] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [qty, setQty] = useState(1);
 
   const increaseQty = () => setQty((q) => q + 1);
@@ -299,50 +300,83 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
     }, 800); // matches CSS animation duration
   };
 
+  const handleClose = () => {
+    if (isClosing) return; // Prevent multiple close calls
+    setIsClosing(true);
+    // Wait for animation to complete before actually closing
+    setTimeout(() => {
+      onClose();
+    }, 200); // Match CSS animation duration
+  };
+
   // Calculate extra price for display
   const extraPrice = selected.reduce((acc, i) => acc + (i.extraPrice || 0), 0);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !isClosing) {
+        handleClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [isClosing]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+    <div 
+      className={`modal-overlay ${isClosing ? "modal-closing" : ""}`} 
+      onClick={handleClose}
+    >
+      <div 
+        className={`modal-box ${isClosing ? "modal-closing" : ""}`} 
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-content">
-          <img
-            className="modalImage"
-            src={`./assets/${item.image}`}
-            alt={item.image}
-          />
-          <h3>Tilpas din {item.name}</h3>
-          <p className="modal-desc">Vælg tilvalg:</p>
-
-          <div className="modal-ingredients">
-            {item.ingredients?.map((ing) => (
-              <label key={ing.name} className="modal-ingredient">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(ing)}
-                  onChange={() => toggle(ing)}
-                />
-
-                <span className="custom-checkbox" />
-
-                <span className="ingredient-label">
-                  {ing.name}
-                  {ing.extraPrice ? ` (+${ing.extraPrice} kr)` : ""}
-                </span>
-              </label>
-            ))}
+          <div className="modal-image-wrapper">
+            <img
+              className="modalImage"
+              src={`./assets/${item.image}`}
+              alt={item.image}
+            />
+            <div className="modal-price-badge">
+              {item.price} kr
+            </div>
           </div>
+          
+          <div className="modal-header-section">
+            <h3 className="modal-title-text">Tilpas din {item.name}</h3>
+            {item.desc && (
+              <p className="modal-item-desc">{item.desc}</p>
+            )}
+          </div>
+
+          {item.ingredients && item.ingredients.length > 0 && (
+            <>
+              <div className="modal-section-divider"></div>
+              <p className="modal-desc">Vælg tilvalg:</p>
+              <div className="modal-ingredients">
+                {item.ingredients.map((ing) => (
+                  <label key={ing.name} className="modal-ingredient">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(ing)}
+                      onChange={() => toggle(ing)}
+                    />
+                    <span className="custom-checkbox" />
+                    <span className="ingredient-label">
+                      {ing.name}
+                      {ing.extraPrice ? (
+                        <span className="ingredient-price">+{ing.extraPrice} kr</span>
+                      ) : null}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        <button onClick={onClose} className="modal-cancel">
+        <button onClick={handleClose} className="modal-cancel">
           <CloseIcon width={20} height={20} />
         </button>
 
@@ -364,7 +398,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
           </div>
           <div className="modal-add-wrapper">
             <button onClick={handleConfirm} className="modal-confirm">
-              Add to order DKK ({(item.price + extraPrice) * qty},-)
+              <span>Tilføj til kurv • {(item.price + extraPrice) * qty} kr</span>
             </button>
             {animate && <div className="add-notify">Tilføjet!</div>}
           </div>

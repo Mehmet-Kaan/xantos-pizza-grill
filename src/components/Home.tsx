@@ -311,7 +311,7 @@ export default function Home() {
               <div className="trust-icon">🚚</div>
               <h3>Levering</h3>
               <p>Hurtig & varm</p>
-              <p>30–45 min · Op til 5 km</p>
+              {/* <p>30–45 min · Op til 5 km</p> */}
             </div>
             </ScrollReveal>
             <ScrollReveal>  
