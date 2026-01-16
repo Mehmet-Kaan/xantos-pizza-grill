@@ -1032,7 +1032,12 @@ export default function Menu() {
                     <div
                       key={item.id}
                       className="menu-item-simple"
-                      onClick={() => openModal(item)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (item.ingredients && item.ingredients.length > 0) {
+                          openModal(item);
+                        } 
+                      }}
                     >
                       <img
                         src={`./assets/${item.image}`}
@@ -1061,7 +1066,11 @@ export default function Menu() {
                         className="menu-item-simple-add"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openModal(item);
+                          if (item.ingredients && item.ingredients.length > 0) {
+                            openModal(item);
+                          } else {
+                            confirmAdd(item, [], 1);
+                          }
                         }}
                       >
                         +
@@ -1099,7 +1108,12 @@ export default function Menu() {
                     <div
                       key={item.id}
                       className="menu-item-simple"
-                      onClick={() => openModal(item)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (item.ingredients && item.ingredients.length > 0) {
+                          openModal(item);
+                        }
+                      }}
                     >
                       <img
                         src={`./assets/${item.image}`}
@@ -1128,7 +1142,11 @@ export default function Menu() {
                         className="menu-item-simple-add"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openModal(item);
+                          if (item.ingredients && item.ingredients.length > 0) {
+                            openModal(item);
+                          } else {
+                            confirmAdd(item, [], 1);
+                          }
                         }}
                       >
                         +
