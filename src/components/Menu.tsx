@@ -627,14 +627,133 @@ export default function Menu() {
   const popularIds = new Set(products.slice(0, 3).map((item) => item.id));
   const popularItems = filteredItems.filter((item) => popularIds.has(item.id));
 
+  // Track if category change is from user click (to prevent scroll-based updates during click)
+  const isUserClickingRef = useRef(false);
+
   const handleCategoryClick = (cat: string) => {
+    isUserClickingRef.current = true;
     setSelectedCategory(cat);
     const target =
       cat === "Most Popular" ? popularRef.current : sectionRefs.current[cat];
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    // Reset flag after scroll animation completes
+    setTimeout(() => {
+      isUserClickingRef.current = false;
+    }, 1000);
   };
+
+  // Auto-scroll the active category button into view in categoriesContainer-revealOnScroll
+  useEffect(() => {
+    if (loading || products.length === 0 || !selectedCategory) return;
+
+    // Only scroll if the reveal container is visible
+    const revealContainer = document.querySelector(
+      ".categoriesContainer-revealOnScroll"
+    ) as HTMLElement;
+    if (!revealContainer || !revealContainer.classList.contains("is-visible")) {
+      return;
+    }
+
+    // Find the active button by text content
+    const buttons = revealContainer.querySelectorAll("button");
+    let targetButton: HTMLElement | null = null;
+    buttons.forEach((btn) => {
+      if (btn.textContent?.trim() === selectedCategory) {
+        targetButton = btn;
+      }
+    });
+
+    if (targetButton && revealContainer) {
+      const containerRect = revealContainer.getBoundingClientRect();
+      const buttonRect = (targetButton as HTMLElement).getBoundingClientRect();
+
+      // Calculate scroll position to center the button
+      const scrollLeft =
+        revealContainer.scrollLeft +
+        (buttonRect.left - containerRect.left) -
+        containerRect.width / 2 +
+        buttonRect.width / 2;
+
+      // Smooth scroll to the button
+      revealContainer.scrollTo({
+        left: scrollLeft,
+        behavior: "smooth",
+      });
+    }
+  }, [selectedCategory, loading, products.length]);
+
+  // Auto-update active category based on scroll position
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+
+    const updateActiveCategory = () => {
+      // Don't update if user just clicked a category
+      if (isUserClickingRef.current) return;
+
+      const scrollY = window.scrollY || window.pageYOffset;
+      const viewportHeight = window.innerHeight;
+      const threshold = viewportHeight * 0.3; // Consider section active when 30% into viewport
+
+      let activeCategory: string | null = null;
+      let minDistance = Infinity;
+
+      // Check "Most Popular" section
+      if (popularRef.current) {
+        const rect = popularRef.current.getBoundingClientRect();
+        const sectionTop = rect.top + scrollY;
+        const distance = Math.abs(scrollY + threshold - sectionTop);
+
+        if (rect.top <= threshold && rect.bottom > 0 && distance < minDistance) {
+          minDistance = distance;
+          activeCategory = "Most Popular";
+        }
+      }
+
+      // Check all other category sections
+      Object.entries(sectionRefs.current).forEach(([cat, element]) => {
+        if (!element) return;
+
+        const rect = element.getBoundingClientRect();
+        const sectionTop = rect.top + scrollY;
+        const distance = Math.abs(scrollY + threshold - sectionTop);
+
+        if (rect.top <= threshold && rect.bottom > 0 && distance < minDistance) {
+          minDistance = distance;
+          activeCategory = cat;
+        }
+      });
+
+      // Update selected category if we found an active one
+      if (activeCategory && activeCategory !== selectedCategory) {
+        setSelectedCategory(activeCategory);
+      }
+    };
+
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveCategory();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", updateActiveCategory, { passive: true });
+
+    // Initial check
+    updateActiveCategory();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateActiveCategory);
+    };
+  }, [loading, products.length, selectedCategory]);
 
   if (loading) {
     return (
