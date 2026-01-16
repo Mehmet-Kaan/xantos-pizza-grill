@@ -73,20 +73,20 @@ export default function Checkout() {
 
       // Create order in Firebase
       const orderId = await createOrder({
-        items,
+      items,
         total: finalTotal,
-        name,
-        phone,
-        address: method === "delivery" ? address : null,
+      name,
+      phone,
+      address: method === "delivery" ? address : null,
         method: method as "pickup" | "delivery",
-        note,
+      note,
         paymentMethod: requiresPayment ? (paymentMethod as "card" | "mobilepay") : "cash",
         paymentStatus: requiresPayment && paymentMethod === "card" ? "paid" : "pending",
-        status: "pending",
+      status: "pending",
       });
 
       // Clear cart and go to confirmation
-      clear();
+    clear();
       setIsProcessing(false);
       navigate("/confirmation/" + orderId);
     } catch (error) {
@@ -103,43 +103,43 @@ export default function Checkout() {
           <CartIcon style={{ marginRight: "0.5rem", verticalAlign: "middle" }} />
           Gennemfør bestilling
         </h2>
-        {items.length === 0 ? (
+      {items.length === 0 ? (
           <div className="checkout-empty">
             <p>Din kurv er tom —</p>
             <Link to="/bestil" className="checkout-link">
               Se menuen
-            </Link>
-          </div>
-        ) : (
+          </Link>
+        </div>
+      ) : (
           <div className="checkout-layout">
             <form onSubmit={handlePlaceOrder} className="checkout-form">
               <section className="checkout-section">
                 <h3 className="checkout-section-title">Kontaktoplysninger</h3>
                 <div className="form-group">
                   <label className="form-label">Navn</label>
-                  <input
+            <input
                     type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
                     className="form-input"
                     placeholder="Indtast dit navn"
-                  />
-                </div>
+            />
+          </div>
                 <div className="form-group">
                   <label className="form-label">
                     <PhoneIcon style={{ marginRight: "0.35rem", verticalAlign: "middle" }} />
                     Telefonnummer
                   </label>
-                  <input
+            <input
                     type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
                     className="form-input"
                     placeholder="+45 12 34 56 78"
-                  />
-                </div>
+            />
+          </div>
               </section>
 
               <section className="checkout-section">
@@ -167,7 +167,7 @@ export default function Checkout() {
                       name="method"
                       value="delivery"
                       checked={method === "delivery"}
-                      onChange={(e) => setMethod(e.target.value)}
+              onChange={(e) => setMethod(e.target.value)}
                     />
                     <div className="method-content">
                       <span className="method-icon">🚴</span>
@@ -177,29 +177,29 @@ export default function Checkout() {
                       </div>
                     </div>
                   </label>
-                </div>
+          </div>
 
-                {method === "delivery" && (
+          {method === "delivery" && (
                   <div className="form-group" style={{ marginTop: "1rem" }}>
                     <label className="form-label">Leveringsadresse</label>
-                    <input
+              <input
                       type="text"
-                      required={method === "delivery"}
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
+                required={method === "delivery"}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                       className="form-input"
                       placeholder="Gadenavn og nummer"
-                    />
-                  </div>
-                )}
+              />
+            </div>
+          )}
               </section>
 
               <section className="checkout-section">
                 <h3 className="checkout-section-title">Bemærkninger (valgfrit)</h3>
                 <div className="form-group">
-                  <textarea
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
                     className="form-textarea"
                     placeholder="Har du nogen særlige ønsker eller allergener?"
                     rows={4}
@@ -293,8 +293,8 @@ export default function Checkout() {
                             className="form-input"
                             placeholder="123"
                             maxLength={3}
-                          />
-                        </div>
+            />
+          </div>
                       </div>
                     </div>
                   )}
@@ -308,16 +308,16 @@ export default function Checkout() {
               )}
 
               <div className="checkout-actions">
-                <button
-                  type="button"
-                  onClick={() => navigate("/cart")}
+              <button
+                type="button"
+                onClick={() => navigate("/cart")}
                   className="btn-secondary"
                   disabled={isProcessing}
-                >
+              >
                   Tilbage
-                </button>
-                <button 
-                  type="submit" 
+              </button>
+              <button
+                type="submit"
                   className="btn-primary"
                   disabled={isProcessing}
                 >
@@ -332,7 +332,7 @@ export default function Checkout() {
                       <ArrowRightIcon style={{ marginLeft: "0.5rem", verticalAlign: "middle" }} />
                     </>
                   )}
-                </button>
+              </button>
               </div>
 
               <p className="checkout-note">
@@ -375,11 +375,11 @@ export default function Checkout() {
                 <div className="summary-total-row summary-total-final">
                   <span>Total</span>
                   <strong>DKK {finalTotal.toFixed(2)}</strong>
-                </div>
-              </div>
+            </div>
+          </div>
             </aside>
           </div>
-        )}
+      )}
       </div>
     </main>
   );

@@ -9,6 +9,7 @@ import {
   getAllProducts,
   getProductsMetadata,
 } from "../services/productsService";
+import ScrollReveal from "../utils/ScrollReveal";
 
 // localStorage keys
 const PRODUCTS_STORAGE_KEY = "xanthos_products";
@@ -270,7 +271,6 @@ export function MenuCard({ item }: { item: MenuItem }) {
   );
 }
 
-
 interface ModifyModalProps {
   item: Product;
   onClose: () => void;
@@ -394,11 +394,11 @@ export default function Menu() {
   useEffect(() => {
     const isMobile = window.innerWidth < 720;
     const itemsIncreased = items.length > prevItemsCountRef.current;
-    
+
     if (isMobile && itemsIncreased && items.length > 0 && !cartDrawerOpen) {
       setCartDrawerOpen(true);
     }
-    
+
     prevItemsCountRef.current = items.length;
   }, [items.length, cartDrawerOpen]);
 
@@ -545,15 +545,15 @@ export default function Menu() {
     const checkStickyTitles = () => {
       Object.values(categoryTitleRefs.current).forEach((titleElement) => {
         if (!titleElement) return;
-        
+
         const rect = titleElement.getBoundingClientRect();
         // Check if the title is at the top (sticky position) and still visible
         const isSticky = rect.top <= 0 && rect.bottom > 0;
-        
+
         if (isSticky) {
-          titleElement.classList.add('is-sticky');
+          titleElement.classList.add("is-sticky");
         } else {
-          titleElement.classList.remove('is-sticky');
+          titleElement.classList.remove("is-sticky");
         }
       });
     };
@@ -564,13 +564,52 @@ export default function Menu() {
     }, 100); // Small delay to ensure refs are set
 
     // Add scroll listener
-    window.addEventListener('scroll', checkStickyTitles, { passive: true });
-    
+    window.addEventListener("scroll", checkStickyTitles, { passive: true });
+
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('scroll', checkStickyTitles);
+      window.removeEventListener("scroll", checkStickyTitles);
     };
   }, [products]);
+
+  // Show categoriesContainer-revealOnScroll when scrolling past menu-filters > categoriesContainer
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+
+    const checkRevealOnScroll = () => {
+      // Find the categoriesContainer inside menu-filters
+      const menuFilters = document.querySelector(".menu-filters");
+      const triggerEl = menuFilters?.querySelector(
+        ".categoriesContainer"
+      ) as HTMLElement;
+      const revealEl = document.querySelector(
+        ".categoriesContainer-revealOnScroll"
+      ) as HTMLElement;
+
+      if (!triggerEl || !revealEl) return;
+
+      const triggerRect = triggerEl.getBoundingClientRect();
+
+      // Show when the trigger element has scrolled out of view (above viewport)
+      // This means user has scrolled past the menu-filters categoriesContainer
+      if (triggerRect.top <= 0) {
+        // Scrolled past - show the reveal element
+        revealEl.classList.add("is-visible");
+      } else {
+        // Scrolled back to top - hide the reveal element
+        revealEl.classList.remove("is-visible");
+      }
+    };
+
+    // Add scroll listener
+    window.addEventListener("scroll", checkRevealOnScroll, { passive: true });
+    window.addEventListener("resize", checkRevealOnScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", checkRevealOnScroll);
+      window.removeEventListener("resize", checkRevealOnScroll);
+    };
+  }, [loading, products.length]);
 
   const filteredItems = products.filter((item) => {
     const matchesSearch =
@@ -619,7 +658,6 @@ export default function Menu() {
 
   return (
     <main className="menuPageContainer max-w-6xl">
-      {/* <FloatingCartButton /> */}
       <div className="menu-header">
         <div>
           <p className="menu-subtitle">
@@ -651,11 +689,16 @@ export default function Menu() {
         </button>
       </div>
       {showAllergens && (
-        <div 
+        <div
           className="allergen-modal"
-          onClick={() => setShowAllergens(false)}
+          onClick={() => {
+            document
+              .querySelector(".allergen-modal")
+              ?.classList.add("allergen-close-animation");
+            setTimeout(() => setShowAllergens(false), 400);
+          }}
         >
-          <div 
+          <div
             className="max-w-6xl modal-content"
             onClick={(e) => e.stopPropagation()}
           >
@@ -713,7 +756,12 @@ export default function Menu() {
 
             <div className="modal-close-btn">
               <button
-                onClick={() => setShowAllergens(false)}
+                onClick={() => {
+                  document
+                    .querySelector(".allergen-modal")
+                    ?.classList.add("allergen-close-animation");
+                  setTimeout(() => setShowAllergens(false), 400);
+                }}
                 aria-label="Close"
               >
                 <svg
@@ -761,88 +809,107 @@ export default function Menu() {
           </div>
         </aside>
 
+        <div className="categoriesContainer-revealOnScroll">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={cat === selectedCategory ? "solid" : "ghost"}
+              onClick={() => handleCategoryClick(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         <section className="menu-products">
           <div className="menu-filters">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Søg efter pizza, grill, drikke..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="menu-search"
-              />
-              <span className="search-icon">🔍</span>
-            </div>
-
-            <div className="categoriesContainer">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  className={cat === selectedCategory ? "solid" : "ghost"}
-                  onClick={() => handleCategoryClick(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-          {popularItems.length > 0 && (
-            <div
-              className="menu-category-block menu-popular-block"
-              ref={(el) => {
-                popularRef.current = el;
-              }}
-            >
-              <h3 
-                className="menu-category-title"
-                ref={(el) => {
-                  categoryTitleRefs.current['Most Popular'] = el;
-                }}
-              >
-                Most Popular
-              </h3>
-              <div className="menu-products-grid">
-                {popularItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="menu-item-simple"
-                    onClick={() => openModal(item)}
+            <ScrollReveal>
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Søg efter pizza, grill, drikke..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="menu-search"
+                />
+                <span className="search-icon">🔍</span>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal>
+              <div className="categoriesContainer">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    className={cat === selectedCategory ? "solid" : "ghost"}
+                    onClick={() => handleCategoryClick(cat)}
                   >
-                    <img 
-                      src={`./assets/${item.image}`} 
-                      alt={item.name}
-                      className="menu-item-simple-img"
-                    />
-                    <div className="menu-item-simple-content">
-                      <div className="menu-item-simple-header">
-                        <h4 className="menu-item-simple-name">{item.name}</h4>
-                        <span className="menu-item-simple-price">{item.price} kr</span>
-                      </div>
-                      <p className="menu-item-simple-desc">{item.desc}</p>
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="menu-item-simple-tags">
-                          {item.tags.slice(0, 2).map((tag) => (
-                            <span key={tag} className="menu-item-simple-tag">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      className="menu-item-simple-add"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openModal(item);
-                      }}
-                    >
-                      +
-                    </button>
-                  </div>
+                    {cat}
+                  </button>
                 ))}
               </div>
-            </div>
-          )}
+            </ScrollReveal>
+          </div>
+          <ScrollReveal>
+            {popularItems.length > 0 && (
+              <div
+                className="menu-category-block menu-popular-block"
+                ref={(el) => {
+                  popularRef.current = el;
+                }}
+              >
+                <h3
+                  className="menu-category-title"
+                  ref={(el) => {
+                    categoryTitleRefs.current["Most Popular"] = el;
+                  }}
+                >
+                  Most Popular
+                </h3>
+                <div className="menu-products-grid">
+                  {popularItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="menu-item-simple"
+                      onClick={() => openModal(item)}
+                    >
+                      <img
+                        src={`./assets/${item.image}`}
+                        alt={item.name}
+                        className="menu-item-simple-img"
+                      />
+                      <div className="menu-item-simple-content">
+                        <div className="menu-item-simple-header">
+                          <h4 className="menu-item-simple-name">{item.name}</h4>
+                          <span className="menu-item-simple-price">
+                            {item.price} kr
+                          </span>
+                        </div>
+                        <p className="menu-item-simple-desc">{item.desc}</p>
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="menu-item-simple-tags">
+                            {item.tags.slice(0, 2).map((tag) => (
+                              <span key={tag} className="menu-item-simple-tag">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        className="menu-item-simple-add"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(item);
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </ScrollReveal>
           {Array.from(new Set(products.map((m) => m.category))).map((cat) => {
             const itemsInCategory = filteredItems.filter(
               (item) => item.category === cat
@@ -857,7 +924,7 @@ export default function Menu() {
                   sectionRefs.current[cat] = el;
                 }}
               >
-                <h3 
+                <h3
                   className="menu-category-title"
                   ref={(el) => {
                     categoryTitleRefs.current[cat] = el;
@@ -872,15 +939,17 @@ export default function Menu() {
                       className="menu-item-simple"
                       onClick={() => openModal(item)}
                     >
-                      <img 
-                        src={`./assets/${item.image}`} 
+                      <img
+                        src={`./assets/${item.image}`}
                         alt={item.name}
                         className="menu-item-simple-img"
                       />
                       <div className="menu-item-simple-content">
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
-                          <span className="menu-item-simple-price">{item.price} kr</span>
+                          <span className="menu-item-simple-price">
+                            {item.price} kr
+                          </span>
                         </div>
                         <p className="menu-item-simple-desc">{item.desc}</p>
                         {item.tags && item.tags.length > 0 && (
@@ -925,22 +994,30 @@ export default function Menu() {
         </section>
 
         {/* Mobile Cart Drawer */}
-        <div 
-          className={`cart-drawer-overlay ${cartDrawerOpen ? "cart-drawer-open" : ""}`}
+        <div
+          className={`cart-drawer-overlay ${
+            cartDrawerOpen ? "cart-drawer-open" : ""
+          }`}
           onClick={() => setCartDrawerOpen(false)}
         >
-          <div 
-            className={`cart-drawer ${cartDrawerOpen ? "cart-drawer-open" : ""}`}
+          <div
+            className={`cart-drawer ${
+              cartDrawerOpen ? "cart-drawer-open" : ""
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="cart-drawer-header">
               <h3>Din kurv</h3>
               <div className="cart-drawer-header-actions">
                 {items.length > 0 && (
-                  <button 
+                  <button
                     className="cart-drawer-clear"
                     onClick={() => {
-                      if (window.confirm("Er du sikker på, at du vil fjerne alle varer fra kurven?")) {
+                      if (
+                        window.confirm(
+                          "Er du sikker på, at du vil fjerne alle varer fra kurven?"
+                        )
+                      ) {
                         clear();
                       }
                     }}
@@ -949,7 +1026,7 @@ export default function Menu() {
                     Tøm kurv
                   </button>
                 )}
-                <button 
+                <button
                   className="cart-drawer-close"
                   onClick={() => setCartDrawerOpen(false)}
                   aria-label="Luk kurv"
@@ -970,17 +1047,22 @@ export default function Menu() {
                     <div key={item.id} className="menu-cart-item">
                       <div>
                         <p className="menu-cart-item-name">{item.name}</p>
-                        {item.selectedIngredients && item.selectedIngredients.length > 0 && (
-                          <p className="menu-cart-item-ingredients">
-                            {item.selectedIngredients.map((ing, idx) => (
-                              <span key={idx}>
-                                {ing.name}
-                                {ing.extraPrice ? ` (+${ing.extraPrice} kr)` : ""}
-                                {idx < item.selectedIngredients!.length - 1 ? ", " : ""}
-                              </span>
-                            ))}
-                          </p>
-                        )}
+                        {item.selectedIngredients &&
+                          item.selectedIngredients.length > 0 && (
+                            <p className="menu-cart-item-ingredients">
+                              {item.selectedIngredients.map((ing, idx) => (
+                                <span key={idx}>
+                                  {ing.name}
+                                  {ing.extraPrice
+                                    ? ` (+${ing.extraPrice} kr)`
+                                    : ""}
+                                  {idx < item.selectedIngredients!.length - 1
+                                    ? ", "
+                                    : ""}
+                                </span>
+                              ))}
+                            </p>
+                          )}
                         <p className="menu-cart-item-price">
                           DKK {(item.price * item.qty).toFixed(2)}
                         </p>
@@ -1015,8 +1097,8 @@ export default function Menu() {
                   <span>Total</span>
                   <strong>DKK {total.toFixed(2)}</strong>
                 </div>
-                <Link 
-                  to="/checkout" 
+                <Link
+                  to="/checkout"
                   className="nav-cta menu-cart-cta"
                   onClick={() => setCartDrawerOpen(false)}
                 >
@@ -1028,14 +1110,16 @@ export default function Menu() {
         </div>
 
         {/* Mobile Floating Cart Button */}
-        <button 
+        <button
           className="mobile-cart-button"
           onClick={() => setCartDrawerOpen(true)}
           aria-label="Åbn kurv"
         >
           <CartIcon />
           {items.length > 0 && (
-            <span className="mobile-cart-badge">{items.reduce((sum, i) => sum + i.qty, 0)}</span>
+            <span className="mobile-cart-badge">
+              {items.reduce((sum, i) => sum + i.qty, 0)}
+            </span>
           )}
         </button>
 
@@ -1046,10 +1130,14 @@ export default function Menu() {
               <span className="menu-cart-count">{items.length} varer</span>
             </div>
             {items.length > 0 && (
-              <button 
+              <button
                 className="menu-cart-clear"
                 onClick={() => {
-                  if (window.confirm("Er du sikker på, at du vil fjerne alle varer fra kurven?")) {
+                  if (
+                    window.confirm(
+                      "Er du sikker på, at du vil fjerne alle varer fra kurven?"
+                    )
+                  ) {
                     clear();
                   }
                 }}
@@ -1071,17 +1159,22 @@ export default function Menu() {
                   <div key={item.id} className="menu-cart-item">
                     <div>
                       <p className="menu-cart-item-name">{item.name}</p>
-                      {item.selectedIngredients && item.selectedIngredients.length > 0 && (
-                        <p className="menu-cart-item-ingredients">
-                          {item.selectedIngredients.map((ing, idx) => (
-                            <span key={idx}>
-                              {ing.name}
-                              {ing.extraPrice ? ` (+${ing.extraPrice} kr)` : ""}
-                              {idx < item.selectedIngredients!.length - 1 ? ", " : ""}
-                            </span>
-                          ))}
-                        </p>
-                      )}
+                      {item.selectedIngredients &&
+                        item.selectedIngredients.length > 0 && (
+                          <p className="menu-cart-item-ingredients">
+                            {item.selectedIngredients.map((ing, idx) => (
+                              <span key={idx}>
+                                {ing.name}
+                                {ing.extraPrice
+                                  ? ` (+${ing.extraPrice} kr)`
+                                  : ""}
+                                {idx < item.selectedIngredients!.length - 1
+                                  ? ", "
+                                  : ""}
+                              </span>
+                            ))}
+                          </p>
+                        )}
                       <p className="menu-cart-item-price">
                         DKK {(item.price * item.qty).toFixed(2)}
                       </p>
