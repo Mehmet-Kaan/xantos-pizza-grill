@@ -51,6 +51,7 @@
   background-position: center;
   overflow: hidden;
   padding: var(--spacing-xl) var(--spacing-md);
+  /* background: linear-gradient(130deg, #dc2626 0%, #b61a1a 15%, #f97316 75%, #f97316 100%); */
 }
 
 .hero-overlay {
@@ -681,6 +682,7 @@
   .hero-section {
     min-height: auto;
     padding: var(--spacing-lg) var(--spacing-md);
+    /* background: linear-gradient(99deg, #dc2626 0%, #b61a1a 15%, #f97316 75%, #f97316 100%); */
   }
 
   .about-content {

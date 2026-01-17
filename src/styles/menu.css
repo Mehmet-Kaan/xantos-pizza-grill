@@ -1565,12 +1565,12 @@
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
 } */
 
-[data-theme="dark"] .menu-filters {
+/* [data-theme="dark"] .menu-filters {
   background: rgba(30, 41, 59, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-}
+} */
 
 /* [data-theme="dark"] .menu-filters:hover {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5),
@@ -1705,6 +1705,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
+  font-size: 1rem;
 }
 
 .menu-filters .categoriesContainer button::before, .categoriesContainer-revealOnScroll button::before {
@@ -1903,6 +1904,7 @@
     flex-shrink: 0;
     white-space: nowrap;
     font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 600;
     border-radius: 10px;
     line-height: 1.2;
@@ -2871,3 +2873,9 @@ body.modal-open header {
     }
   }
 }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }

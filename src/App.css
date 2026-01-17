@@ -441,6 +441,7 @@ body:hover {
   background-clip: text;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  font-size: 2.5rem;
 }
 
 .modern-logo-sub {
@@ -498,6 +499,7 @@ body:hover {
   display: flex;
   align-items: center;
   gap: 1rem;
+  transform: scale(1.25);
 }
 
 .modern-header-phone {
@@ -897,7 +899,7 @@ body.mobile-menu-open {
 
 @media (max-width: 768px) {
   .modern-header-container {
-    padding: 1rem;
+    padding: .25rem 1rem;
     gap: 1rem;
   }
 
@@ -920,9 +922,9 @@ body.mobile-menu-open {
     display: block;
   }
 
-  .modern-logo-main {
-    font-size: 1.5rem;
-  }
+  /* .modern-logo-main {
+    font-size: 2.5rem;
+  } */
 
   .modern-logo-sub {
     font-size: 0.75rem;
