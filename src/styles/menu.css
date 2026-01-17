@@ -264,6 +264,7 @@
   border-radius: 14px;
   position: relative;
   z-index: 10000;
+  padding: 1rem;
 }
 
 @keyframes fade-bg {
@@ -339,6 +340,10 @@
   width: 100%;
   height: 14px;
   z-index: 4;
+}
+
+.allergen-modal .modal-content::before{
+  display: none;
 }
 
 .modal-content::before {
@@ -2811,8 +2816,6 @@ body.modal-open header {
 
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
-
-    padding: 0.5rem;
   }
 
   /* Subtle gradient overlay on image for depth */

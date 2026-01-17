@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
-import { CartIcon, PhoneIcon, ArrowRightIcon } from "./Icons";
+import { CartIcon, PhoneIcon, ArrowRightIcon, PizzaIcon, InfoIcon, ContactIcon } from "./Icons";
 import { SunIcon, MoonIcon } from "../hooks/icons";
 
 function Nav() {
@@ -126,17 +126,29 @@ function Nav() {
         className={`modern-mobile-menu ${open ? "open" : ""}`}
       >
         <nav className="modern-mobile-nav">
-          <Link to="/menu" onClick={() => setOpen(false)}>Menu</Link>
-          <Link to="/om-os" onClick={() => setOpen(false)}>Om os</Link>
-          <Link to="/kontakt" onClick={() => setOpen(false)}>Kontakt</Link>
+          <Link to="/menu" onClick={() => setOpen(false)}>
+            <PizzaIcon className="mobile-nav-icon" />
+            <span>Menu</span>
+          </Link>
+          <Link to="/om-os" onClick={() => setOpen(false)}>
+            <InfoIcon className="mobile-nav-icon" />
+            <span>Om os</span>
+          </Link>
+          <Link to="/kontakt" onClick={() => setOpen(false)}>
+            <ContactIcon className="mobile-nav-icon" />
+            <span>Kontakt</span>
+          </Link>
           <Link to="/cart" onClick={() => setOpen(false)}>
-            Kurv {count > 0 && `(${count})`}
+            <CartIcon className="mobile-nav-icon" />
+            <span>Kurv {count > 0 && `(${count})`}</span>
           </Link>
           <a href="tel:+4570123456" onClick={() => setOpen(false)}>
-            Ring: 70 12 34 56
+            <PhoneIcon className="mobile-nav-icon" />
+            <span>+45 70 12 34 56</span>
           </a>
           <Link to="/bestil" onClick={() => setOpen(false)} className="modern-mobile-cta">
-            Bestil takeaway
+            <span>Bestil takeaway</span>
+            <ArrowRightIcon className="mobile-nav-cta-icon" />
           </Link>
         </nav>
       </div>
