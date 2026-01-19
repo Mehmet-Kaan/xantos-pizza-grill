@@ -148,6 +148,7 @@ export async function setMostPopularProductIds(productIds: string[]): Promise<vo
       metadataRef,
       {
         mostPopularProductIds: productIds,
+        mostPopularLastUpdated: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       },
       { merge: true }
@@ -155,5 +156,61 @@ export async function setMostPopularProductIds(productIds: string[]): Promise<vo
   } catch (error) {
     console.error("Error setting most popular product IDs:", error);
     throw error;
+  }
+}
+
+// Get most popular metadata (lastUpdated timestamp)
+export async function getMostPopularMetadata(): Promise<Date | null> {
+  try {
+    const metadataRef = doc(db, "metadata", "products");
+    const metadataSnap = await getDoc(metadataRef);
+
+    if (metadataSnap.exists()) {
+      const data = metadataSnap.data();
+      const mostPopularLastUpdated = data.mostPopularLastUpdated;
+      if (mostPopularLastUpdated) {
+        // Convert Firestore Timestamp to Date
+        if (mostPopularLastUpdated.toDate) {
+          return mostPopularLastUpdated.toDate();
+        }
+        return new Date(mostPopularLastUpdated);
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching most popular metadata:", error);
+    return null;
+  }
+}
+
+// Get most popular metadata and IDs in one call (optimized)
+export async function getMostPopularMetadataAndIds(): Promise<{
+  lastUpdated: Date | null;
+  productIds: string[];
+}> {
+  try {
+    const metadataRef = doc(db, "metadata", "products");
+    const metadataSnap = await getDoc(metadataRef);
+
+    if (metadataSnap.exists()) {
+      const data = metadataSnap.data();
+      const productIds = data.mostPopularProductIds || [];
+      
+      let lastUpdated: Date | null = null;
+      const mostPopularLastUpdated = data.mostPopularLastUpdated;
+      if (mostPopularLastUpdated) {
+        if (mostPopularLastUpdated.toDate) {
+          lastUpdated = mostPopularLastUpdated.toDate();
+        } else {
+          lastUpdated = new Date(mostPopularLastUpdated);
+        }
+      }
+      
+      return { lastUpdated, productIds };
+    }
+    return { lastUpdated: null, productIds: [] };
+  } catch (error) {
+    console.error("Error fetching most popular metadata and IDs:", error);
+    return { lastUpdated: null, productIds: [] };
   }
 }

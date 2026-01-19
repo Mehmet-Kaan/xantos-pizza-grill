@@ -8,13 +8,15 @@ import { CartIcon } from "./Icons";
 import {
   getAllProducts,
   getProductsMetadata,
-  getMostPopularProductIds,
+  getMostPopularMetadataAndIds,
 } from "../services/productsService";
 import ScrollReveal from "../utils/ScrollReveal";
 
 // localStorage keys
 const PRODUCTS_STORAGE_KEY = "xanthos_products";
 const PRODUCTS_LAST_UPDATED_KEY = "xanthos_products_lastUpdated";
+const MOST_POPULAR_IDS_KEY = "xanthos_mostPopularProductIds";
+const MOST_POPULAR_LAST_UPDATED_KEY = "xanthos_mostPopular_lastUpdated";
 
 // Helper functions for localStorage
 function getStoredProducts(): Product[] | null {
@@ -54,6 +56,47 @@ function setStoredLastUpdated(date: Date): void {
     localStorage.setItem(PRODUCTS_LAST_UPDATED_KEY, date.toISOString());
   } catch (error) {
     console.error("Error saving lastUpdated to localStorage:", error);
+  }
+}
+
+function getStoredMostPopularIds(): string[] | null {
+  try {
+    const stored = localStorage.getItem(MOST_POPULAR_IDS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? (parsed as string[]) : null;
+    }
+  } catch (error) {
+    console.error("Error reading most popular product IDs from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredMostPopularIds(ids: string[]): void {
+  try {
+    localStorage.setItem(MOST_POPULAR_IDS_KEY, JSON.stringify(ids));
+  } catch (error) {
+    console.error("Error saving most popular product IDs to localStorage:", error);
+  }
+}
+
+function getStoredMostPopularLastUpdated(): Date | null {
+  try {
+    const stored = localStorage.getItem(MOST_POPULAR_LAST_UPDATED_KEY);
+    if (stored) {
+      return new Date(stored);
+    }
+  } catch (error) {
+    console.error("Error reading most popular lastUpdated from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredMostPopularLastUpdated(date: Date): void {
+  try {
+    localStorage.setItem(MOST_POPULAR_LAST_UPDATED_KEY, date.toISOString());
+  } catch (error) {
+    console.error("Error saving most popular lastUpdated to localStorage:", error);
   }
 }
 export const MENU: Product[] = [
@@ -516,13 +559,54 @@ export default function Menu() {
     }
     loadProducts();
     
-    // Load most popular product IDs
+    // Load most popular product IDs with caching logic
     async function loadMostPopularProductIds() {
       try {
-        const productIds = await getMostPopularProductIds();
-        setMostPopularProductIds(productIds);
+        // First, try to load from localStorage
+        const storedIds = getStoredMostPopularIds();
+        const storedLastUpdated = getStoredMostPopularLastUpdated();
+
+        if (storedIds && storedIds.length >= 0 && storedLastUpdated) {
+          // Set from cache immediately for fast UI
+          setMostPopularProductIds(storedIds);
+
+          // Check if we need to update from Firebase (single read to get both timestamp and IDs)
+          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+            await getMostPopularMetadataAndIds();
+
+          if (firebaseLastUpdated) {
+            // Compare timestamps
+            const needsUpdate =
+              !storedLastUpdated ||
+              firebaseLastUpdated.getTime() > storedLastUpdated.getTime();
+
+            if (needsUpdate) {
+              // Update with fresh data from Firebase (already fetched in same call)
+              setMostPopularProductIds(fetchedIds);
+              setStoredMostPopularIds(fetchedIds);
+              setStoredMostPopularLastUpdated(firebaseLastUpdated);
+            }
+          }
+        } else {
+          // No cached data, fetch from Firebase (single read to get both timestamp and IDs)
+          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+            await getMostPopularMetadataAndIds();
+          
+          setMostPopularProductIds(fetchedIds);
+          setStoredMostPopularIds(fetchedIds);
+          
+          if (firebaseLastUpdated) {
+            setStoredMostPopularLastUpdated(firebaseLastUpdated);
+          }
+        }
       } catch (err) {
         console.error("Error loading most popular product IDs:", err);
+        
+        // Fallback to cached data if available
+        const storedIds = getStoredMostPopularIds();
+        if (storedIds) {
+          setMostPopularProductIds(storedIds);
+        }
       }
     }
     loadMostPopularProductIds();

@@ -1,8 +1,27 @@
 import { useState, useEffect, useRef } from "react";
-import { getAllOrders, updateOrderStatus, subscribeToOrders, type Order } from "../services/ordersService";
+import {
+  getAllOrders,
+  updateOrderStatus,
+  subscribeToOrders,
+  type Order,
+} from "../services/ordersService";
 import { initializeProducts } from "../utils/initProducts";
-import { getAllProducts, updateProduct, deleteProduct, getProductsMetadata, getMostPopularProductIds, setMostPopularProductIds, type Product } from "../services/productsService";
-import { getAllReviews, updateReview, getReviewsMetadata, deleteReview, type Review } from "../services/reviewsService";
+import {
+  getAllProducts,
+  updateProduct,
+  deleteProduct,
+  getProductsMetadata,
+  setMostPopularProductIds,
+  getMostPopularMetadataAndIds,
+  type Product,
+} from "../services/productsService";
+import {
+  getAllReviews,
+  updateReview,
+  getReviewsMetadata,
+  deleteReview,
+  type Review,
+} from "../services/reviewsService";
 import type { Unsubscribe } from "firebase/firestore";
 import "../styles/Admin.css";
 
@@ -11,6 +30,9 @@ const PRODUCTS_STORAGE_KEY = "admin_products";
 const PRODUCTS_LAST_UPDATED_KEY = "admin_products_lastUpdated";
 const REVIEWS_STORAGE_KEY = "admin_reviews";
 const REVIEWS_LAST_UPDATED_KEY = "admin_reviews_lastUpdated";
+// Reuse same keys as menu for most popular so both stay in sync
+const MOST_POPULAR_IDS_KEY = "xanthos_mostPopularProductIds";
+const MOST_POPULAR_LAST_UPDATED_KEY = "xanthos_mostPopular_lastUpdated";
 
 // Products localStorage helpers
 function getStoredProducts(): Product[] | null {
@@ -40,7 +62,10 @@ function getStoredProductsLastUpdated(): Date | null {
       return new Date(stored);
     }
   } catch (error) {
-    console.error("Error reading products lastUpdated from localStorage:", error);
+    console.error(
+      "Error reading products lastUpdated from localStorage:",
+      error,
+    );
   }
   return null;
 }
@@ -50,6 +75,54 @@ function setStoredProductsLastUpdated(date: Date): void {
     localStorage.setItem(PRODUCTS_LAST_UPDATED_KEY, date.toISOString());
   } catch (error) {
     console.error("Error saving products lastUpdated to localStorage:", error);
+  }
+}
+
+// Most popular products localStorage helpers (shared with Menu)
+function getStoredMostPopularIdsAdmin(): string[] | null {
+  try {
+    const stored = localStorage.getItem(MOST_POPULAR_IDS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? (parsed as string[]) : null;
+    }
+  } catch (error) {
+    console.error("Error reading most popular product IDs from localStorage:", error);
+  }
+  return null;
+}
+
+function setStoredMostPopularIdsAdmin(ids: string[]): void {
+  try {
+    localStorage.setItem(MOST_POPULAR_IDS_KEY, JSON.stringify(ids));
+  } catch (error) {
+    console.error("Error saving most popular product IDs to localStorage:", error);
+  }
+}
+
+function getStoredMostPopularLastUpdatedAdmin(): Date | null {
+  try {
+    const stored = localStorage.getItem(MOST_POPULAR_LAST_UPDATED_KEY);
+    if (stored) {
+      return new Date(stored);
+    }
+  } catch (error) {
+    console.error(
+      "Error reading most popular lastUpdated from localStorage:",
+      error,
+    );
+  }
+  return null;
+}
+
+function setStoredMostPopularLastUpdatedAdmin(date: Date): void {
+  try {
+    localStorage.setItem(MOST_POPULAR_LAST_UPDATED_KEY, date.toISOString());
+  } catch (error) {
+    console.error(
+      "Error saving most popular lastUpdated to localStorage:",
+      error,
+    );
   }
 }
 
@@ -86,7 +159,10 @@ function getStoredReviewsLastUpdated(): Date | null {
       return new Date(stored);
     }
   } catch (error) {
-    console.error("Error reading reviews lastUpdated from localStorage:", error);
+    console.error(
+      "Error reading reviews lastUpdated from localStorage:",
+      error,
+    );
   }
   return null;
 }
@@ -105,7 +181,9 @@ type Tab = "orders" | "products" | "reviews";
 function playNotificationSound() {
   try {
     // Create a simple notification sound using Web Audio API
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -118,7 +196,10 @@ function playNotificationSound() {
     oscillator.type = "sine";
 
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.3,
+    );
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.3);
@@ -129,7 +210,7 @@ function playNotificationSound() {
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("orders");
-  
+
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -137,12 +218,12 @@ export default function Admin() {
   const seenOrderIdsRef = useRef<Set<string>>(new Set());
   const unsubscribeRef = useRef<Unsubscribe | null>(null);
   const isInitialLoadRef = useRef<boolean>(true);
-  
+
   // All today's orders state (for subsection)
   const [allTodaysOrders, setAllTodaysOrders] = useState<Order[]>([]);
   const [allTodaysOrdersLoading, setAllTodaysOrdersLoading] = useState(false);
   const [showAllTodaysOrders, setShowAllTodaysOrders] = useState(false);
-  
+
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -151,7 +232,9 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [initializing, setInitializing] = useState(false);
   const [initSuccess, setInitSuccess] = useState(false);
-  const [mostPopularProductIds, setMostPopularProductIdsState] = useState<string[]>([]);
+  const [mostPopularProductIds, setMostPopularProductIdsState] = useState<
+    string[]
+  >([]);
   const [savingPopularProducts, setSavingPopularProducts] = useState(false);
 
   // Reviews state
@@ -189,19 +272,22 @@ export default function Admin() {
         JSON.stringify({
           date: new Date().toISOString(),
           orders: orders,
-        })
+        }),
       );
     } catch (error) {
       console.error("Error saving today's orders to localStorage:", error);
     }
   };
 
-  const updateStoredTodaysOrderStatus = (orderId: string, newStatus: Order["status"]) => {
+  const updateStoredTodaysOrderStatus = (
+    orderId: string,
+    newStatus: Order["status"],
+  ) => {
     try {
       const stored = getStoredTodaysOrders();
       if (stored) {
         const updated = stored.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
+          order.id === orderId ? { ...order, status: newStatus } : order,
         );
         setStoredTodaysOrders(updated);
         // Always update the state if the subsection is visible
@@ -221,14 +307,14 @@ export default function Admin() {
       // Only fetch today's orders that are not "ready" (klar)
       const fetchedOrders = await getAllOrders(true, true);
       setOrders(fetchedOrders);
-      
+
       // Reset seen orders if manual refresh
       if (resetSeenOrders) {
         seenOrderIdsRef.current.clear();
       }
-      
+
       // Initialize seen orders
-      fetchedOrders.forEach(o => {
+      fetchedOrders.forEach((o) => {
         if (o.id) {
           seenOrderIdsRef.current.add(o.id);
         }
@@ -244,7 +330,7 @@ export default function Admin() {
   async function loadAllTodaysOrders() {
     try {
       setAllTodaysOrdersLoading(true);
-      
+
       // First, try to load from localStorage
       const storedOrders = getStoredTodaysOrders();
       if (storedOrders && storedOrders.length > 0) {
@@ -252,7 +338,7 @@ export default function Admin() {
         setAllTodaysOrdersLoading(false);
         return; // Use cached data, don't fetch from Firebase
       }
-      
+
       // If no cached data, fetch from Firebase
       const fetchedOrders = await getAllOrders(true, false); // Get all today's orders including "ready"
       setAllTodaysOrders(fetchedOrders);
@@ -269,43 +355,48 @@ export default function Admin() {
     try {
       setProductsLoading(true);
       setProductsError(null);
-      
+
       // Check metadata first
       const serverMetadata = await getProductsMetadata();
       const storedLastUpdated = getStoredProductsLastUpdated();
       const storedProducts = getStoredProducts();
-      
+
       // If we have cached data and metadata hasn't changed, use cache
       if (storedProducts && storedLastUpdated && serverMetadata) {
         // Compare timestamps (allowing for small differences due to serialization)
-        const timeDiff = Math.abs(serverMetadata.getTime() - storedLastUpdated.getTime());
-        if (timeDiff < 1000) { // Less than 1 second difference
+        const timeDiff = Math.abs(
+          serverMetadata.getTime() - storedLastUpdated.getTime(),
+        );
+        if (timeDiff < 1000) {
+          // Less than 1 second difference
           console.log("Using cached products (metadata unchanged)");
           setProducts(storedProducts);
           setProductsLoading(false);
-          // Still load most popular category
-          await loadMostPopularCategory();
+          // Load most popular product IDs (with its own metadata caching)
+          await loadMostPopularProductIds();
           return;
         }
       }
-      
+
       // Metadata changed or no cache - fetch from Firebase
-      console.log("Fetching products from Firebase (metadata changed or no cache)");
+      console.log(
+        "Fetching products from Firebase (metadata changed or no cache)",
+      );
       const fetchedProducts = await getAllProducts();
       setProducts(fetchedProducts);
-      
+
       // Update cache
       setStoredProducts(fetchedProducts);
       if (serverMetadata) {
         setStoredProductsLastUpdated(serverMetadata);
       }
-      
-      // Load most popular product IDs
+
+      // Load most popular product IDs (with its own metadata caching)
       await loadMostPopularProductIds();
     } catch (err) {
       console.error("Error loading products:", err);
       setProductsError("Kunne ikke indlæse produkter. Prøv venligst igen.");
-      
+
       // Try to use cached data as fallback
       const storedProducts = getStoredProducts();
       if (storedProducts) {
@@ -319,10 +410,48 @@ export default function Admin() {
 
   async function loadMostPopularProductIds() {
     try {
-      const productIds = await getMostPopularProductIds();
-      setMostPopularProductIdsState(productIds);
+      // First, try to load from localStorage
+      const storedIds = getStoredMostPopularIdsAdmin();
+      const storedLastUpdated = getStoredMostPopularLastUpdatedAdmin();
+
+      if (storedIds && storedLastUpdated) {
+        // Use cached data immediately
+        setMostPopularProductIdsState(storedIds);
+
+        // Check if we need to update from Firebase (single read to get both timestamp and IDs)
+        const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+          await getMostPopularMetadataAndIds();
+
+        if (firebaseLastUpdated) {
+          const needsUpdate =
+            firebaseLastUpdated.getTime() > storedLastUpdated.getTime();
+
+          if (needsUpdate) {
+            // Update with fresh data from Firebase (already fetched in same call)
+            setMostPopularProductIdsState(fetchedIds);
+            setStoredMostPopularIdsAdmin(fetchedIds);
+            setStoredMostPopularLastUpdatedAdmin(firebaseLastUpdated);
+          }
+        }
+      } else {
+        // No cached data, fetch from Firebase (single read to get both timestamp and IDs)
+        const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+          await getMostPopularMetadataAndIds();
+        
+        setMostPopularProductIdsState(fetchedIds);
+        setStoredMostPopularIdsAdmin(fetchedIds);
+
+        if (firebaseLastUpdated) {
+          setStoredMostPopularLastUpdatedAdmin(firebaseLastUpdated);
+        }
+      }
     } catch (err) {
       console.error("Error loading most popular product IDs:", err);
+      // Fallback to cached data if available
+      const storedIds = getStoredMostPopularIdsAdmin();
+      if (storedIds) {
+        setMostPopularProductIdsState(storedIds);
+      }
     }
   }
 
@@ -333,9 +462,12 @@ export default function Admin() {
       const updatedIds = isCurrentlyPopular
         ? mostPopularProductIds.filter((id) => id !== productId)
         : [...mostPopularProductIds, productId];
-      
+
       await setMostPopularProductIds(updatedIds);
       setMostPopularProductIdsState(updatedIds);
+      // Keep localStorage in sync so Menu uses the same data immediately
+      setStoredMostPopularIdsAdmin(updatedIds);
+      setStoredMostPopularLastUpdatedAdmin(new Date());
     } catch (err) {
       console.error("Error updating most popular products:", err);
       alert("Kunne ikke opdatere mest populære produkter. Prøv venligst igen.");
@@ -345,7 +477,11 @@ export default function Admin() {
   }
 
   async function handleClearAllMostPopular() {
-    if (!confirm("Er du sikker på, at du vil fjerne alle produkter fra 'Most Popular'?")) {
+    if (
+      !confirm(
+        "Er du sikker på, at du vil fjerne alle produkter fra 'Most Popular'?",
+      )
+    ) {
       return;
     }
     try {
@@ -353,6 +489,9 @@ export default function Admin() {
       await setMostPopularProductIds([]);
       setMostPopularProductIdsState([]);
       alert("Alle produkter fjernet fra 'Most Popular'!");
+      // Clear localStorage cache for most popular
+      setStoredMostPopularIdsAdmin([]);
+      setStoredMostPopularLastUpdatedAdmin(new Date());
     } catch (err) {
       console.error("Error clearing most popular products:", err);
       alert("Kunne ikke fjerne produkter. Prøv venligst igen.");
@@ -365,30 +504,35 @@ export default function Admin() {
     try {
       setReviewsLoading(true);
       setReviewsError(null);
-      
+
       // Check metadata first
       const serverMetadata = await getReviewsMetadata();
       const storedLastUpdated = getStoredReviewsLastUpdated();
       const storedReviews = getStoredReviews();
-      
+
       // If we have cached data and metadata hasn't changed, use cache
       if (storedReviews && storedLastUpdated && serverMetadata) {
         // Compare timestamps (allowing for small differences due to serialization)
-        const timeDiff = Math.abs(serverMetadata.getTime() - storedLastUpdated.getTime());
-        if (timeDiff < 1000) { // Less than 1 second difference
+        const timeDiff = Math.abs(
+          serverMetadata.getTime() - storedLastUpdated.getTime(),
+        );
+        if (timeDiff < 1000) {
+          // Less than 1 second difference
           console.log("Using cached reviews (metadata unchanged)");
           setReviews(storedReviews);
           setReviewsLoading(false);
           return;
         }
       }
-      
+
       // Metadata changed or no cache - fetch from Firebase
-      console.log("Fetching reviews from Firebase (metadata changed or no cache)");
+      console.log(
+        "Fetching reviews from Firebase (metadata changed or no cache)",
+      );
       // Get all reviews including unapproved ones for admin
       const fetchedReviews = await getAllReviews(undefined, true);
       setReviews(fetchedReviews);
-      
+
       // Update cache
       setStoredReviews(fetchedReviews);
       if (serverMetadata) {
@@ -397,7 +541,7 @@ export default function Admin() {
     } catch (err) {
       console.error("Error loading reviews:", err);
       setReviewsError("Kunne ikke indlæse anmeldelser. Prøv venligst igen.");
-      
+
       // Try to use cached data as fallback
       const storedReviews = getStoredReviews();
       if (storedReviews) {
@@ -414,14 +558,14 @@ export default function Admin() {
       // Initial load
       loadOrders();
       isInitialLoadRef.current = true;
-      
+
       // Set up real-time listener for orders (only today's orders, excluding "ready" status)
       unsubscribeRef.current = subscribeToOrders(
         (fetchedOrders) => {
           if (isInitialLoadRef.current) {
             // First load: just set orders and mark as seen
             setOrders(fetchedOrders);
-            fetchedOrders.forEach(o => {
+            fetchedOrders.forEach((o) => {
               if (o.id) {
                 seenOrderIdsRef.current.add(o.id);
               }
@@ -431,35 +575,41 @@ export default function Admin() {
           } else {
             // Subsequent updates: check for new orders
             const previousOrderIds = seenOrderIdsRef.current;
-            
+
             // Find new orders that we haven't seen before
             const newOrders = fetchedOrders.filter(
-              o => o.id && !previousOrderIds.has(o.id)
+              (o) => o.id && !previousOrderIds.has(o.id),
             );
-            
+
             if (newOrders.length > 0) {
               // Only play sound if page is visible
               if (!document.hidden) {
                 // Play notification sound for new orders
                 playNotificationSound();
               }
-              
+
               // Append new orders to existing list (prepend since sorted by date desc)
-              setOrders(prevOrders => {
+              setOrders((prevOrders) => {
                 // Get existing order IDs to avoid duplicates
-                const existingIds = new Set(prevOrders.map(o => o.id));
-                const uniqueNewOrders = newOrders.filter(o => o.id && !existingIds.has(o.id));
-                
+                const existingIds = new Set(prevOrders.map((o) => o.id));
+                const uniqueNewOrders = newOrders.filter(
+                  (o) => o.id && !existingIds.has(o.id),
+                );
+
                 // Prepend new orders to existing ones (newest first)
                 const updatedOrders = [...uniqueNewOrders, ...prevOrders];
-                
+
                 // Sort by createdAt descending to maintain order (newest first)
                 return updatedOrders.sort((a, b) => {
                   const getTime = (order: Order) => {
                     if (order.createdAt instanceof Date) {
                       return order.createdAt.getTime();
                     }
-                    if (order.createdAt && typeof order.createdAt === 'object' && 'toDate' in order.createdAt) {
+                    if (
+                      order.createdAt &&
+                      typeof order.createdAt === "object" &&
+                      "toDate" in order.createdAt
+                    ) {
                       return (order.createdAt as any).toDate().getTime();
                     }
                     return new Date(order.createdAt as any).getTime();
@@ -467,9 +617,9 @@ export default function Admin() {
                   return getTime(b) - getTime(a);
                 });
               });
-              
+
               // Update seen orders - mark new orders as seen
-              newOrders.forEach(o => {
+              newOrders.forEach((o) => {
                 if (o.id) {
                   seenOrderIdsRef.current.add(o.id);
                 }
@@ -483,14 +633,14 @@ export default function Admin() {
           setOrdersError("Fejl ved real-time opdatering af ordrer.");
         },
         true, // onlyToday: only fetch today's orders
-        true  // excludeReady: exclude orders with "ready" status
+        true, // excludeReady: exclude orders with "ready" status
       );
     } else if (activeTab === "products") {
       loadProducts();
     } else if (activeTab === "reviews") {
       loadReviews();
     }
-    
+
     // Cleanup: unsubscribe when tab changes or component unmounts
     return () => {
       if (unsubscribeRef.current) {
@@ -511,7 +661,11 @@ export default function Admin() {
   }, []);
 
   async function handleInitializeProducts() {
-    if (!confirm("Er du sikker på, at du vil initialisere alle produkter? Dette kan oprette dubletter hvis produkter allerede findes.")) {
+    if (
+      !confirm(
+        "Er du sikker på, at du vil initialisere alle produkter? Dette kan oprette dubletter hvis produkter allerede findes.",
+      )
+    ) {
       return;
     }
 
@@ -529,15 +683,16 @@ export default function Admin() {
       setTimeout(() => setInitSuccess(false), 5000);
     } catch (err) {
       console.error("Error initializing products:", err);
-      setProductsError("Kunne ikke initialisere produkter. Tjek konsollen for detaljer.");
+      setProductsError(
+        "Kunne ikke initialisere produkter. Tjek konsollen for detaljer.",
+      );
     } finally {
       setInitializing(false);
     }
   }
 
-
   // async function handleInitializeReviews() {
-   
+
   //   try {
   //     await initializeReviews();
 
@@ -547,29 +702,27 @@ export default function Admin() {
   //   }
   // }
 
-  
-
   async function handleUpdateOrderStatus(id: string, status: Order["status"]) {
     try {
       await updateOrderStatus(id, status);
-      
+
       // If status is "ready", remove from main orders list (since we filter out "ready" orders)
       if (status === "ready") {
         setOrders((prev) => prev.filter((o) => o.id !== id));
       } else {
         // Otherwise, just update the status
         setOrders((prev) =>
-          prev.map((o) => (o.id === id ? { ...o, status } : o))
+          prev.map((o) => (o.id === id ? { ...o, status } : o)),
         );
       }
-      
+
       // Always update localStorage cache and "All Today's Orders" state
       updateStoredTodaysOrderStatus(id, status);
-      
+
       // Also update the "All Today's Orders" state directly if visible
       if (showAllTodaysOrders) {
         setAllTodaysOrders((prev) =>
-          prev.map((o) => (o.id === id ? { ...o, status } : o))
+          prev.map((o) => (o.id === id ? { ...o, status } : o)),
         );
       }
     } catch (err) {
@@ -578,19 +731,24 @@ export default function Admin() {
     }
   }
 
-  async function handleUpdateProduct(productId: string, updates: Partial<Product>) {
+  async function handleUpdateProduct(
+    productId: string,
+    updates: Partial<Product>,
+  ) {
     try {
       await updateProduct(productId, updates);
-      const updatedProducts = products.map((p) => (p.id === productId ? { ...p, ...updates } : p));
+      const updatedProducts = products.map((p) =>
+        p.id === productId ? { ...p, ...updates } : p,
+      );
       setProducts(updatedProducts);
-      
+
       // Update localStorage cache
       setStoredProducts(updatedProducts);
       const newMetadata = await getProductsMetadata();
       if (newMetadata) {
         setStoredProductsLastUpdated(newMetadata);
       }
-      
+
       setEditingProduct(null);
       alert("Produkt opdateret med succes!");
     } catch (err) {
@@ -608,14 +766,14 @@ export default function Admin() {
       await deleteProduct(productId);
       const updatedProducts = products.filter((p) => p.id !== productId);
       setProducts(updatedProducts);
-      
+
       // Update localStorage cache
       setStoredProducts(updatedProducts);
       const newMetadata = await getProductsMetadata();
       if (newMetadata) {
         setStoredProductsLastUpdated(newMetadata);
       }
-      
+
       alert("Produkt slettet!");
     } catch (err) {
       console.error("Error deleting product:", err);
@@ -626,16 +784,18 @@ export default function Admin() {
   async function handleApproveReview(reviewId: string) {
     try {
       await updateReview(reviewId, { approved: true });
-      const updatedReviews = reviews.map((r) => (r.id === reviewId ? { ...r, approved: true } : r));
+      const updatedReviews = reviews.map((r) =>
+        r.id === reviewId ? { ...r, approved: true } : r,
+      );
       setReviews(updatedReviews);
-      
+
       // Update localStorage cache
       setStoredReviews(updatedReviews);
       const newMetadata = await getReviewsMetadata();
       if (newMetadata) {
         setStoredReviewsLastUpdated(newMetadata);
       }
-      
+
       alert("Anmeldelse godkendt!");
     } catch (err) {
       console.error("Error approving review:", err);
@@ -650,16 +810,18 @@ export default function Admin() {
 
     try {
       await updateReview(reviewId, { approved: false });
-      const updatedReviews = reviews.map((r) => (r.id === reviewId ? { ...r, approved: false } : r));
+      const updatedReviews = reviews.map((r) =>
+        r.id === reviewId ? { ...r, approved: false } : r,
+      );
       setReviews(updatedReviews);
-      
+
       // Update localStorage cache
       setStoredReviews(updatedReviews);
       const newMetadata = await getReviewsMetadata();
       if (newMetadata) {
         setStoredReviewsLastUpdated(newMetadata);
       }
-      
+
       alert("Anmeldelse afvist!");
     } catch (err) {
       console.error("Error rejecting review:", err);
@@ -676,14 +838,14 @@ export default function Admin() {
       await deleteReview(reviewId);
       const updatedReviews = reviews.filter((r) => r.id !== reviewId);
       setReviews(updatedReviews);
-      
+
       // Update localStorage cache
       setStoredReviews(updatedReviews);
       const newMetadata = await getReviewsMetadata();
       if (newMetadata) {
         setStoredReviewsLastUpdated(newMetadata);
       }
-      
+
       alert("Anmeldelse slettet!");
     } catch (err) {
       console.error("Error deleting review:", err);
@@ -735,7 +897,9 @@ export default function Admin() {
             {/* All Today's Orders Subsection */}
             <div className="todays-orders-subsection">
               <div className="todays-orders-header">
-                <h3 className="todays-orders-title">Alle Dagens Ordrer ({allTodaysOrders.length})</h3>
+                <h3 className="todays-orders-title">
+                  Alle Dagens Ordrer ({allTodaysOrders.length})
+                </h3>
                 <div className="todays-orders-actions">
                   {showAllTodaysOrders && (
                     <button
@@ -762,7 +926,9 @@ export default function Admin() {
                     className="btn-refresh btn-small"
                     disabled={allTodaysOrdersLoading}
                   >
-                    {showAllTodaysOrders ? "⬆️ Skjul" : "⬇️ Vis Alle Dagens Ordrer"}
+                    {showAllTodaysOrders
+                      ? "⬆️ Skjul"
+                      : "⬇️ Vis Alle Dagens Ordrer"}
                   </button>
                 </div>
               </div>
@@ -770,7 +936,9 @@ export default function Admin() {
               {showAllTodaysOrders && (
                 <div>
                   {allTodaysOrdersLoading ? (
-                    <div className="loading-state">Indlæser alle dagens ordrer...</div>
+                    <div className="loading-state">
+                      Indlæser alle dagens ordrer...
+                    </div>
                   ) : allTodaysOrders.length === 0 ? (
                     <div className="empty-state">Ingen ordrer i dag endnu.</div>
                   ) : (
@@ -781,30 +949,47 @@ export default function Admin() {
                             <div>
                               <div className="order-name">{o.name}</div>
                               <div className="order-meta">
-                                {o.method === "delivery" ? "🚴 Levering" : "🚗 Afhentning"}
+                                {o.method === "delivery"
+                                  ? "🚴 Levering"
+                                  : "🚗 Afhentning"}
                                 {" • "}
                                 {(() => {
                                   if (o.createdAt instanceof Date) {
                                     return o.createdAt.toLocaleString("da-DK");
                                   }
-                                  if (o.createdAt && typeof o.createdAt === 'object' && 'toDate' in o.createdAt) {
-                                    return (o.createdAt as any).toDate().toLocaleString("da-DK");
+                                  if (
+                                    o.createdAt &&
+                                    typeof o.createdAt === "object" &&
+                                    "toDate" in o.createdAt
+                                  ) {
+                                    return (o.createdAt as any)
+                                      .toDate()
+                                      .toLocaleString("da-DK");
                                   }
                                   // Handle string dates from localStorage
-                                  return new Date(o.createdAt as string | Date).toLocaleString("da-DK");
+                                  return new Date(
+                                    o.createdAt as string | Date,
+                                  ).toLocaleString("da-DK");
                                 })()}
                               </div>
                               <div className="order-phone">📞 {o.phone}</div>
                               {o.address && (
-                                <div className="order-address">📍 {o.address}</div>
+                                <div className="order-address">
+                                  📍 {o.address}
+                                </div>
                               )}
                             </div>
                             <div className="order-actions">
-                              <div className="order-total">DKK {o.total.toFixed(2)}</div>
+                              <div className="order-total">
+                                DKK {o.total.toFixed(2)}
+                              </div>
                               <select
                                 value={o.status}
                                 onChange={(e) =>
-                                  handleUpdateOrderStatus(o.id!, e.target.value as Order["status"])
+                                  handleUpdateOrderStatus(
+                                    o.id!,
+                                    e.target.value as Order["status"],
+                                  )
                                 }
                                 className="status-select"
                               >
@@ -821,7 +1006,8 @@ export default function Admin() {
                             <ul>
                               {o.items.map((i: any) => (
                                 <li key={i.id}>
-                                  {i.qty} × {i.name} — DKK {(i.price * i.qty).toFixed(2)}
+                                  {i.qty} × {i.name} — DKK{" "}
+                                  {(i.price * i.qty).toFixed(2)}
                                 </li>
                               ))}
                             </ul>
@@ -855,17 +1041,27 @@ export default function Admin() {
                       <div>
                         <div className="order-name">{o.name}</div>
                         <div className="order-meta">
-                          {o.method === "delivery" ? "🚴 Levering" : "🚗 Afhentning"}
+                          {o.method === "delivery"
+                            ? "🚴 Levering"
+                            : "🚗 Afhentning"}
                           {" • "}
                           {(() => {
                             if (o.createdAt instanceof Date) {
                               return o.createdAt.toLocaleString("da-DK");
                             }
-                            if (o.createdAt && typeof o.createdAt === 'object' && 'toDate' in o.createdAt) {
-                              return (o.createdAt as any).toDate().toLocaleString("da-DK");
+                            if (
+                              o.createdAt &&
+                              typeof o.createdAt === "object" &&
+                              "toDate" in o.createdAt
+                            ) {
+                              return (o.createdAt as any)
+                                .toDate()
+                                .toLocaleString("da-DK");
                             }
                             // Handle string dates from localStorage
-                            return new Date(o.createdAt as string | Date).toLocaleString("da-DK");
+                            return new Date(
+                              o.createdAt as string | Date,
+                            ).toLocaleString("da-DK");
                           })()}
                         </div>
                         <div className="order-phone">📞 {o.phone}</div>
@@ -874,11 +1070,16 @@ export default function Admin() {
                         )}
                       </div>
                       <div className="order-actions">
-                        <div className="order-total">DKK {o.total.toFixed(2)}</div>
+                        <div className="order-total">
+                          DKK {o.total.toFixed(2)}
+                        </div>
                         <select
                           value={o.status}
                           onChange={(e) =>
-                            handleUpdateOrderStatus(o.id!, e.target.value as Order["status"])
+                            handleUpdateOrderStatus(
+                              o.id!,
+                              e.target.value as Order["status"],
+                            )
                           }
                           className="status-select"
                         >
@@ -895,7 +1096,8 @@ export default function Admin() {
                       <ul>
                         {o.items.map((i: any) => (
                           <li key={i.id}>
-                            {i.qty} × {i.name} — DKK {(i.price * i.qty).toFixed(2)}
+                            {i.qty} × {i.name} — DKK{" "}
+                            {(i.price * i.qty).toFixed(2)}
                           </li>
                         ))}
                       </ul>
@@ -970,7 +1172,9 @@ export default function Admin() {
                 {editingProduct && (
                   <ProductEditForm
                     product={editingProduct}
-                    onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
+                    onSave={(updates) =>
+                      handleUpdateProduct(editingProduct.id!, updates)
+                    }
                     onCancel={() => setEditingProduct(null)}
                   />
                 )}
@@ -996,16 +1200,22 @@ export default function Admin() {
                     <div className="saving-indicator">Gemmer...</div>
                   )}
                   <p className="most-popular-info">
-                    Vælg produkter der skal vises i "Most Popular" sektionen på menuen. Klik på et produkt for at tilføje/fjerne det.
+                    Vælg produkter der skal vises i "Most Popular" sektionen på
+                    menuen. Klik på et produkt for at tilføje/fjerne det.
                   </p>
                   <div className="most-popular-products-grid">
                     {products.map((product) => {
-                      const isPopular = mostPopularProductIds.includes(product.id || "");
+                      const isPopular = mostPopularProductIds.includes(
+                        product.id || "",
+                      );
                       return (
                         <div
                           key={product.id}
                           className={`most-popular-product-card ${isPopular ? "is-popular" : ""}`}
-                          onClick={() => !savingPopularProducts && handleToggleMostPopular(product.id!)}
+                          onClick={() =>
+                            !savingPopularProducts &&
+                            handleToggleMostPopular(product.id!)
+                          }
                         >
                           <div className="most-popular-product-checkbox">
                             {isPopular ? "✓" : ""}
@@ -1016,8 +1226,12 @@ export default function Admin() {
                             className="most-popular-product-image"
                           />
                           <div className="most-popular-product-info">
-                            <div className="most-popular-product-name">{product.name}</div>
-                            <div className="most-popular-product-category">{product.category}</div>
+                            <div className="most-popular-product-name">
+                              {product.name}
+                            </div>
+                            <div className="most-popular-product-category">
+                              {product.category}
+                            </div>
                           </div>
                         </div>
                       );
@@ -1025,7 +1239,9 @@ export default function Admin() {
                   </div>
                   {mostPopularProductIds.length > 0 && (
                     <div className="most-popular-summary">
-                      <strong>{mostPopularProductIds.length}</strong> produkt{mostPopularProductIds.length !== 1 ? "er" : ""} valgt til "Most Popular"
+                      <strong>{mostPopularProductIds.length}</strong> produkt
+                      {mostPopularProductIds.length !== 1 ? "er" : ""} valgt til
+                      "Most Popular"
                     </div>
                   )}
                 </div>
@@ -1054,16 +1270,18 @@ export default function Admin() {
                 {(() => {
                   const filteredProducts = products.filter((product) => {
                     if (!productSearchQuery.trim()) return true;
-                    
+
                     const query = productSearchQuery.toLowerCase();
                     const searchableText = [
                       product.name,
                       product.category,
                       product.desc,
                       ...(product.tags || []),
-                      ...(product.ingredients?.map(ing => ing.name) || []),
-                    ].join(" ").toLowerCase();
-                    
+                      ...(product.ingredients?.map((ing) => ing.name) || []),
+                    ]
+                      .join(" ")
+                      .toLowerCase();
+
                     return searchableText.includes(query);
                   });
 
@@ -1084,73 +1302,88 @@ export default function Admin() {
                   return (
                     <div className="products-grid">
                       {filteredProducts.map((product) => (
-                    <div key={product.id} className="product-card">
-                      <div className="product-header">
+                        <div key={product.id} className="product-card">
+                          <div className="product-header">
+                            <img
+                              src={`./assets/${product.image}`}
+                              alt={product.name}
+                            />
 
-                        <img src={`./assets/${product.image}`} alt={product.name}/>
-
-                        <div>
-                          <div className="product-name">{product.name}</div>
-                          <div className="product-category">{product.category}</div>
+                            <div>
+                              <div className="product-name">{product.name}</div>
+                              <div className="product-category">
+                                {product.category}
+                              </div>
+                            </div>
+                            <div className="product-price">
+                              DKK {product.price.toFixed(2)}
+                            </div>
+                          </div>
+                          <div className="product-desc">{product.desc}</div>
+                          {product.ingredients &&
+                            product.ingredients.length > 0 && (
+                              <div className="product-ingredients">
+                                <strong>Tilvalg:</strong>
+                                <ul>
+                                  {product.ingredients.map((ing, idx) => (
+                                    <li key={idx}>
+                                      {ing.name}
+                                      {ing.extraPrice &&
+                                        ` (+DKK ${ing.extraPrice})`}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          {product.tags && product.tags.length > 0 && (
+                            <div className="product-ingredients">
+                              <strong>Tags:</strong>
+                              <ul>
+                                {product.tags.map((tag, idx) => (
+                                  <li key={idx}>{tag}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          <div className="product-actions">
+                            <button
+                              onClick={() => setEditingProduct(product)}
+                              className="btn-edit"
+                            >
+                              ✏️ Rediger
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id!)}
+                              className="btn-delete"
+                            >
+                              🗑️ Slet
+                            </button>
+                          </div>
                         </div>
-                        <div className="product-price">DKK {product.price.toFixed(2)}</div>
-                      </div>
-                      <div className="product-desc">{product.desc}</div>
-                      {product.ingredients && product.ingredients.length > 0 && (
-                        <div className="product-ingredients">
-                          <strong>Tilvalg:</strong>
-                          <ul>
-                            {product.ingredients.map((ing, idx) => (
-                              <li key={idx}>
-                                {ing.name}
-                                {ing.extraPrice && ` (+DKK ${ing.extraPrice})`}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {product.tags && product.tags.length > 0 && (
-                        <div className="product-ingredients">
-                          <strong>Tags:</strong>
-                          <ul>
-                            {product.tags.map((tag, idx) => (
-                              <li key={idx}>{tag}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      <div className="product-actions">
-                        <button
-                          onClick={() => setEditingProduct(product)}
-                          className="btn-edit"
-                        >
-                          ✏️ Rediger
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product.id!)}
-                          className="btn-delete"
-                        >
-                          🗑️ Slet
-                        </button>
-                      </div>
-                    </div>
                       ))}
                     </div>
                   );
                 })()}
                 {productSearchQuery && (
                   <div className="products-search-results-info">
-                    Viser {products.filter((product) => {
-                      const query = productSearchQuery.toLowerCase();
-                      const searchableText = [
-                        product.name,
-                        product.category,
-                        product.desc,
-                        ...(product.tags || []),
-                        ...(product.ingredients?.map(ing => ing.name) || []),
-                      ].join(" ").toLowerCase();
-                      return searchableText.includes(query);
-                    }).length} af {products.length} produkter
+                    Viser{" "}
+                    {
+                      products.filter((product) => {
+                        const query = productSearchQuery.toLowerCase();
+                        const searchableText = [
+                          product.name,
+                          product.category,
+                          product.desc,
+                          ...(product.tags || []),
+                          ...(product.ingredients?.map((ing) => ing.name) ||
+                            []),
+                        ]
+                          .join(" ")
+                          .toLowerCase();
+                        return searchableText.includes(query);
+                      }).length
+                    }{" "}
+                    af {products.length} produkter
                   </div>
                 )}
               </>
@@ -1186,7 +1419,11 @@ export default function Admin() {
                   <div
                     key={review.id}
                     className={`review-card-admin ${
-                      review.approved === false ? "review-rejected" : review.approved === true ? "review-approved" : "review-pending"
+                      review.approved === false
+                        ? "review-rejected"
+                        : review.approved === true
+                          ? "review-approved"
+                          : "review-pending"
                     }`}
                   >
                     <div className="review-card-header">
@@ -1201,21 +1438,35 @@ export default function Admin() {
                             if (review.createdAt instanceof Date) {
                               return review.createdAt.toLocaleString("da-DK");
                             }
-                            if (review.createdAt && typeof review.createdAt === 'object' && 'toDate' in review.createdAt) {
-                              return (review.createdAt as any).toDate().toLocaleString("da-DK");
+                            if (
+                              review.createdAt &&
+                              typeof review.createdAt === "object" &&
+                              "toDate" in review.createdAt
+                            ) {
+                              return (review.createdAt as any)
+                                .toDate()
+                                .toLocaleString("da-DK");
                             }
                             // Handle string dates from localStorage
-                            return new Date(review.createdAt as string | Date).toLocaleString("da-DK");
+                            return new Date(
+                              review.createdAt as string | Date,
+                            ).toLocaleString("da-DK");
                           })()}
                         </div>
                       </div>
                       <div className="review-status">
                         {review.approved === true ? (
-                          <span className="status-badge status-approved">✓ Godkendt</span>
+                          <span className="status-badge status-approved">
+                            ✓ Godkendt
+                          </span>
                         ) : review.approved === false ? (
-                          <span className="status-badge status-rejected">✗ Afvist</span>
+                          <span className="status-badge status-rejected">
+                            ✗ Afvist
+                          </span>
                         ) : (
-                          <span className="status-badge status-pending">⏳ Afventer</span>
+                          <span className="status-badge status-pending">
+                            ⏳ Afventer
+                          </span>
                         )}
                       </div>
                     </div>
@@ -1271,10 +1522,10 @@ function ProductEditForm({
   const [category, setCategory] = useState(product.category);
   const [image, setImage] = useState(product.image);
   const [tags, setTags] = useState<string[]>(product.tags || []);
-  const [ingredients, setIngredients] = useState<Array<{ name: string; extraPrice?: number }>>(
-    product.ingredients || []
-  );
-  
+  const [ingredients, setIngredients] = useState<
+    Array<{ name: string; extraPrice?: number }>
+  >(product.ingredients || []);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     onSave({
@@ -1284,7 +1535,7 @@ function ProductEditForm({
       category,
       image,
       tags: tags.length > 0 ? tags : [],
-      ingredients: ingredients.length > 0 ? ingredients : []
+      ingredients: ingredients.length > 0 ? ingredients : [],
     });
   }
 
@@ -1296,163 +1547,184 @@ function ProductEditForm({
     setIngredients(ingredients.filter((_, i) => i !== index));
   }
 
-  function updateIngredient(index: number, field: "name" | "extraPrice", value: string | number) {
+  function updateIngredient(
+    index: number,
+    field: "name" | "extraPrice",
+    value: string | number,
+  ) {
     const updated = [...ingredients];
     updated[index] = {
       ...updated[index],
-      [field]: field === "extraPrice" ? (value === "" ? undefined : Number(value)) : value,
+      [field]:
+        field === "extraPrice"
+          ? value === ""
+            ? undefined
+            : Number(value)
+          : value,
     };
     setIngredients(updated);
   }
 
   return (
     <>
-    <div className="modal-backdrop" onClick={onCancel}></div>
-    <div className="product-edit-form">
-      <h3>Rediger Produkt</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
+      <div className="modal-backdrop" onClick={onCancel}></div>
+      <div className="product-edit-form">
+        <h3>Rediger Produkt</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Navn</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Kategori</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="Pizza">Pizza</option>
+                <option value="Grill">Grill</option>
+                <option value="Sides">Sides</option>
+                <option value="Drinks">Drinks</option>
+              </select>
+            </div>
+          </div>
           <div className="form-group">
-            <label>Navn</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+            <label>Beskrivelse</label>
+            <textarea
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
               required
+              rows={3}
             />
           </div>
-          <div className="form-group">
-            <label>Kategori</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-              <option value="Pizza">Pizza</option>
-              <option value="Grill">Grill</option>
-              <option value="Sides">Sides</option>
-              <option value="Drinks">Drinks</option>
-            </select>
-          </div>
-        </div>
-        <div className="form-group">
-          <label>Beskrivelse</label>
-          <textarea
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            required
-            rows={3}
-          />
-        </div>
 
-        {/* Ingredients Section */}
-        <div className="form-group">
-          <div className="form-group-header">
-            <label>Tilvalg (Ingredienser)</label>
-            <button
-              type="button"
-              onClick={addIngredient}
-              className="btn-add-small"
-            >
-              + Tilføj tilvalg
-            </button>
+          {/* Ingredients Section */}
+          <div className="form-group">
+            <div className="form-group-header">
+              <label>Tilvalg (Ingredienser)</label>
+              <button
+                type="button"
+                onClick={addIngredient}
+                className="btn-add-small"
+              >
+                + Tilføj tilvalg
+              </button>
+            </div>
+            {ingredients.length === 0 ? (
+              <p className="form-hint">
+                Ingen tilvalg tilføjet. Klik på "Tilføj tilvalg" for at tilføje.
+              </p>
+            ) : (
+              <div className="ingredients-list">
+                {ingredients.map((ing, idx) => (
+                  <div key={idx} className="ingredient-item">
+                    <input
+                      type="text"
+                      placeholder="Navn på tilvalg"
+                      value={ing.name}
+                      onChange={(e) =>
+                        updateIngredient(idx, "name", e.target.value)
+                      }
+                      className="ingredient-name"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Ekstra pris (valgfrit)"
+                      value={ing.extraPrice || ""}
+                      onChange={(e) =>
+                        updateIngredient(idx, "extraPrice", e.target.value)
+                      }
+                      className="ingredient-price"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeIngredient(idx)}
+                      className="btn-remove"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {ingredients.length === 0 ? (
-            <p className="form-hint">Ingen tilvalg tilføjet. Klik på "Tilføj tilvalg" for at tilføje.</p>
-          ) : (
-            <div className="ingredients-list">
-              {ingredients.map((ing, idx) => (
-                <div key={idx} className="ingredient-item">
+
+          {/* Tags Section */}
+          <div className="form-group">
+            <label>Tags</label>
+            <div className="tags-checkbox-group">
+              {[
+                { value: "vegetarian", label: "🌱 Vegetar" },
+                { value: "vegan", label: "🥬 Vegansk" },
+                { value: "spicy", label: "🌶️ Stærk" },
+                { value: "glutenfree", label: "🌾 Glutenfri" },
+                { value: "halal", label: "☪️ Halal" },
+                { value: "popular", label: "⭐ Populær" },
+              ].map((tag) => (
+                <label key={tag.value} className="tag-checkbox-label">
                   <input
-                    type="text"
-                    placeholder="Navn på tilvalg"
-                    value={ing.name}
-                    onChange={(e) => updateIngredient(idx, "name", e.target.value)}
-                    className="ingredient-name"
+                    type="checkbox"
+                    value={tag.value}
+                    checked={tags.includes(tag.value)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setTags([...tags, tag.value]);
+                      } else {
+                        setTags(tags.filter((t) => t !== tag.value));
+                      }
+                    }}
+                    className="tag-checkbox"
                   />
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Ekstra pris (valgfrit)"
-                    value={ing.extraPrice || ""}
-                    onChange={(e) => updateIngredient(idx, "extraPrice", e.target.value)}
-                    className="ingredient-price"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeIngredient(idx)}
-                    className="btn-remove"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                  <span className="tag-checkbox-text">{tag.label}</span>
+                </label>
               ))}
             </div>
-          )}
-        </div>
-
-        {/* Tags Section */}
-        <div className="form-group">
-          <label>Tags</label>
-          <div className="tags-checkbox-group">
-            {[
-              { value: "vegetarian", label: "🌱 Vegetar" },
-              { value: "vegan", label: "🥬 Vegansk" },
-              { value: "spicy", label: "🌶️ Stærk" },
-              { value: "glutenfree", label: "🌾 Glutenfri" },
-              { value: "halal", label: "☪️ Halal" },
-              { value: "popular", label: "⭐ Populær" },
-            ].map((tag) => (
-              <label key={tag.value} className="tag-checkbox-label">
-                <input
-                  type="checkbox"
-                  value={tag.value}
-                  checked={tags.includes(tag.value)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setTags([...tags, tag.value]);
-                    } else {
-                      setTags(tags.filter((t) => t !== tag.value));
-                    }
-                  }}
-                  className="tag-checkbox"
-                />
-                <span className="tag-checkbox-text">{tag.label}</span>
-              </label>
-            ))}
+            {tags.length > 0 && (
+              <div className="selected-tags">
+                <strong>Valgte tags:</strong> {tags.join(", ")}
+              </div>
+            )}
           </div>
-          {tags.length > 0 && (
-            <div className="selected-tags">
-              <strong>Valgte tags:</strong> {tags.join(", ")}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Pris (DKK)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+              />
             </div>
-          )}
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Pris (DKK)</label>
-            <input
-              type="number"
-              step="0.01"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
+            <div className="form-group">
+              <label>Billede filnavn</label>
+              <input
+                type="text"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+                required
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label>Billede filnavn</label>
-            <input
-              type="text"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              required
-            />
+          <div className="form-actions">
+            <button type="submit" className="btn-save">
+              💾 Gem
+            </button>
+            <button type="button" onClick={onCancel} className="btn-cancel">
+              Annuller
+            </button>
           </div>
-        </div>
-        <div className="form-actions">
-          <button type="submit" className="btn-save">💾 Gem</button>
-          <button type="button" onClick={onCancel} className="btn-cancel">
-            Annuller
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </>
   );
 }
