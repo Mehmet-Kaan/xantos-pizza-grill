@@ -8,6 +8,7 @@ import { CartIcon } from "./Icons";
 import {
   getAllProducts,
   getProductsMetadata,
+  getMostPopularProductIds,
 } from "../services/productsService";
 import ScrollReveal from "../utils/ScrollReveal";
 
@@ -364,7 +365,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
                     />
                     <span className="custom-checkbox" />
                     <span className="ingredient-label">
-                      {ing.name}
+                      <span className="ingredient-name">{ing.name}</span>
                       {ing.extraPrice ? (
                         <span className="ingredient-price">+{ing.extraPrice} kr</span>
                       ) : null}
@@ -417,6 +418,7 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
+  const [mostPopularProductIds, setMostPopularProductIds] = useState<string[]>([]);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const popularRef = useRef<HTMLElement | null>(null);
   const categoryTitleRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -513,12 +515,25 @@ export default function Menu() {
       }
     }
     loadProducts();
+    
+    // Load most popular product IDs
+    async function loadMostPopularProductIds() {
+      try {
+        const productIds = await getMostPopularProductIds();
+        setMostPopularProductIds(productIds);
+      } catch (err) {
+        console.error("Error loading most popular product IDs:", err);
+      }
+    }
+    loadMostPopularProductIds();
   }, []);
 
-  const categories = [
-    "Most Popular",
-    ...new Set(products.map((m) => m.category)),
-  ];
+  const categories = mostPopularProductIds.length > 0
+    ? [
+        "Most Popular",
+        ...new Set(products.map((m) => m.category)),
+      ]
+    : [...new Set(products.map((m) => m.category))];
 
   const openModal = (item: Product) => {
     setActiveItem(item);
@@ -657,12 +672,15 @@ export default function Menu() {
     return matchesSearch;
   });
 
-  // Most popular: top 3 products (you can adjust this logic later based on actual order data)
-  const popularIds = new Set(products.slice(0, 3).map((item) => item.id));
-  const popularItems = filteredItems.filter((item) => popularIds.has(item.id));
+  // Most popular: show selected products
+  const popularItems = filteredItems.filter((item) => 
+    item.id && mostPopularProductIds.includes(item.id)
+  );
 
   // Track if category change is from user click (to prevent scroll-based updates during click)
   const isUserClickingRef = useRef(false);
+  // Track if we've initialized the category on first load
+  const hasInitializedCategoryRef = useRef(false);
 
   const handleCategoryClick = (cat: string) => {
     isUserClickingRef.current = true;
@@ -677,6 +695,31 @@ export default function Menu() {
       isUserClickingRef.current = false;
     }, 1000);
   };
+
+  // Ensure "Most Popular" is selected when data loads (only on initial load, no scrolling)
+  useEffect(() => {
+    // Only run once when data is ready and we're at the top of the page
+    if (
+      hasInitializedCategoryRef.current ||
+      loading ||
+      products.length === 0 ||
+      window.scrollY > 0
+    ) {
+      return;
+    }
+
+    // Check if "Most Popular" should be available
+    if (mostPopularProductIds.length > 0 && popularItems.length > 0) {
+      // Only set if current category is not "Most Popular"
+      if (selectedCategory !== "Most Popular") {
+        hasInitializedCategoryRef.current = true;
+        setSelectedCategory("Most Popular");
+      } else {
+        // Already correct, just mark as initialized
+        hasInitializedCategoryRef.current = true;
+      }
+    }
+  }, [loading, products.length, mostPopularProductIds.length, popularItems.length, selectedCategory]);
 
   // Auto-scroll the active category button into view in categoriesContainer-revealOnScroll
   useEffect(() => {
@@ -723,9 +766,8 @@ export default function Menu() {
     if (loading || products.length === 0) return;
 
     const updateActiveCategory = () => {
-      // Don't update if user just clicked a category
-
-      // if (isUserClickingRef.current) return;
+      // Don't update if user just clicked a category or if we haven't initialized yet
+      if (isUserClickingRef.current || !hasInitializedCategoryRef.current) return;
 
       const scrollY = window.scrollY || window.pageYOffset;
       const viewportHeight = window.innerHeight;
@@ -1012,7 +1054,7 @@ export default function Menu() {
             </ScrollReveal>
           </div>
           <ScrollReveal>
-            {popularItems.length > 0 && (
+            {mostPopularProductIds.length > 0 && popularItems.length > 0 && (
               <div
                 className="menu-category-block menu-popular-block"
                 ref={(el) => {

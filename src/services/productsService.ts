@@ -122,3 +122,38 @@ export async function updateProductsMetadata(): Promise<void> {
     console.error("Error updating products metadata:", error);
   }
 }
+
+// Get most popular product IDs
+export async function getMostPopularProductIds(): Promise<string[]> {
+  try {
+    const metadataRef = doc(db, "metadata", "products");
+    const metadataSnap = await getDoc(metadataRef);
+    
+    if (metadataSnap.exists()) {
+      const data = metadataSnap.data();
+      return data.mostPopularProductIds || [];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching most popular product IDs:", error);
+    return [];
+  }
+}
+
+// Set most popular product IDs
+export async function setMostPopularProductIds(productIds: string[]): Promise<void> {
+  try {
+    const metadataRef = doc(db, "metadata", "products");
+    await setDoc(
+      metadataRef,
+      {
+        mostPopularProductIds: productIds,
+        lastUpdated: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Error setting most popular product IDs:", error);
+    throw error;
+  }
+}

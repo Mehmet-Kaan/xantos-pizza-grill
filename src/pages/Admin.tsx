@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getAllOrders, updateOrderStatus, subscribeToOrders, type Order } from "../services/ordersService";
 import { initializeProducts } from "../utils/initProducts";
-import { getAllProducts, updateProduct, deleteProduct, getProductsMetadata, type Product } from "../services/productsService";
+import { getAllProducts, updateProduct, deleteProduct, getProductsMetadata, getMostPopularProductIds, setMostPopularProductIds, type Product } from "../services/productsService";
 import { getAllReviews, updateReview, getReviewsMetadata, deleteReview, type Review } from "../services/reviewsService";
 import type { Unsubscribe } from "firebase/firestore";
 import "../styles/Admin.css";
@@ -151,6 +151,8 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [initializing, setInitializing] = useState(false);
   const [initSuccess, setInitSuccess] = useState(false);
+  const [mostPopularProductIds, setMostPopularProductIdsState] = useState<string[]>([]);
+  const [savingPopularProducts, setSavingPopularProducts] = useState(false);
 
   // Reviews state
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -281,6 +283,8 @@ export default function Admin() {
           console.log("Using cached products (metadata unchanged)");
           setProducts(storedProducts);
           setProductsLoading(false);
+          // Still load most popular category
+          await loadMostPopularCategory();
           return;
         }
       }
@@ -295,6 +299,9 @@ export default function Admin() {
       if (serverMetadata) {
         setStoredProductsLastUpdated(serverMetadata);
       }
+      
+      // Load most popular product IDs
+      await loadMostPopularProductIds();
     } catch (err) {
       console.error("Error loading products:", err);
       setProductsError("Kunne ikke indlæse produkter. Prøv venligst igen.");
@@ -307,6 +314,50 @@ export default function Admin() {
       }
     } finally {
       setProductsLoading(false);
+    }
+  }
+
+  async function loadMostPopularProductIds() {
+    try {
+      const productIds = await getMostPopularProductIds();
+      setMostPopularProductIdsState(productIds);
+    } catch (err) {
+      console.error("Error loading most popular product IDs:", err);
+    }
+  }
+
+  async function handleToggleMostPopular(productId: string) {
+    try {
+      setSavingPopularProducts(true);
+      const isCurrentlyPopular = mostPopularProductIds.includes(productId);
+      const updatedIds = isCurrentlyPopular
+        ? mostPopularProductIds.filter((id) => id !== productId)
+        : [...mostPopularProductIds, productId];
+      
+      await setMostPopularProductIds(updatedIds);
+      setMostPopularProductIdsState(updatedIds);
+    } catch (err) {
+      console.error("Error updating most popular products:", err);
+      alert("Kunne ikke opdatere mest populære produkter. Prøv venligst igen.");
+    } finally {
+      setSavingPopularProducts(false);
+    }
+  }
+
+  async function handleClearAllMostPopular() {
+    if (!confirm("Er du sikker på, at du vil fjerne alle produkter fra 'Most Popular'?")) {
+      return;
+    }
+    try {
+      setSavingPopularProducts(true);
+      await setMostPopularProductIds([]);
+      setMostPopularProductIdsState([]);
+      alert("Alle produkter fjernet fra 'Most Popular'!");
+    } catch (err) {
+      console.error("Error clearing most popular products:", err);
+      alert("Kunne ikke fjerne produkter. Prøv venligst igen.");
+    } finally {
+      setSavingPopularProducts(false);
     }
   }
 
@@ -923,6 +974,61 @@ export default function Admin() {
                     onCancel={() => setEditingProduct(null)}
                   />
                 )}
+
+                {/* Most Popular Products Selector */}
+                <div className="most-popular-selector">
+                  <div className="most-popular-header">
+                    <label className="most-popular-label">
+                      ⭐ Mest Populære Produkter:
+                    </label>
+                    {mostPopularProductIds.length > 0 && (
+                      <button
+                        onClick={handleClearAllMostPopular}
+                        className="btn-clear-popular"
+                        disabled={savingPopularProducts}
+                        title="Fjern alle produkter fra Most Popular"
+                      >
+                        ✕ Fjern Alle ({mostPopularProductIds.length})
+                      </button>
+                    )}
+                  </div>
+                  {savingPopularProducts && (
+                    <div className="saving-indicator">Gemmer...</div>
+                  )}
+                  <p className="most-popular-info">
+                    Vælg produkter der skal vises i "Most Popular" sektionen på menuen. Klik på et produkt for at tilføje/fjerne det.
+                  </p>
+                  <div className="most-popular-products-grid">
+                    {products.map((product) => {
+                      const isPopular = mostPopularProductIds.includes(product.id || "");
+                      return (
+                        <div
+                          key={product.id}
+                          className={`most-popular-product-card ${isPopular ? "is-popular" : ""}`}
+                          onClick={() => !savingPopularProducts && handleToggleMostPopular(product.id!)}
+                        >
+                          <div className="most-popular-product-checkbox">
+                            {isPopular ? "✓" : ""}
+                          </div>
+                          <img
+                            src={`./assets/${product.image}`}
+                            alt={product.name}
+                            className="most-popular-product-image"
+                          />
+                          <div className="most-popular-product-info">
+                            <div className="most-popular-product-name">{product.name}</div>
+                            <div className="most-popular-product-category">{product.category}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {mostPopularProductIds.length > 0 && (
+                    <div className="most-popular-summary">
+                      <strong>{mostPopularProductIds.length}</strong> produkt{mostPopularProductIds.length !== 1 ? "er" : ""} valgt til "Most Popular"
+                    </div>
+                  )}
+                </div>
 
                 {/* Search Bar */}
                 <div className="products-search-container">
