@@ -22,8 +22,8 @@ function AppContent() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Nav />
+        <div className="min-h-screen flex flex-col">
+          <Nav />
 
       <div className="flex-1 app-bg">
         <ScrollToTop />
@@ -121,9 +121,9 @@ function AppContent() {
         </AnimatePresence>
       </div>
 
-      <Footer />
+          <Footer />
       {/* <CookieBanner /> */}
-    </div>
+        </div>
   );
 }
 

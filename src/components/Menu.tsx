@@ -67,7 +67,10 @@ function getStoredMostPopularIds(): string[] | null {
       return Array.isArray(parsed) ? (parsed as string[]) : null;
     }
   } catch (error) {
-    console.error("Error reading most popular product IDs from localStorage:", error);
+    console.error(
+      "Error reading most popular product IDs from localStorage:",
+      error,
+    );
   }
   return null;
 }
@@ -76,7 +79,10 @@ function setStoredMostPopularIds(ids: string[]): void {
   try {
     localStorage.setItem(MOST_POPULAR_IDS_KEY, JSON.stringify(ids));
   } catch (error) {
-    console.error("Error saving most popular product IDs to localStorage:", error);
+    console.error(
+      "Error saving most popular product IDs to localStorage:",
+      error,
+    );
   }
 }
 
@@ -87,7 +93,10 @@ function getStoredMostPopularLastUpdated(): Date | null {
       return new Date(stored);
     }
   } catch (error) {
-    console.error("Error reading most popular lastUpdated from localStorage:", error);
+    console.error(
+      "Error reading most popular lastUpdated from localStorage:",
+      error,
+    );
   }
   return null;
 }
@@ -96,7 +105,10 @@ function setStoredMostPopularLastUpdated(date: Date): void {
   try {
     localStorage.setItem(MOST_POPULAR_LAST_UPDATED_KEY, date.toISOString());
   } catch (error) {
-    console.error("Error saving most popular lastUpdated to localStorage:", error);
+    console.error(
+      "Error saving most popular lastUpdated to localStorage:",
+      error,
+    );
   }
 }
 export const MENU: Product[] = [
@@ -332,7 +344,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
 
   const toggle = (ing: IngredientOption) => {
     setSelected((prev) =>
-      prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing]
+      prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing],
     );
   };
 
@@ -367,12 +379,12 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
   }, [isClosing]);
 
   return (
-    <div 
-      className={`modal-overlay ${isClosing ? "modal-closing" : ""}`} 
+    <div
+      className={`modal-overlay ${isClosing ? "modal-closing" : ""}`}
       onClick={handleClose}
     >
-      <div 
-        className={`modal-box ${isClosing ? "modal-closing" : ""}`} 
+      <div
+        className={`modal-box ${isClosing ? "modal-closing" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content">
@@ -382,16 +394,12 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
               src={`./assets/${item.image}`}
               alt={item.image}
             />
-            <div className="modal-price-badge">
-              {item.price} kr
-            </div>
+            <div className="modal-price-badge">{item.price} kr</div>
           </div>
-          
+
           <div className="modal-header-section">
             <h3 className="modal-title-text">Tilpas din {item.name}</h3>
-            {item.desc && (
-              <p className="modal-item-desc">{item.desc}</p>
-            )}
+            {item.desc && <p className="modal-item-desc">{item.desc}</p>}
           </div>
 
           {item.ingredients && item.ingredients.length > 0 && (
@@ -410,7 +418,9 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
                     <span className="ingredient-label">
                       <span className="ingredient-name">{ing.name}</span>
                       {ing.extraPrice ? (
-                        <span className="ingredient-price">+{ing.extraPrice} kr</span>
+                        <span className="ingredient-price">
+                          +{ing.extraPrice} kr
+                        </span>
                       ) : null}
                     </span>
                   </label>
@@ -442,7 +452,9 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
           </div>
           <div className="modal-add-wrapper">
             <button onClick={handleConfirm} className="modal-confirm">
-              <span>Tilføj til kurv • {(item.price + extraPrice) * qty} kr</span>
+              <span>
+                Tilføj til kurv • {(item.price + extraPrice) * qty} kr
+              </span>
             </button>
             {animate && <div className="add-notify">Tilføjet!</div>}
           </div>
@@ -461,7 +473,9 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
-  const [mostPopularProductIds, setMostPopularProductIds] = useState<string[]>([]);
+  const [mostPopularProductIds, setMostPopularProductIds] = useState<string[]>(
+    [],
+  );
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const popularRef = useRef<HTMLElement | null>(null);
   const categoryTitleRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -558,7 +572,7 @@ export default function Menu() {
       }
     }
     loadProducts();
-    
+
     // Load most popular product IDs with caching logic
     async function loadMostPopularProductIds() {
       try {
@@ -571,7 +585,7 @@ export default function Menu() {
           setMostPopularProductIds(storedIds);
 
           // Check if we need to update from Firebase (single read to get both timestamp and IDs)
-          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } =
             await getMostPopularMetadataAndIds();
 
           if (firebaseLastUpdated) {
@@ -589,19 +603,19 @@ export default function Menu() {
           }
         } else {
           // No cached data, fetch from Firebase (single read to get both timestamp and IDs)
-          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } =
             await getMostPopularMetadataAndIds();
-          
+
           setMostPopularProductIds(fetchedIds);
           setStoredMostPopularIds(fetchedIds);
-          
+
           if (firebaseLastUpdated) {
             setStoredMostPopularLastUpdated(firebaseLastUpdated);
           }
         }
       } catch (err) {
         console.error("Error loading most popular product IDs:", err);
-        
+
         // Fallback to cached data if available
         const storedIds = getStoredMostPopularIds();
         if (storedIds) {
@@ -612,12 +626,10 @@ export default function Menu() {
     loadMostPopularProductIds();
   }, []);
 
-  const categories = mostPopularProductIds.length > 0
-    ? [
-        "Most Popular",
-        ...new Set(products.map((m) => m.category)),
-      ]
-    : [...new Set(products.map((m) => m.category))];
+  const categories =
+    mostPopularProductIds.length > 0
+      ? ["Most Popular", ...new Set(products.map((m) => m.category))]
+      : [...new Set(products.map((m) => m.category))];
 
   const openModal = (item: Product) => {
     setActiveItem(item);
@@ -630,7 +642,7 @@ export default function Menu() {
   const confirmAdd = (
     item: Product,
     selectedIngredients: IngredientOption[],
-    qty: number
+    qty: number,
   ) => {
     addItem({ ...item, selectedIngredients, qty });
     setActiveItem(null);
@@ -713,10 +725,10 @@ export default function Menu() {
       // Find the categoriesContainer inside menu-filters
       const menuFilters = document.querySelector(".menu-filters");
       const triggerEl = menuFilters?.querySelector(
-        ".categoriesContainer"
+        ".categoriesContainer",
       ) as HTMLElement;
       const revealEl = document.querySelector(
-        ".categoriesContainer-revealOnScroll"
+        ".categoriesContainer-revealOnScroll",
       ) as HTMLElement;
 
       if (!triggerEl || !revealEl) return;
@@ -749,7 +761,7 @@ export default function Menu() {
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.tags?.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
+        tag.toLowerCase().includes(searchQuery.toLowerCase()),
       ) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -757,8 +769,8 @@ export default function Menu() {
   });
 
   // Most popular: show selected products
-  const popularItems = filteredItems.filter((item) => 
-    item.id && mostPopularProductIds.includes(item.id)
+  const popularItems = filteredItems.filter(
+    (item) => item.id && mostPopularProductIds.includes(item.id),
   );
 
   // Track if category change is from user click (to prevent scroll-based updates during click)
@@ -803,7 +815,13 @@ export default function Menu() {
         hasInitializedCategoryRef.current = true;
       }
     }
-  }, [loading, products.length, mostPopularProductIds.length, popularItems.length, selectedCategory]);
+  }, [
+    loading,
+    products.length,
+    mostPopularProductIds.length,
+    popularItems.length,
+    selectedCategory,
+  ]);
 
   // Auto-scroll the active category button into view in categoriesContainer-revealOnScroll
   useEffect(() => {
@@ -811,7 +829,7 @@ export default function Menu() {
 
     // Only scroll if the reveal container is visible
     const revealContainer = document.querySelector(
-      ".categoriesContainer-revealOnScroll"
+      ".categoriesContainer-revealOnScroll",
     ) as HTMLElement;
     if (!revealContainer || !revealContainer.classList.contains("is-visible")) {
       return;
@@ -851,7 +869,8 @@ export default function Menu() {
 
     const updateActiveCategory = () => {
       // Don't update if user just clicked a category or if we haven't initialized yet
-      if (isUserClickingRef.current || !hasInitializedCategoryRef.current) return;
+      if (isUserClickingRef.current || !hasInitializedCategoryRef.current)
+        return;
 
       const scrollY = window.scrollY || window.pageYOffset;
       const viewportHeight = window.innerHeight;
@@ -1162,7 +1181,7 @@ export default function Menu() {
                         e.stopPropagation();
                         if (item.ingredients && item.ingredients.length > 0) {
                           openModal(item);
-                        } 
+                        }
                       }}
                     >
                       <img
@@ -1209,7 +1228,7 @@ export default function Menu() {
           </ScrollReveal>
           {Array.from(new Set(products.map((m) => m.category))).map((cat) => {
             const itemsInCategory = filteredItems.filter(
-              (item) => item.category === cat
+              (item) => item.category === cat,
             );
             if (itemsInCategory.length === 0) return null;
 
@@ -1321,7 +1340,7 @@ export default function Menu() {
                     onClick={() => {
                       if (
                         window.confirm(
-                          "Er du sikker på, at du vil fjerne alle varer fra kurven?"
+                          "Er du sikker på, at du vil fjerne alle varer fra kurven?",
                         )
                       ) {
                         clear();
@@ -1441,7 +1460,7 @@ export default function Menu() {
                 onClick={() => {
                   if (
                     window.confirm(
-                      "Er du sikker på, at du vil fjerne alle varer fra kurven?"
+                      "Er du sikker på, at du vil fjerne alle varer fra kurven?",
                     )
                   ) {
                     clear();

@@ -892,7 +892,7 @@ export default function Admin() {
               >
                 {ordersLoading ? "Indlæser..." : "🔄 Opdater"}
               </button>
-            </div>
+      </div>
 
             {/* All Today's Orders Subsection */}
             <div className="todays-orders-subsection">
@@ -946,7 +946,7 @@ export default function Admin() {
                       {allTodaysOrders.map((o) => (
                         <div key={o.id} className="order-card">
                           <div className="order-header">
-                            <div>
+                <div>
                               <div className="order-name">{o.name}</div>
                               <div className="order-meta">
                                 {o.method === "delivery"
@@ -971,20 +971,20 @@ export default function Admin() {
                                     o.createdAt as string | Date,
                                   ).toLocaleString("da-DK");
                                 })()}
-                              </div>
+                  </div>
                               <div className="order-phone">📞 {o.phone}</div>
                               {o.address && (
                                 <div className="order-address">
                                   📍 {o.address}
-                                </div>
+                  </div>
                               )}
-                            </div>
+                </div>
                             <div className="order-actions">
                               <div className="order-total">
                                 DKK {o.total.toFixed(2)}
                               </div>
-                              <select
-                                value={o.status}
+                    <select
+                      value={o.status}
                                 onChange={(e) =>
                                   handleUpdateOrderStatus(
                                     o.id!,
@@ -998,9 +998,9 @@ export default function Admin() {
                                 <option value="making">👨‍🍳 Tilbereder</option>
                                 <option value="ready">✅ Klar</option>
                                 <option value="collected">📦 Afhentet</option>
-                              </select>
-                            </div>
-                          </div>
+                    </select>
+                  </div>
+                </div>
                           <div className="order-items">
                             <strong>Varer:</strong>
                             <ul>
@@ -1011,7 +1011,7 @@ export default function Admin() {
                                 </li>
                               ))}
                             </ul>
-                          </div>
+              </div>
                           {o.note && (
                             <div className="order-note">
                               <strong>Bemærkning:</strong> {o.note}
@@ -1095,22 +1095,22 @@ export default function Admin() {
                       <strong>Varer:</strong>
                       <ul>
                         {o.items.map((i: any) => (
-                          <li key={i.id}>
+                    <li key={i.id}>
                             {i.qty} × {i.name} — DKK{" "}
                             {(i.price * i.qty).toFixed(2)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
                     {o.note && (
                       <div className="order-note">
                         <strong>Bemærkning:</strong> {o.note}
                       </div>
                     )}
-                  </div>
-                ))}
-              </div>
-            )}
+            </div>
+          ))}
+        </div>
+      )}
           </section>
         )}
 
