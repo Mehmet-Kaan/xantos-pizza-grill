@@ -1,9 +1,15 @@
 import "../App.css";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import Home from "../components/Home";
-import Menu from "../components/Menu";
+import Home from "../pages/Home";
+import Menu from "./Menu";
 import CartPage from "./CartPage";
 import Checkout from "./Checkout";
 import Confirmation from "./Confirmation";
@@ -22,8 +28,8 @@ function AppContent() {
   const location = useLocation();
 
   return (
-        <div className="min-h-screen flex flex-col">
-          <Nav />
+    <div className="min-h-screen flex flex-col">
+      <Nav />
 
       <div className="flex-1 app-bg">
         <ScrollToTop />
@@ -121,9 +127,9 @@ function AppContent() {
         </AnimatePresence>
       </div>
 
-          <Footer />
+      <Footer />
       {/* <CookieBanner /> */}
-        </div>
+    </div>
   );
 }
 

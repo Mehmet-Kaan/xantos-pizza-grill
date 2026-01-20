@@ -88,6 +88,8 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
+
+  align-self: flex-start;
 }
 
 .cart-clear-btn:hover {
@@ -98,6 +100,23 @@
 
 .cart-clear-btn.active {
   background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+[data-theme="dark"] .menu-cart-clear {
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.menu-cart-clear:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.3);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .menu-cart-clear:hover {
+  background: rgba(220, 38, 38, 0.3);
   border-color: rgba(220, 38, 38, 0.4);
 }
 
@@ -121,7 +140,11 @@
 }
 
 [data-theme="dark"] .cart-confirm-box {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(185, 28, 28, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.15) 0%,
+    rgba(185, 28, 28, 0.1) 100%
+  );
   border-color: rgba(220, 38, 38, 0.3);
 }
 

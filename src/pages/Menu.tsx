@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { IngredientOption, Product } from "../hooks/types";
 import { CloseIcon } from "../hooks/icons";
-import { CartIcon } from "./Icons";
+import { CartIcon, TrashIcon } from "../components/Icons";
 import {
   getAllProducts,
   getProductsMetadata,
@@ -353,7 +353,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
     setTimeout(() => {
       setAnimate(false);
       onConfirm(selected, qty);
-    }, 800); // matches CSS animation duration
+    }, 600); // matches CSS animation duration
   };
 
   const handleClose = () => {
@@ -453,7 +453,8 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
           <div className="modal-add-wrapper">
             <button onClick={handleConfirm} className="modal-confirm">
               <span>
-                Tilføj til kurv • {(item.price + extraPrice) * qty} kr
+                Tilføj til {window.innerWidth < 720 ? "" : "kurv"} •{" "}
+                {(item.price + extraPrice) * qty} kr
               </span>
             </button>
             {animate && <div className="add-notify">Tilføjet!</div>}
@@ -481,6 +482,8 @@ export default function Menu() {
   const categoryTitleRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const { addItem, items, updateQty, removeItem, clear, total } = useCart();
+  const [confirmClear, setConfirmClear] = useState(false);
+
   const prevItemsCountRef = useRef(items.length);
 
   // Open cart drawer when item is added (mobile only)
@@ -1336,19 +1339,12 @@ export default function Menu() {
               <div className="cart-drawer-header-actions">
                 {items.length > 0 && (
                   <button
-                    className="cart-drawer-clear"
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Er du sikker på, at du vil fjerne alle varer fra kurven?",
-                        )
-                      ) {
-                        clear();
-                      }
-                    }}
-                    aria-label="Fjern alle varer"
+                    className={`cart-clear-btn ${confirmClear ? "active" : ""}`}
+                    onClick={() => setConfirmClear(true)}
+                    aria-label="Tøm kurv"
                   >
-                    Tøm kurv
+                    <TrashIcon className="cart-clear-icon" />
+                    <span>Tøm kurv</span>
                   </button>
                 )}
                 <button
@@ -1368,6 +1364,39 @@ export default function Menu() {
             ) : (
               <>
                 <div className="menu-cart-items">
+                  {confirmClear && (
+                    <div className="cart-confirm-box mb-0">
+                      <div className="cart-confirm-content">
+                        <div className="cart-confirm-icon">⚠️</div>
+                        <div className="cart-confirm-text">
+                          <h3 className="cart-confirm-title">Tøm kurven?</h3>
+                          <p className="cart-confirm-desc">
+                            Alle varer fjernes permanent. Denne handling kan
+                            ikke fortrydes.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="cart-confirm-actions">
+                        <button
+                          className="cart-confirm-cancel"
+                          onClick={() => setConfirmClear(false)}
+                        >
+                          Annuller
+                        </button>
+
+                        <button
+                          className="cart-confirm-danger"
+                          onClick={() => {
+                            clear();
+                            setConfirmClear(false);
+                          }}
+                        >
+                          Ja, tøm kurv
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   {items.map((item) => (
                     <div key={item.id} className="menu-cart-item">
                       <div>
@@ -1456,19 +1485,12 @@ export default function Menu() {
             </div>
             {items.length > 0 && (
               <button
-                className="menu-cart-clear"
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      "Er du sikker på, at du vil fjerne alle varer fra kurven?",
-                    )
-                  ) {
-                    clear();
-                  }
-                }}
-                aria-label="Fjern alle varer"
+                className={`cart-clear-btn ${confirmClear ? "active" : ""}`}
+                onClick={() => setConfirmClear(true)}
+                aria-label="Tøm kurv"
               >
-                Tøm kurv
+                <TrashIcon className="cart-clear-icon" />
+                <span>Tøm kurv</span>
               </button>
             )}
           </div>
@@ -1480,6 +1502,39 @@ export default function Menu() {
           ) : (
             <>
               <div className="menu-cart-items">
+                {confirmClear && (
+                  <div className="cart-confirm-box mb-0">
+                    <div className="cart-confirm-content">
+                      <div className="cart-confirm-icon">⚠️</div>
+                      <div className="cart-confirm-text">
+                        <h3 className="cart-confirm-title">Tøm kurven?</h3>
+                        <p className="cart-confirm-desc">
+                          Alle varer fjernes permanent. Denne handling kan ikke
+                          fortrydes.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="cart-confirm-actions">
+                      <button
+                        className="cart-confirm-cancel"
+                        onClick={() => setConfirmClear(false)}
+                      >
+                        Annuller
+                      </button>
+
+                      <button
+                        className="cart-confirm-danger"
+                        onClick={() => {
+                          clear();
+                          setConfirmClear(false);
+                        }}
+                      >
+                        Ja, tøm kurv
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {items.map((item) => (
                   <div key={item.id} className="menu-cart-item">
                     <div>

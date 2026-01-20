@@ -1,7 +1,7 @@
 import "../styles/home.css";
 import { Link } from "react-router-dom";
-import { MENU, MenuCard } from "./Menu";
-import { PizzaIcon, ArrowRightIcon } from "./Icons";
+import { MENU, MenuCard } from "../pages/Menu";
+import { PizzaIcon, ArrowRightIcon } from "../components/Icons";
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import {
@@ -58,7 +58,7 @@ function getStoredReviewsLastUpdated(): Date | null {
   } catch (error) {
     console.error(
       "Error reading reviews lastUpdated from localStorage:",
-      error
+      error,
     );
   }
   return null;
@@ -245,47 +245,45 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         {/* <ScrollReveal> */}
-          <div className="hero-container">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <span
-                  className={isOpenNow() ? "open-dot" : "closed-dot"}
-                ></span>
-                {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00"}
-              </div>
-              <h1 className="hero-title">
-                <PizzaIcon />
-                Velkommen til Xanthos Pizza & Grill
-              </h1>
-              <p className="hero-subtitle">
-                Autentiske pizzor och grillfavoriter. Beställ enkelt online och
-                hämta eller få hemleverans.
-              </p>
-              <div className="hero-features">
-                <span className="hero-feature">
-                  <span className="hero-icon">🔥</span>
-                  Pickup
-                </span>
-                <span className="hero-feature">
-                  <span className="hero-icon">🚚</span>
-                  Levering
-                </span>
-                <span className="hero-feature">
-                  <span className="hero-icon">⭐</span>
-                  4.6/5 (500+ anmeldelser)
-                </span>
-              </div>
-              <div className="hero-cta">
-                <Link to="/bestil" className="btn-primary">
-                  Bestil takeaway
-                  <ArrowRightIcon />
-                </Link>
-                <Link to="/menu" className="btn-secondary">
-                  Se menu
-                </Link>
-              </div>
+        <div className="hero-container">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span className={isOpenNow() ? "open-dot" : "closed-dot"}></span>
+              {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00"}
             </div>
-            <ScrollReveal>  
+            <h1 className="hero-title">
+              <PizzaIcon />
+              Velkommen til Xanthos Pizza & Grill
+            </h1>
+            <p className="hero-subtitle">
+              Autentiske pizzor och grillfavoriter. Beställ enkelt online och
+              hämta eller få hemleverans.
+            </p>
+            <div className="hero-features">
+              <span className="hero-feature">
+                <span className="hero-icon">🔥</span>
+                Pickup
+              </span>
+              <span className="hero-feature">
+                <span className="hero-icon">🚚</span>
+                Levering
+              </span>
+              <span className="hero-feature">
+                <span className="hero-icon">⭐</span>
+                4.6/5 (500+ anmeldelser)
+              </span>
+            </div>
+            <div className="hero-cta">
+              <Link to="/bestil" className="btn-primary">
+                Bestil takeaway
+                <ArrowRightIcon />
+              </Link>
+              <Link to="/menu" className="btn-secondary">
+                Se menu
+              </Link>
+            </div>
+          </div>
+          <ScrollReveal>
             <div className="hero-special">
               <div className="special-card">
                 <span className="special-badge">Dagens tilbud</span>
@@ -297,8 +295,8 @@ export default function Home() {
                 <p className="special-price">{special.price}</p>
               </div>
             </div>
-            </ScrollReveal>
-          </div>
+          </ScrollReveal>
+        </div>
         {/* </ScrollReveal> */}
       </section>
 
@@ -306,34 +304,34 @@ export default function Home() {
         {/* TRUST BAR */}
         <section className="trust-section">
           <div className="trust-grid">
-            <ScrollReveal>  
-            <div className="trust-card">
-              <div className="trust-icon">🚚</div>
-              <h3>Levering</h3>
-              <p>Hurtig & varm</p>
-              {/* <p>30–45 min · Op til 5 km</p> */}
-            </div>
-            </ScrollReveal>
-            <ScrollReveal>  
-            <div className="trust-card">
-              <div className="trust-icon">🛍️</div>
-              <h3>Afhentning</h3>
-              <p>Klar på 15 min</p>
-            </div>
+            <ScrollReveal>
+              <div className="trust-card">
+                <div className="trust-icon">🚚</div>
+                <h3>Levering</h3>
+                <p>Hurtig & varm</p>
+                {/* <p>30–45 min · Op til 5 km</p> */}
+              </div>
             </ScrollReveal>
             <ScrollReveal>
-            <div className="trust-card">
-              <div className="trust-icon">💳</div>
-              <h3>Sikker betaling</h3>
-              <p>Kort & MobilePay</p>
-            </div>
+              <div className="trust-card">
+                <div className="trust-icon">🛍️</div>
+                <h3>Afhentning</h3>
+                <p>Klar på 15 min</p>
+              </div>
             </ScrollReveal>
             <ScrollReveal>
-            <div className="trust-card">
-              <div className="trust-icon">⭐</div>
-              <h3>4.6 stjerner</h3>
-              <p>500+ anmeldelser</p>
-            </div>
+              <div className="trust-card">
+                <div className="trust-icon">💳</div>
+                <h3>Sikker betaling</h3>
+                <p>Kort & MobilePay</p>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal>
+              <div className="trust-card">
+                <div className="trust-icon">⭐</div>
+                <h3>4.6 stjerner</h3>
+                <p>500+ anmeldelser</p>
+              </div>
             </ScrollReveal>
           </div>
         </section>
@@ -341,36 +339,36 @@ export default function Home() {
         {/* ABOUT US SECTION */}
         <section className="section about-section">
           <ScrollReveal>
-          <div className="section-header">
-            <h2 className="section-title">Om os</h2>
-            <p className="section-subtitle">Din lokale pizzabar og grill</p>
-          </div>
+            <div className="section-header">
+              <h2 className="section-title">Om os</h2>
+              <p className="section-subtitle">Din lokale pizzabar og grill</p>
+            </div>
           </ScrollReveal>
           <ScrollReveal>
-          <div className="about-content">
-            <div className="about-text">
-              <p>
-                Xanthos Pizza & Grill er en lokal pizzabar og grill med fokus på
-                gode råvarer, hurtig service og hyggelig stemning. Vi bager
-                vores pizzaer i stenovn og griller kød på åben grill, så du får
-                maksimal smag hver gang.
-              </p>
-              <p>
-                Du kan både spise hjemme, hente selv eller få leveret. Bestil
-                online, og vi gør din mad klar, mens du er på vej – eller sørger
-                for hurtig udbringning i lokalområdet.
-              </p>
-              <p>
-                Har du ønsker til allergener, vegetariske muligheder eller
-                større selskaber, er du altid velkommen til at kontakte os.
-              </p>
-            </div>
-            <div className="about-image">
-              <div className="about-image-placeholder">
-                <PizzaIcon />
+            <div className="about-content">
+              <div className="about-text">
+                <p>
+                  Xanthos Pizza & Grill er en lokal pizzabar og grill med fokus
+                  på gode råvarer, hurtig service og hyggelig stemning. Vi bager
+                  vores pizzaer i stenovn og griller kød på åben grill, så du
+                  får maksimal smag hver gang.
+                </p>
+                <p>
+                  Du kan både spise hjemme, hente selv eller få leveret. Bestil
+                  online, og vi gør din mad klar, mens du er på vej – eller
+                  sørger for hurtig udbringning i lokalområdet.
+                </p>
+                <p>
+                  Har du ønsker til allergener, vegetariske muligheder eller
+                  større selskaber, er du altid velkommen til at kontakte os.
+                </p>
+              </div>
+              <div className="about-image">
+                <div className="about-image-placeholder">
+                  <PizzaIcon />
+                </div>
               </div>
             </div>
-          </div>
           </ScrollReveal>
         </section>
 

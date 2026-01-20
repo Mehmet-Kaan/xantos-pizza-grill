@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { ArrowRightIcon, PhoneIcon, CartIcon } from "../components/Icons";
 import { createOrder } from "../services/ordersService";
-import "./Checkout.css";
+import "../styles/Checkout.css";
 
 const DELIVERY_FEE = 30;
 
@@ -50,7 +50,7 @@ export default function Checkout() {
 
   async function handlePlaceOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    
+
     // Validate payment if required
     if (requiresPayment && paymentMethod === "card") {
       if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
@@ -73,20 +73,23 @@ export default function Checkout() {
 
       // Create order in Firebase
       const orderId = await createOrder({
-      items,
+        items,
         total: finalTotal,
-      name,
-      phone,
-      address: method === "delivery" ? address : null,
+        name,
+        phone,
+        address: method === "delivery" ? address : null,
         method: method as "pickup" | "delivery",
-      note,
-        paymentMethod: requiresPayment ? (paymentMethod as "card" | "mobilepay") : "cash",
-        paymentStatus: requiresPayment && paymentMethod === "card" ? "paid" : "pending",
-      status: "pending",
+        note,
+        paymentMethod: requiresPayment
+          ? (paymentMethod as "card" | "mobilepay")
+          : "cash",
+        paymentStatus:
+          requiresPayment && paymentMethod === "card" ? "paid" : "pending",
+        status: "pending",
       });
 
       // Clear cart and go to confirmation
-    clear();
+      clear();
       setIsProcessing(false);
       navigate("/confirmation/" + orderId);
     } catch (error) {
@@ -100,52 +103,63 @@ export default function Checkout() {
     <main className="checkout-page">
       <div className="checkout-container">
         <h2 className="checkout-title">
-          <CartIcon style={{ marginRight: "0.5rem", verticalAlign: "middle" }} />
+          <CartIcon
+            style={{ marginRight: "0.5rem", verticalAlign: "middle" }}
+          />
           Gennemfør bestilling
         </h2>
-      {items.length === 0 ? (
+        {items.length === 0 ? (
           <div className="checkout-empty">
             <p>Din kurv er tom —</p>
             <Link to="/bestil" className="checkout-link">
               Se menuen
-          </Link>
-        </div>
-      ) : (
+            </Link>
+          </div>
+        ) : (
           <div className="checkout-layout">
             <form onSubmit={handlePlaceOrder} className="checkout-form">
               <section className="checkout-section">
                 <h3 className="checkout-section-title">Kontaktoplysninger</h3>
                 <div className="form-group">
                   <label className="form-label">Navn</label>
-            <input
+                  <input
                     type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="form-input"
                     placeholder="Indtast dit navn"
-            />
-          </div>
+                  />
+                </div>
                 <div className="form-group">
                   <label className="form-label">
-                    <PhoneIcon style={{ marginRight: "0.35rem", verticalAlign: "middle" }} />
+                    <PhoneIcon
+                      style={{
+                        marginRight: "0.35rem",
+                        verticalAlign: "middle",
+                      }}
+                    />
                     Telefonnummer
                   </label>
-            <input
+                  <input
                     type="tel"
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="form-input"
                     placeholder="+45 12 34 56 78"
-            />
-          </div>
+                  />
+                </div>
               </section>
 
               <section className="checkout-section">
-                <h3 className="checkout-section-title">Afhentning eller levering</h3>
+                <h3 className="checkout-section-title">
+                  Afhentning eller levering
+                </h3>
                 <div className="method-selector">
-                  <label className={`method-option ${method === "pickup" ? "active" : ""}`}>
+                  <label
+                    className={`method-option ${method === "pickup" ? "active" : ""}`}
+                  >
                     <input
                       type="radio"
                       name="method"
@@ -157,49 +171,57 @@ export default function Checkout() {
                       <span className="method-icon">🚗</span>
                       <div>
                         <div className="method-title">Afhentning</div>
-                        <div className="method-desc">Hent din bestilling i butikken</div>
+                        <div className="method-desc">
+                          Hent din bestilling i butikken
+                        </div>
                       </div>
                     </div>
                   </label>
-                  <label className={`method-option ${method === "delivery" ? "active" : ""}`}>
+                  <label
+                    className={`method-option ${method === "delivery" ? "active" : ""}`}
+                  >
                     <input
                       type="radio"
                       name="method"
                       value="delivery"
                       checked={method === "delivery"}
-              onChange={(e) => setMethod(e.target.value)}
+                      onChange={(e) => setMethod(e.target.value)}
                     />
                     <div className="method-content">
                       <span className="method-icon">🚴</span>
                       <div>
                         <div className="method-title">Levering</div>
-                        <div className="method-desc">Vi bringer det til dig</div>
+                        <div className="method-desc">
+                          Vi bringer det til dig
+                        </div>
                       </div>
                     </div>
                   </label>
-          </div>
+                </div>
 
-          {method === "delivery" && (
+                {method === "delivery" && (
                   <div className="form-group" style={{ marginTop: "1rem" }}>
                     <label className="form-label">Leveringsadresse</label>
-              <input
+                    <input
                       type="text"
-                required={method === "delivery"}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                      required={method === "delivery"}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
                       className="form-input"
                       placeholder="Gadenavn og nummer"
-              />
-            </div>
-          )}
+                    />
+                  </div>
+                )}
               </section>
 
               <section className="checkout-section">
-                <h3 className="checkout-section-title">Bemærkninger (valgfrit)</h3>
+                <h3 className="checkout-section-title">
+                  Bemærkninger (valgfrit)
+                </h3>
                 <div className="form-group">
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
                     className="form-textarea"
                     placeholder="Har du nogen særlige ønsker eller allergener?"
                     rows={4}
@@ -211,7 +233,9 @@ export default function Checkout() {
                 <section className="checkout-section">
                   <h3 className="checkout-section-title">💳 Betalingsmetode</h3>
                   <div className="payment-methods">
-                    <label className={`payment-method-option ${paymentMethod === "card" ? "active" : ""}`}>
+                    <label
+                      className={`payment-method-option ${paymentMethod === "card" ? "active" : ""}`}
+                    >
                       <input
                         type="radio"
                         name="payment"
@@ -222,12 +246,18 @@ export default function Checkout() {
                       <div className="payment-method-content">
                         <span className="payment-icon">💳</span>
                         <div>
-                          <div className="payment-method-title">Kortbetaling</div>
-                          <div className="payment-method-desc">Visa, Mastercard, Dankort</div>
+                          <div className="payment-method-title">
+                            Kortbetaling
+                          </div>
+                          <div className="payment-method-desc">
+                            Visa, Mastercard, Dankort
+                          </div>
                         </div>
                       </div>
                     </label>
-                    <label className={`payment-method-option ${paymentMethod === "mobilepay" ? "active" : ""}`}>
+                    <label
+                      className={`payment-method-option ${paymentMethod === "mobilepay" ? "active" : ""}`}
+                    >
                       <input
                         type="radio"
                         name="payment"
@@ -239,7 +269,9 @@ export default function Checkout() {
                         <span className="payment-icon">📱</span>
                         <div>
                           <div className="payment-method-title">MobilePay</div>
-                          <div className="payment-method-desc">Betal med MobilePay</div>
+                          <div className="payment-method-desc">
+                            Betal med MobilePay
+                          </div>
                         </div>
                       </div>
                     </label>
@@ -264,7 +296,9 @@ export default function Checkout() {
                           type="text"
                           required={paymentMethod === "card"}
                           value={cardNumber}
-                          onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                          onChange={(e) =>
+                            setCardNumber(formatCardNumber(e.target.value))
+                          }
                           className="form-input"
                           placeholder="1234 5678 9012 3456"
                           maxLength={19}
@@ -277,7 +311,9 @@ export default function Checkout() {
                             type="text"
                             required={paymentMethod === "card"}
                             value={cardExpiry}
-                            onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                            onChange={(e) =>
+                              setCardExpiry(formatExpiry(e.target.value))
+                            }
                             className="form-input"
                             placeholder="MM/ÅÅ"
                             maxLength={5}
@@ -289,35 +325,42 @@ export default function Checkout() {
                             type="text"
                             required={paymentMethod === "card"}
                             value={cardCvv}
-                            onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                            onChange={(e) =>
+                              setCardCvv(
+                                e.target.value.replace(/\D/g, "").slice(0, 3),
+                              )
+                            }
                             className="form-input"
                             placeholder="123"
                             maxLength={3}
-            />
-          </div>
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
 
                   {paymentMethod === "mobilepay" && (
                     <div className="mobilepay-info">
-                      <p>Du vil blive omdirigeret til MobilePay for at gennemføre betalingen.</p>
+                      <p>
+                        Du vil blive omdirigeret til MobilePay for at gennemføre
+                        betalingen.
+                      </p>
                     </div>
                   )}
                 </section>
               )}
 
               <div className="checkout-actions">
-              <button
-                type="button"
-                onClick={() => navigate("/cart")}
+                <button
+                  type="button"
+                  onClick={() => navigate("/cart")}
                   className="btn-secondary"
                   disabled={isProcessing}
-              >
+                >
                   Tilbage
-              </button>
-              <button
-                type="submit"
+                </button>
+                <button
+                  type="submit"
                   className="btn-primary"
                   disabled={isProcessing}
                 >
@@ -328,25 +371,33 @@ export default function Checkout() {
                     </>
                   ) : (
                     <>
-                      {requiresPayment ? "Betal og placer ordre" : "Placer ordre"}
-                      <ArrowRightIcon style={{ marginLeft: "0.5rem", verticalAlign: "middle" }} />
+                      {requiresPayment
+                        ? "Betal og placer ordre"
+                        : "Placer ordre"}
+                      <ArrowRightIcon
+                        style={{
+                          marginLeft: "0.5rem",
+                          verticalAlign: "middle",
+                        }}
+                      />
                     </>
                   )}
-              </button>
+                </button>
               </div>
 
               <p className="checkout-note">
-                {requiresPayment 
+                {requiresPayment
                   ? "🔒 Din betaling er sikker og krypteret. Vi ringer til dig, når din bestilling er klar!"
-                  : "💳 Betaling sker ved afhentning. Vi ringer til dig, når din bestilling er klar!"
-                }
+                  : "💳 Betaling sker ved afhentning. Vi ringer til dig, når din bestilling er klar!"}
               </p>
             </form>
 
             <aside className="checkout-summary">
               <div className="summary-header">
                 <h3>Din bestilling</h3>
-                <span className="summary-count">{items.length} {items.length === 1 ? "vare" : "varer"}</span>
+                <span className="summary-count">
+                  {items.length} {items.length === 1 ? "vare" : "varer"}
+                </span>
               </div>
               <div className="summary-items">
                 {items.map((item) => (
@@ -375,11 +426,11 @@ export default function Checkout() {
                 <div className="summary-total-row summary-total-final">
                   <span>Total</span>
                   <strong>DKK {finalTotal.toFixed(2)}</strong>
-            </div>
-          </div>
+                </div>
+              </div>
             </aside>
           </div>
-      )}
+        )}
       </div>
     </main>
   );

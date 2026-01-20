@@ -1,7 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
-import { CartIcon, PhoneIcon, ArrowRightIcon, PizzaIcon, InfoIcon, ContactIcon } from "./Icons";
+import {
+  CartIcon,
+  PhoneIcon,
+  ArrowRightIcon,
+  PizzaIcon,
+  InfoIcon,
+  ContactIcon,
+} from "./Icons";
 import { SunIcon, MoonIcon } from "../hooks/icons";
 
 function Nav() {
@@ -40,9 +47,9 @@ function Nav() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!open) return;
-      
+
       const target = event.target as Node;
-      
+
       // Don't close if clicking inside the menu or on the toggle button
       if (
         menuRef.current?.contains(target) ||
@@ -50,7 +57,7 @@ function Nav() {
       ) {
         return;
       }
-      
+
       setOpen(false);
     };
 
@@ -72,16 +79,19 @@ function Nav() {
         </Link>
 
         <nav className="modern-header-nav">
-          <Link to="/menu" className="modern-nav-link">Menu</Link>
-          <Link to="/om-os" className="modern-nav-link">Om os</Link>
-          <Link to="/kontakt" className="modern-nav-link">Kontakt</Link>
+          <Link to="/menu" className="modern-nav-link">
+            Menu
+          </Link>
+          <Link to="/om-os" className="modern-nav-link">
+            Om os
+          </Link>
+          <Link to="/kontakt" className="modern-nav-link">
+            Kontakt
+          </Link>
         </nav>
 
         <div className="modern-header-actions">
-          <a
-            href="tel:+4570123456"
-            className="modern-header-phone"
-          >
+          <a href="tel:+4570123456" className="modern-header-phone">
             <PhoneIcon />
             <span>70 12 34 56</span>
           </a>
@@ -89,9 +99,7 @@ function Nav() {
           <Link to="/cart" className="modern-header-cart">
             <CartIcon />
             <span>Kurv</span>
-            {count > 0 && (
-              <span className="modern-cart-badge">{count}</span>
-            )}
+            {count > 0 && <span className="modern-cart-badge">{count}</span>}
           </Link>
 
           <Link to="/bestil" className="modern-header-cta">
@@ -121,10 +129,7 @@ function Nav() {
         </div>
       </div>
 
-      <div 
-        ref={menuRef}
-        className={`modern-mobile-menu ${open ? "open" : ""}`}
-      >
+      <div ref={menuRef} className={`modern-mobile-menu ${open ? "open" : ""}`}>
         <nav className="modern-mobile-nav">
           <Link to="/menu" onClick={() => setOpen(false)}>
             <PizzaIcon className="mobile-nav-icon" />
@@ -142,11 +147,24 @@ function Nav() {
             <CartIcon className="mobile-nav-icon" />
             <span>Kurv {count > 0 && `(${count})`}</span>
           </Link>
-          <a href="tel:+4570123456" onClick={() => setOpen(false)}>
-            <PhoneIcon className="mobile-nav-icon" />
-            <span>+45 70 12 34 56</span>
-          </a>
-          <Link to="/bestil" onClick={() => setOpen(false)} className="modern-mobile-cta">
+          <div className="contact-and-theme-div">
+            <a href="tel:+4570123456" onClick={() => setOpen(false)}>
+              <PhoneIcon className="mobile-nav-icon" />
+              <span>+45 70 12 34 56</span>
+            </a>
+            <button
+              className="mobile-theme-toggle"
+              onClick={() => setDarkMode((prev) => !prev)}
+              aria-label="Skift tema"
+            >
+              {darkMode ? <SunIcon /> : <MoonIcon />}
+            </button>
+          </div>
+          <Link
+            to="/bestil"
+            onClick={() => setOpen(false)}
+            className="modern-mobile-cta"
+          >
             <span>Bestil takeaway</span>
             <ArrowRightIcon className="mobile-nav-cta-icon" />
           </Link>

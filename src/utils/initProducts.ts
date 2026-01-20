@@ -2,7 +2,7 @@
 // Run this once to populate your Firestore with initial products
 
 import { createProduct } from "../services/productsService";
-import { MENU } from "../components/Menu";
+import { MENU } from "../pages/Menu";
 
 export async function initializeProducts() {
   try {

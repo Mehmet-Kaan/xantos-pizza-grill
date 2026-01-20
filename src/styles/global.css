@@ -105,14 +105,17 @@ header {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .card {
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -123,12 +126,6 @@ header {
   margin-bottom: 30px;
 }
 
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 15px;
-}
-
 .menu-item {
   background: white;
   padding: 15px;
@@ -137,7 +134,10 @@ header {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .menu-item {
@@ -209,14 +209,17 @@ header {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .checkout-form {
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -266,14 +269,17 @@ header {
   padding: 25px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .confirm-box {
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -286,14 +292,17 @@ header {
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .order-box {
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -324,14 +333,17 @@ header {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 3rem 2.5rem;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .privacy-policy-container {
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -356,7 +368,9 @@ header {
   margin: 0 0 2.5rem 0;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
-  transition: color 0.3s ease, border-color 0.3s ease;
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .privacy-policy-updated {
@@ -449,7 +463,9 @@ header {
   padding: 1.25rem;
   margin: 1.5rem 0;
   border-radius: 6px;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 [data-theme="dark"] .privacy-contact {
