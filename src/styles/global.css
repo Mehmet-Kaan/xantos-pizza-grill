@@ -126,6 +126,12 @@ header {
   margin-bottom: 30px;
 }
 
+/* .menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+} */
+
 .menu-item {
   background: white;
   padding: 15px;
