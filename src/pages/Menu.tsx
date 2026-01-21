@@ -967,7 +967,7 @@ export default function Menu() {
   }
 
   return (
-    <main className="menuPageContainer max-w-6xl">
+    <main className="menuPageContainer max-w-7xl">
       <div className="menu-header">
         <div>
           <p className="menu-subtitle">
@@ -1358,9 +1358,13 @@ export default function Menu() {
             </div>
 
             {items.length === 0 ? (
-              <p className="menu-cart-empty">
-                Din kurv er tom. Tilføj lækre retter fra menuen.
-              </p>
+              <div className="cart-empty-state">
+                <div className="cart-empty-icon">🛒</div>
+                <h2 className="cart-empty-title">Din kurv er tom</h2>
+                <p className="cart-empty-text">
+                  Tilføj lækre retter fra menuen for at komme i gang
+                </p>
+              </div>
             ) : (
               <>
                 <div className="menu-cart-items">
@@ -1423,9 +1427,13 @@ export default function Menu() {
                       </div>
                       <div className="menu-cart-controls">
                         <button
-                          onClick={() =>
-                            updateQty(item.id, Math.max(1, item.qty - 1))
-                          }
+                          onClick={() => {
+                            if (item.qty == 1) {
+                              removeItem(item.id);
+                            } else {
+                              updateQty(item.id, Math.max(1, item.qty - 1));
+                            }
+                          }}
                           aria-label="Fjern en"
                         >
                           −
@@ -1441,7 +1449,7 @@ export default function Menu() {
                           className="menu-cart-remove"
                           onClick={() => removeItem(item.id)}
                         >
-                          Fjern
+                          <TrashIcon className="clear-cart-icon" />
                         </button>
                       </div>
                     </div>
@@ -1496,9 +1504,13 @@ export default function Menu() {
           </div>
 
           {items.length === 0 ? (
-            <p className="menu-cart-empty">
-              Din kurv er tom. Tilføj lækre retter fra menuen.
-            </p>
+            <div className="cart-empty-state">
+              <div className="cart-empty-icon">🛒</div>
+              <h2 className="cart-empty-title">Din kurv er tom</h2>
+              <p className="cart-empty-text">
+                Tilføj lækre retter fra menuen for at komme i gang
+              </p>
+            </div>
           ) : (
             <>
               <div className="menu-cart-items">
@@ -1561,9 +1573,13 @@ export default function Menu() {
                     </div>
                     <div className="menu-cart-controls">
                       <button
-                        onClick={() =>
-                          updateQty(item.id, Math.max(1, item.qty - 1))
-                        }
+                        onClick={() => {
+                          if (item.qty == 1) {
+                            removeItem(item.id);
+                          } else {
+                            updateQty(item.id, Math.max(1, item.qty - 1));
+                          }
+                        }}
                         aria-label="Fjern en"
                       >
                         −
@@ -1579,7 +1595,7 @@ export default function Menu() {
                         className="menu-cart-remove"
                         onClick={() => removeItem(item.id)}
                       >
-                        Fjern
+                        <TrashIcon className="clear-cart-icon" />
                       </button>
                     </div>
                   </div>

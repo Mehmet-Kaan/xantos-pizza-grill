@@ -70,7 +70,7 @@
 }
 
 .admin-tab::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
@@ -110,7 +110,7 @@
   backdrop-filter: blur(20px);
   border-radius: 24px;
   padding: 2.5rem;
-  box-shadow: 
+  box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.08),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -120,19 +120,19 @@
 [data-theme="dark"] .admin-section {
   background: rgba(30, 41, 59, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
+  box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 .admin-section:hover {
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.12),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
 }
 
 [data-theme="dark"] .admin-section:hover {
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
@@ -187,7 +187,7 @@
 }
 
 .btn-refresh::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
@@ -315,7 +315,7 @@
 }
 
 .order-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -497,7 +497,11 @@
 .order-note {
   margin-top: 1.25rem;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 138, 0.4) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(254, 243, 199, 0.6) 0%,
+    rgba(253, 230, 138, 0.4) 100%
+  );
   backdrop-filter: blur(10px);
   border-radius: 12px;
   font-size: 0.875rem;
@@ -506,7 +510,11 @@
 }
 
 [data-theme="dark"] .order-note {
-  background: linear-gradient(135deg, rgba(120, 53, 15, 0.3) 0%, rgba(146, 64, 14, 0.2) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(120, 53, 15, 0.3) 0%,
+    rgba(146, 64, 14, 0.2) 100%
+  );
   color: #fde68a;
   border-color: rgba(251, 191, 36, 0.2);
 }
@@ -625,7 +633,11 @@
 }
 
 .most-popular-product-card.is-popular {
-  background: linear-gradient(135deg, rgba(254, 242, 242, 0.6) 0%, rgba(255, 247, 237, 0.6) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(254, 242, 242, 0.6) 0%,
+    rgba(255, 247, 237, 0.6) 100%
+  );
   border-color: #dc2626;
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
@@ -641,7 +653,11 @@
 }
 
 [data-theme="dark"] .most-popular-product-card.is-popular {
-  background: linear-gradient(135deg, rgba(127, 29, 29, 0.4) 0%, rgba(154, 52, 18, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(127, 29, 29, 0.4) 0%,
+    rgba(154, 52, 18, 0.3) 100%
+  );
   border-color: #fca5a5;
 }
 
@@ -673,7 +689,9 @@
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-[data-theme="dark"] .most-popular-product-card.is-popular .most-popular-product-checkbox {
+[data-theme="dark"]
+  .most-popular-product-card.is-popular
+  .most-popular-product-checkbox {
   background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
   border-color: transparent;
 }
@@ -759,7 +777,9 @@
 .products-search-input:focus {
   outline: none;
   border-color: #dc2626;
-  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1), 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 0 0 4px rgba(220, 38, 38, 0.1),
+    0 8px 20px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 1);
 }
 
@@ -775,7 +795,9 @@
 
 [data-theme="dark"] .products-search-input:focus {
   border-color: #fca5a5;
-  box-shadow: 0 0 0 4px rgba(252, 165, 165, 0.1), 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 0 4px rgba(252, 165, 165, 0.1),
+    0 8px 20px rgba(0, 0, 0, 0.3);
   background: rgba(30, 41, 59, 1);
 }
 
@@ -854,7 +876,7 @@
 }
 
 .product-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1060,8 +1082,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Modern Product Edit Form */
@@ -1247,8 +1273,8 @@
 }
 
 [data-theme="dark"] .ingredient-name {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: rgba(255, 255, 255, 0.2);
+  /* background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.2); */
   color: #f1f5f9;
 }
 
@@ -1473,7 +1499,7 @@
 }
 
 .review-card-admin::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;

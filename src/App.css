@@ -367,6 +367,11 @@ body:hover {
   margin-left: auto;
   margin-right: auto;
 }
+.max-w-7xl {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .mx-auto {
   margin-left: auto;
@@ -426,7 +431,8 @@ body:hover {
 .modern-header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0rem 1rem;
+  /* padding: 0rem 1rem; */
+  padding: 0rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -469,7 +475,7 @@ body:hover {
   display: flex;
   align-items: center;
   gap: 2rem;
-  flex: 1;
+  /* flex: 1; */
   justify-content: center;
 }
 
@@ -510,10 +516,15 @@ body:hover {
 .modern-header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  transform: scale(1.25);
-  flex: 1;
+  gap: 2.5rem;
+  /* transform: scale(1.25);
+  flex: 1; */
   justify-content: center;
+}
+
+.modern-header-actions a,
+.modern-header-actions button {
+  transform: scale(1.25);
 }
 
 .modern-header-phone {
@@ -532,15 +543,14 @@ body:hover {
   transition: all 0.3s ease;
 }
 
-.modern-header-phone:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
-}
-
 .modern-header-phone svg {
   width: 18px;
   height: 18px;
+}
+.modern-header-phone:hover {
+  transform: scale(1.2);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .modern-header-cart {
@@ -561,9 +571,9 @@ body:hover {
 }
 
 .modern-header-cart:hover {
+  transform: scale(1.2);
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
 }
 
 .modern-header-cart svg {
@@ -631,7 +641,6 @@ body:hover {
 
 .modern-header-cta:hover {
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  transform: translateY(-2px);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.4) inset;
@@ -999,12 +1008,18 @@ body.mobile-menu-open {
     font-size: 0.875rem;
   }
   .modern-header-actions {
-    transform: scale(1.05);
-    flex: unset;
+    /* transform: scale(1.05); */
+    /* flex: unset; */
+    gap: 1.5rem;
+  }
+
+  .modern-header-actions a,
+  .modern-header-actions button {
+    transform: scale(1.1);
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .modern-header-container {
     padding: 0.25rem 1rem;
     gap: 1rem;
@@ -1043,7 +1058,6 @@ body.mobile-menu-open {
   }
   .modern-header-actions {
     flex: unset;
-    transform: scale(1.25);
   }
   /* .modern-logo-main {
     font-size: 2.5rem;
@@ -1544,12 +1558,6 @@ textarea:focus {
 
   main {
     padding: 1rem;
-  }
-
-  .max-w-6xl,
-  .max-w-4xl {
-    /* padding-left: 0;
-    padding-right: 0; */
   }
 
   .nav-toggle {

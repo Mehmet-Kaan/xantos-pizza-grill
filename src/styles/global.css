@@ -20,7 +20,7 @@ a {
 /* Header */
 header {
   background: linear-gradient(to right, #c62828, #f9a825);
-  padding: 15px;
+  padding: 15px 0;
   color: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
