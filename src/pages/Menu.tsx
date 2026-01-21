@@ -1094,18 +1094,17 @@ export default function Menu() {
         </div>
       )}
       <div className="menu-grid">
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Søg efter pizza, grill, drikke..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="menu-search"
+          />
+          <span className="search-icon">🔍</span>
+        </div>
         <aside className="menu-sidebar">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Søg efter pizza, grill, drikke..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="menu-search"
-            />
-            <span className="search-icon">🔍</span>
-          </div>
-
           <div className="categoriesContainer">
             {categories.map((cat) => (
               <button
