@@ -741,6 +741,10 @@
   }
 }
 
+.homePopularItemsDiv button {
+  transform: scale(1.35);
+}
+
 @media (max-width: 480px) {
   .trust-grid {
     grid-template-columns: 1fr;

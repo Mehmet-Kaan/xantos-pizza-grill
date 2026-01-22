@@ -69,7 +69,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const extras =
       item.selectedIngredients?.reduce(
         (sum, ing) => sum + (ing.extraPrice || 0),
-        0
+        0,
       ) || 0;
     return item.price + extras;
   };
@@ -90,7 +90,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       if (found) {
         return prev.map((i) =>
-          i.id === uniqueId ? { ...i, qty: i.qty + menuItem.qty } : i
+          i.id === uniqueId ? { ...i, qty: i.qty + menuItem.qty } : i,
         );
       }
 
@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) =>
       qty <= 0
         ? prev.filter((i) => i.id !== id)
-        : prev.map((i) => (i.id === id ? { ...i, qty } : i))
+        : prev.map((i) => (i.id === id ? { ...i, qty } : i)),
     );
   }
 

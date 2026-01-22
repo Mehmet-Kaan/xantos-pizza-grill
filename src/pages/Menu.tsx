@@ -10,107 +10,18 @@ import {
   getProductsMetadata,
   getMostPopularMetadataAndIds,
 } from "../services/productsService";
+import {
+  getStoredProducts,
+  setStoredProducts,
+  getStoredLastUpdated,
+  setStoredLastUpdated,
+  getStoredMostPopularIds,
+  setStoredMostPopularIds,
+  getStoredMostPopularLastUpdated,
+  setStoredMostPopularLastUpdated,
+} from "../services/localStorageService";
 import ScrollReveal from "../utils/ScrollReveal";
 
-// localStorage keys
-const PRODUCTS_STORAGE_KEY = "xanthos_products";
-const PRODUCTS_LAST_UPDATED_KEY = "xanthos_products_lastUpdated";
-const MOST_POPULAR_IDS_KEY = "xanthos_mostPopularProductIds";
-const MOST_POPULAR_LAST_UPDATED_KEY = "xanthos_mostPopular_lastUpdated";
-
-// Helper functions for localStorage
-function getStoredProducts(): Product[] | null {
-  try {
-    const stored = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (error) {
-    console.error("Error reading products from localStorage:", error);
-  }
-  return null;
-}
-
-function setStoredProducts(products: Product[]): void {
-  try {
-    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
-  } catch (error) {
-    console.error("Error saving products to localStorage:", error);
-  }
-}
-
-function getStoredLastUpdated(): Date | null {
-  try {
-    const stored = localStorage.getItem(PRODUCTS_LAST_UPDATED_KEY);
-    if (stored) {
-      return new Date(stored);
-    }
-  } catch (error) {
-    console.error("Error reading lastUpdated from localStorage:", error);
-  }
-  return null;
-}
-
-function setStoredLastUpdated(date: Date): void {
-  try {
-    localStorage.setItem(PRODUCTS_LAST_UPDATED_KEY, date.toISOString());
-  } catch (error) {
-    console.error("Error saving lastUpdated to localStorage:", error);
-  }
-}
-
-function getStoredMostPopularIds(): string[] | null {
-  try {
-    const stored = localStorage.getItem(MOST_POPULAR_IDS_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? (parsed as string[]) : null;
-    }
-  } catch (error) {
-    console.error(
-      "Error reading most popular product IDs from localStorage:",
-      error,
-    );
-  }
-  return null;
-}
-
-function setStoredMostPopularIds(ids: string[]): void {
-  try {
-    localStorage.setItem(MOST_POPULAR_IDS_KEY, JSON.stringify(ids));
-  } catch (error) {
-    console.error(
-      "Error saving most popular product IDs to localStorage:",
-      error,
-    );
-  }
-}
-
-function getStoredMostPopularLastUpdated(): Date | null {
-  try {
-    const stored = localStorage.getItem(MOST_POPULAR_LAST_UPDATED_KEY);
-    if (stored) {
-      return new Date(stored);
-    }
-  } catch (error) {
-    console.error(
-      "Error reading most popular lastUpdated from localStorage:",
-      error,
-    );
-  }
-  return null;
-}
-
-function setStoredMostPopularLastUpdated(date: Date): void {
-  try {
-    localStorage.setItem(MOST_POPULAR_LAST_UPDATED_KEY, date.toISOString());
-  } catch (error) {
-    console.error(
-      "Error saving most popular lastUpdated to localStorage:",
-      error,
-    );
-  }
-}
 export const MENU: Product[] = [
   {
     id: "p-margherita",
@@ -301,28 +212,48 @@ export const MENU: Product[] = [
 ];
 
 export function MenuCard({ item }: { item: MenuItem }) {
-  const { addItem } = useCart();
+  const { addItem, items, removeItem } = useCart();
+  console.log(items);
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-semibold">{item.name}</h4>
-          <p className="text-sm text-gray-600">{item.desc}</p>
-        </div>
-        <div className="text-right">
-          <div className="font-bold">{item.price},-</div>
+    <div key={item.id} className="menu-item-simple homePopularItemsDiv">
+      <img
+        src={`./assets/${item.image}`}
+        alt={item.name}
+        className="menu-item-simple-img"
+      />
+      <div>
+        <p className="menu-cart-item-name">{item.name}</p>
+        <p className="menu-cart-item-desc">{item.desc}</p>
+        <p className="menu-cart-item-price" style={{ fontWeight: "bold" }}>
+          DKK {item.price.toFixed(2)}
+        </p>
+      </div>
+      {items.some((i) => i.id === item.id) ? (
+        <div className="menu-cart-controls">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              addItem(item);
+              removeItem(item.id);
             }}
-            className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
+            className="menu-item-simple-add"
           >
-            Add
+            <TrashIcon className="cart-clear-icon" />
           </button>
         </div>
-      </div>
+      ) : (
+        <div className="menu-cart-controls">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              addItem({ ...item, qty: 1 });
+            }}
+            className="menu-item-simple-add"
+          >
+            +
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -679,12 +610,12 @@ export default function Menu() {
 
   useEffect(() => {
     if (showAllergens) {
-      document.body.classList.add("modal-open");
+      document.body.classList.add("modal-open-allergen");
     } else {
-      document.body.classList.remove("modal-open");
+      document.body.classList.remove("modal-open-allergen");
     }
     return () => {
-      document.body.classList.remove("modal-open");
+      document.body.classList.remove("modal-open-allergen");
     };
   }, [showAllergens]);
 

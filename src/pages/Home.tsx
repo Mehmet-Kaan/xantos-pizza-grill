@@ -9,7 +9,13 @@ import {
   getReviewsMetadata,
   type Review,
 } from "../services/reviewsService";
+import {
+  getAllProducts,
+  getProductsMetadata,
+  getMostPopularMetadataAndIds,
+} from "../services/productsService";
 import ScrollReveal from "../utils/ScrollReveal";
+import type { Product } from "../hooks/types";
 
 // localStorage keys
 const REVIEWS_STORAGE_KEY = "xanthos_reviews";
@@ -96,6 +102,17 @@ const SPECIALS = [
   },
 ];
 
+import {
+  getStoredProducts,
+  setStoredProducts,
+  getStoredLastUpdated,
+  setStoredLastUpdated,
+  getStoredMostPopularIds,
+  setStoredMostPopularIds,
+  getStoredMostPopularLastUpdated,
+  setStoredMostPopularLastUpdated,
+} from "../services/localStorageService";
+
 export default function Home() {
   const todayIndex = new Date().getDate() % SPECIALS.length;
   const special = SPECIALS[todayIndex];
@@ -108,6 +125,158 @@ export default function Home() {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(4.6);
   const [totalReviews, setTotalReviews] = useState(500);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [mostPopularProductIds, setMostPopularProductIds] = useState<string[]>(
+    [],
+  );
+  const [mostPopularProducts, setMostPopularProducts] = useState<Product[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load products with caching logic
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // First, try to load from localStorage
+        const storedProducts = getStoredProducts();
+        const storedLastUpdated = getStoredLastUpdated();
+
+        if (storedProducts && storedProducts.length > 0) {
+          // Set products from cache immediately for fast UI
+          const productsWithId = storedProducts.map((p) => ({
+            ...p,
+            id: p.id || "",
+          })) as Product[];
+          setProducts(productsWithId);
+          setLoading(false);
+
+          // Check if we need to update from Firebase
+          const firebaseLastUpdated = await getProductsMetadata();
+
+          if (firebaseLastUpdated) {
+            // Compare timestamps
+            const needsUpdate =
+              !storedLastUpdated ||
+              firebaseLastUpdated.getTime() > storedLastUpdated.getTime();
+
+            if (needsUpdate) {
+              // Fetch fresh data from Firebase
+              const fetchedProducts = await getAllProducts();
+              const freshProductsWithId = fetchedProducts.map((p) => ({
+                ...p,
+                id: p.id || "",
+              })) as Product[];
+
+              // Update state and localStorage
+              setProducts(freshProductsWithId);
+              setStoredProducts(freshProductsWithId);
+              setStoredLastUpdated(firebaseLastUpdated);
+            }
+          }
+        } else {
+          // No cached data, fetch from Firebase
+          const fetchedProducts = await getAllProducts();
+          const productsWithId = fetchedProducts.map((p) => ({
+            ...p,
+            id: p.id || "",
+          })) as Product[];
+
+          setProducts(productsWithId);
+          setStoredProducts(productsWithId);
+
+          const firebaseLastUpdated = await getProductsMetadata();
+          if (firebaseLastUpdated) {
+            setStoredLastUpdated(firebaseLastUpdated);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading products:", err);
+        setError("Kunne ikke indlæse produkter. Prøv venligst igen.");
+        console.log(error);
+
+        // Fallback to cached data if available
+        const storedProducts = getStoredProducts();
+        if (storedProducts && storedProducts.length > 0) {
+          const productsWithId = storedProducts.map((p) => ({
+            ...p,
+            id: p.id || "",
+          })) as Product[];
+          setProducts(productsWithId);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProducts();
+
+    // Load most popular product IDs with caching logic
+    async function loadMostPopularProductIds() {
+      try {
+        // First, try to load from localStorage
+        const storedIds = getStoredMostPopularIds();
+        const storedLastUpdated = getStoredMostPopularLastUpdated();
+
+        if (storedIds && storedIds.length >= 0 && storedLastUpdated) {
+          // Set from cache immediately for fast UI
+          setMostPopularProductIds(storedIds);
+
+          // Check if we need to update from Firebase (single read to get both timestamp and IDs)
+          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } =
+            await getMostPopularMetadataAndIds();
+
+          if (firebaseLastUpdated) {
+            // Compare timestamps
+            const needsUpdate =
+              !storedLastUpdated ||
+              firebaseLastUpdated.getTime() > storedLastUpdated.getTime();
+
+            if (needsUpdate) {
+              // Update with fresh data from Firebase (already fetched in same call)
+              setMostPopularProductIds(fetchedIds);
+              setStoredMostPopularIds(fetchedIds);
+              setStoredMostPopularLastUpdated(firebaseLastUpdated);
+            }
+          }
+        } else {
+          // No cached data, fetch from Firebase (single read to get both timestamp and IDs)
+          const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } =
+            await getMostPopularMetadataAndIds();
+
+          setMostPopularProductIds(fetchedIds);
+          setStoredMostPopularIds(fetchedIds);
+
+          if (firebaseLastUpdated) {
+            setStoredMostPopularLastUpdated(firebaseLastUpdated);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading most popular product IDs:", err);
+
+        // Fallback to cached data if available
+        const storedIds = getStoredMostPopularIds();
+        if (storedIds) {
+          setMostPopularProductIds(storedIds);
+        }
+      }
+    }
+    loadMostPopularProductIds();
+  }, []);
+
+  // Update most popular products whenever products or IDs change
+  useEffect(() => {
+    if (products.length === 0 || mostPopularProductIds.length === 0) return;
+
+    const popularItems = products.filter(
+      (item) => item.id && mostPopularProductIds.includes(item.id),
+    );
+
+    setMostPopularProducts(popularItems);
+  }, [products, mostPopularProductIds]);
 
   function isOpenNow() {
     const now = new Date();
@@ -379,9 +548,17 @@ export default function Home() {
             <p className="section-subtitle">Kundernas favoriter just nu</p>
           </div>
           <div className="popular-grid">
-            {MENU.slice(0, 3).map((item: any) => (
-              <MenuCard key={item.id} item={item} />
-            ))}
+            {loading ? (
+              <div className="popular-loading">Indlæser populære retter...</div>
+            ) : error ? (
+              <div className="popular-error">{error}</div>
+            ) : mostPopularProducts.length === 0 ? (
+              <div className="popular-empty">Ingen populære retter fundet.</div>
+            ) : (
+              mostPopularProducts
+                .slice(0, 3)
+                .map((item: any) => <MenuCard key={item.id} item={item} />)
+            )}
           </div>
         </section>
 

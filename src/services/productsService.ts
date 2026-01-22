@@ -44,7 +44,7 @@ export async function getAllProducts(): Promise<Product[]> {
 
 // Create a new product
 export async function createProduct(
-  productData: Omit<Product, "id">
+  productData: Omit<Product, "id">,
 ): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, "products"), productData);
@@ -59,7 +59,7 @@ export async function createProduct(
 // Update a product
 export async function updateProduct(
   productId: string,
-  productData: Partial<Product>
+  productData: Partial<Product>,
 ): Promise<void> {
   try {
     const productRef = doc(db, "products", productId);
@@ -116,7 +116,7 @@ export async function updateProductsMetadata(): Promise<void> {
       {
         lastUpdated: serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
   } catch (error) {
     console.error("Error updating products metadata:", error);
@@ -128,7 +128,7 @@ export async function getMostPopularProductIds(): Promise<string[]> {
   try {
     const metadataRef = doc(db, "metadata", "products");
     const metadataSnap = await getDoc(metadataRef);
-    
+
     if (metadataSnap.exists()) {
       const data = metadataSnap.data();
       return data.mostPopularProductIds || [];
@@ -141,7 +141,9 @@ export async function getMostPopularProductIds(): Promise<string[]> {
 }
 
 // Set most popular product IDs
-export async function setMostPopularProductIds(productIds: string[]): Promise<void> {
+export async function setMostPopularProductIds(
+  productIds: string[],
+): Promise<void> {
   try {
     const metadataRef = doc(db, "metadata", "products");
     await setDoc(
@@ -151,7 +153,7 @@ export async function setMostPopularProductIds(productIds: string[]): Promise<vo
         mostPopularLastUpdated: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
   } catch (error) {
     console.error("Error setting most popular product IDs:", error);
@@ -195,7 +197,7 @@ export async function getMostPopularMetadataAndIds(): Promise<{
     if (metadataSnap.exists()) {
       const data = metadataSnap.data();
       const productIds = data.mostPopularProductIds || [];
-      
+
       let lastUpdated: Date | null = null;
       const mostPopularLastUpdated = data.mostPopularLastUpdated;
       if (mostPopularLastUpdated) {
@@ -205,7 +207,7 @@ export async function getMostPopularMetadataAndIds(): Promise<{
           lastUpdated = new Date(mostPopularLastUpdated);
         }
       }
-      
+
       return { lastUpdated, productIds };
     }
     return { lastUpdated: null, productIds: [] };
