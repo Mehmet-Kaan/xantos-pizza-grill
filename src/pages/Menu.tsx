@@ -411,6 +411,7 @@ export default function Menu() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const popularRef = useRef<HTMLElement | null>(null);
   const categoryTitleRefs = useRef<Record<string, HTMLElement | null>>({});
+  const cartItemsRef = useRef<HTMLDivElement | null>(null);
 
   const { addItem, items, updateQty, removeItem, clear, total } = useCart();
   const [confirmClear, setConfirmClear] = useState(false);
@@ -428,6 +429,26 @@ export default function Menu() {
 
     prevItemsCountRef.current = items.length;
   }, [items.length, cartDrawerOpen]);
+
+  useEffect(() => {
+    if (cartDrawerOpen && cartItemsRef.current) {
+      // Wait for DOM to render the new item
+      requestAnimationFrame(() => {
+        cartItemsRef.current!.scrollTo({
+          top: cartItemsRef.current!.scrollHeight,
+          behavior: "smooth",
+        });
+      });
+    }
+  }, [cartDrawerOpen, items.length]);
+
+  useEffect(() => {
+    if (confirmClear && cartItemsRef.current) {
+      requestAnimationFrame(() => {
+        cartItemsRef.current!.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+  }, [confirmClear]);
 
   // Load products with caching logic
   useEffect(() => {
@@ -1306,7 +1327,7 @@ export default function Menu() {
               </div>
             ) : (
               <>
-                <div className="menu-cart-items">
+                <div className="menu-cart-items" ref={cartItemsRef}>
                   {confirmClear && (
                     <div className="cart-confirm-box mb-0">
                       <div className="cart-confirm-content">
