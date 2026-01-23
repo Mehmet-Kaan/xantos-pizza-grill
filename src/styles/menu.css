@@ -281,6 +281,10 @@
   }
 }
 
+[data-theme="dark"] .hours-box .hours-list .hours-item .hours-time {
+  color: white;
+}
+
 .modal-content {
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
@@ -412,7 +416,8 @@
 .modal-title {
   font-size: 1.4rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin: 0 0.5rem 0.8rem;
+  margin: 1rem 0.5rem 1rem;
   color: #1f2937;
   transition: color 0.3s ease;
 }
@@ -2632,6 +2637,9 @@ body.cart-drawer-open header {
 body.modal-open {
   overflow: hidden;
 }
+body.modal-open-allergen {
+  overflow: hidden;
+}
 
 /* Lower header z-index when modals are open */
 body.modal-open header,
@@ -3259,10 +3267,6 @@ body.modal-open-allergen header {
   .contact-btn {
     font-size: 0.9rem;
     padding: 9px 10px;
-  }
-
-  .modal-title {
-    font-size: 1.25rem;
   }
 
   /* Alternative Mobile Modal Design - Centered Card Style */

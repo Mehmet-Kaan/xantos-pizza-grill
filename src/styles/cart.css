@@ -855,10 +855,10 @@
     height: 200px;
   }
 
-  .cart-item-header {
+  /* .cart-item-header {
     flex-direction: column;
     align-items: flex-start;
-  }
+  } */
 
   .cart-item-footer {
     flex-direction: column;

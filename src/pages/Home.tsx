@@ -14,6 +14,16 @@ import {
   getProductsMetadata,
   getMostPopularMetadataAndIds,
 } from "../services/productsService";
+import {
+  getStoredProducts,
+  setStoredProducts,
+  getStoredLastUpdated,
+  setStoredLastUpdated,
+  getStoredMostPopularIds,
+  setStoredMostPopularIds,
+  getStoredMostPopularLastUpdated,
+  setStoredMostPopularLastUpdated,
+} from "../services/localStorageService";
 import ScrollReveal from "../utils/ScrollReveal";
 import type { Product } from "../hooks/types";
 
@@ -101,17 +111,6 @@ const SPECIALS = [
     image: "./assets/pepperoni.jpg",
   },
 ];
-
-import {
-  getStoredProducts,
-  setStoredProducts,
-  getStoredLastUpdated,
-  setStoredLastUpdated,
-  getStoredMostPopularIds,
-  setStoredMostPopularIds,
-  getStoredMostPopularLastUpdated,
-  setStoredMostPopularLastUpdated,
-} from "../services/localStorageService";
 
 export default function Home() {
   const todayIndex = new Date().getDate() % SPECIALS.length;
@@ -421,8 +420,8 @@ export default function Home() {
               {isOpenNow() ? "Åben nu" : "Lukket – åbner kl. 11:00"}
             </div>
             <h1 className="hero-title">
-              <PizzaIcon />
-              Velkommen til Xanthos Pizza & Grill
+              <PizzaIcon className="hero-title-pizza-icon" />
+              <span>Velkommen til Xanthos Pizza & Grill</span>
             </h1>
             <p className="hero-subtitle">
               Autentiske pizzor och grillfavoriter. Beställ enkelt online och
@@ -509,7 +508,7 @@ export default function Home() {
         <section className="section about-section">
           <ScrollReveal>
             <div className="section-header">
-              <h2 className="section-title">Om os</h2>
+              <h2 className="section-title darkTitle">Om os</h2>
               <p className="section-subtitle">Din lokale pizzabar og grill</p>
             </div>
           </ScrollReveal>
@@ -572,11 +571,11 @@ export default function Home() {
               </div>
               <div className="hours-list">
                 <div className="hours-item">
-                  <span>Mandag – Torsdag</span>
+                  <span className="darkTitle">Mandag – Torsdag</span>
                   <span className="hours-time">11:00 – 21:00</span>
                 </div>
                 <div className="hours-item">
-                  <span>Fredag – Søndag</span>
+                  <span className="darkTitle">Fredag – Søndag</span>
                   <span className="hours-time">11:00 – 23:00</span>
                 </div>
               </div>
@@ -614,7 +613,7 @@ export default function Home() {
         {/* REVIEWS SECTION */}
         <section className="section reviews-section">
           <div className="section-header">
-            <h2 className="section-title">Hvad vores kunder siger</h2>
+            <h2 className="section-title darkTitle">Hvad vores kunder siger</h2>
             <p className="section-subtitle">
               Anmeldelser fra vores glade kunder
             </p>
@@ -634,7 +633,7 @@ export default function Home() {
                       {renderStars(review.rating)}
                     </div>
                     <p className="review-text">"{review.text}"</p>
-                    <p className="review-author">— {review.author}</p>
+                    <p className="review-author darkTitle">— {review.author}</p>
                   </div>
                 ))}
               </div>
@@ -647,9 +646,9 @@ export default function Home() {
         </section>
 
         {/* CONTACT FORM SECTION */}
-        <section className="section contact-section">
+        {/* <section className="section contact-section">
           <div className="section-header">
-            <h2 className="section-title">Skriv til os</h2>
+            <h2 className="section-title darkTitle">Skriv til os</h2>
             <p className="section-subtitle">
               Har du spørgsmål til allergener, levering, større bestillinger
               eller bare lyst til at bestille over telefonen? Du er altid
@@ -697,7 +696,7 @@ export default function Home() {
               Send besked
             </button>
           </form>
-        </section>
+        </section> */}
 
         {/* FINAL CTA */}
         <section className="section cta-section">

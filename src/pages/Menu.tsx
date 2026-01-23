@@ -954,27 +954,21 @@ export default function Menu() {
             <div className="contact-box">
               <p className="contact-header">Kontakt os direkte</p>
 
-              <a href="tel:YOUR_PHONE_NUMBER" className="contact-btn call">
-                📞 Ring: YOUR_PHONE_NUMBER
+              <a href="tel:0723171061" className="contact-btn call">
+                📞 Ring: 0 (723) 17 10 61
               </a>
 
-              <a href="sms:YOUR_PHONE_NUMBER" className="contact-btn sms">
+              <a href="sms:0723171061" className="contact-btn sms">
                 💬 Send SMS
               </a>
 
               <a
-                href="https://wa.me/yourphonenumber"
+                href="https://wa.me/0046723171061"
                 className="contact-btn whatsapp"
                 target="_blank"
               >
                 🟢 WhatsApp
               </a>
-            </div>
-
-            {/* Opening Hours */}
-            <div className="hours-box">
-              <h4 className="hours-title">Åbningstider</h4>
-              <p className="hours-text">YOUR_OPENING_HOURS</p>
             </div>
 
             {/* Allergen Info */}
@@ -993,6 +987,21 @@ export default function Menu() {
               <p className="modal-note">
                 Kontakt os for detaljer om specifikke retter.
               </p>
+            </div>
+
+            {/* Opening Hours */}
+            <div className="hours-box">
+              <h4 className="hours-title">Åbningstider</h4>
+              <div className="hours-list">
+                <div className="hours-item">
+                  <span>Mandag – Torsdag</span>
+                  <span className="hours-time">11:00 – 21:00</span>
+                </div>
+                <div className="hours-item">
+                  <span>Fredag – Søndag</span>
+                  <span className="hours-time">11:00 – 23:00</span>
+                </div>
+              </div>
             </div>
 
             <div className="modal-close-btn">
