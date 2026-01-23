@@ -3043,9 +3043,11 @@ body.modal-open-allergen header {
   position: fixed;
   bottom: 3.5rem;
   right: 2rem;
-  width: 56px;
-  height: 56px;
+
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
+
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: white;
   border: none;
@@ -3056,9 +3058,13 @@ body.modal-open-allergen header {
   display: none;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
 
-  transform: scale(1.2);
+  will-change: transform;
+  touch-action: manipulation;
+
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
 }
 
 .mobile-cart-button:hover {
@@ -3071,24 +3077,42 @@ body.modal-open-allergen header {
 }
 
 .mobile-cart-button svg {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   stroke: white;
   fill: none;
   stroke-width: 2;
+}
+
+@keyframes cart-pop {
+  0% {
+    transform: translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-4px) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mobile-cart-button.animate {
+  animation: cart-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mobile-cart-badge {
   position: absolute;
   top: -4px;
   right: -4px;
-  min-width: 20px;
-  height: 20px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 6px;
   background: #fff;
   color: #dc2626;
   border-radius: 10px;
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;

@@ -411,12 +411,24 @@ export default function Menu() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const popularRef = useRef<HTMLElement | null>(null);
   const categoryTitleRefs = useRef<Record<string, HTMLElement | null>>({});
-  const cartItemsRef = useRef<HTMLDivElement | null>(null);
 
   const { addItem, items, updateQty, removeItem, clear, total } = useCart();
   const [confirmClear, setConfirmClear] = useState(false);
+  const cartItemsRef = useRef<HTMLDivElement | null>(null);
 
   const prevItemsCountRef = useRef(items.length);
+
+  const [animate, setAnimate] = useState(false);
+  const count = items.reduce((s, i) => s + i.qty, 0);
+
+  //Looks for cart to animate it on new item added
+  useEffect(() => {
+    if (count === 0) return;
+
+    setAnimate(true);
+    const t = setTimeout(() => setAnimate(false), 500);
+    return () => clearTimeout(t);
+  }, [count]);
 
   // Open cart drawer when item is added (mobile only)
   useEffect(() => {
@@ -1432,18 +1444,15 @@ export default function Menu() {
         </div>
 
         {/* Mobile Floating Cart Button */}
-        <button
-          className="mobile-cart-button"
-          onClick={() => setCartDrawerOpen(true)}
-          aria-label="Åbn kurv"
-        >
-          <CartIcon />
-          {items.length > 0 && (
-            <span className="mobile-cart-badge">
-              {items.reduce((sum, i) => sum + i.qty, 0)}
-            </span>
-          )}
-        </button>
+        {count > 0 && (
+          <button
+            className={`mobile-cart-button ${animate ? "animate" : ""}`}
+            onClick={() => setCartDrawerOpen(true)}
+          >
+            <CartIcon />
+            <span className="mobile-cart-badge">{count}</span>
+          </button>
+        )}
 
         <aside className="menu-cart-panel">
           <div className="menu-cart-header">
