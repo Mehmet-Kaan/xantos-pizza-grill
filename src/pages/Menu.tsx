@@ -213,7 +213,6 @@ export const MENU: Product[] = [
 
 export function MenuCard({ item }: { item: MenuItem }) {
   const { addItem, items, removeItem } = useCart();
-  console.log(items);
 
   return (
     <div key={item.id} className="menu-item-simple homePopularItemsDiv">
@@ -976,6 +975,32 @@ export default function Menu() {
             className="max-w-6xl modal-content"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="modal-close-btn">
+              <button
+                onClick={() => {
+                  document
+                    .querySelector(".allergen-modal")
+                    ?.classList.add("allergen-close-animation");
+                  setTimeout(() => setShowAllergens(false), 400);
+                }}
+                aria-label="Close"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="custom-x-icon"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
             <h3 className="modal-title">Allergener & Kontakt</h3>
 
             <p className="modal-text">
@@ -1035,33 +1060,6 @@ export default function Menu() {
                   <span className="hours-time">11:00 – 23:00</span>
                 </div>
               </div>
-            </div>
-
-            <div className="modal-close-btn">
-              <button
-                onClick={() => {
-                  document
-                    .querySelector(".allergen-modal")
-                    ?.classList.add("allergen-close-animation");
-                  setTimeout(() => setShowAllergens(false), 400);
-                }}
-                aria-label="Close"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="custom-x-icon"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
             </div>
           </div>
         </div>

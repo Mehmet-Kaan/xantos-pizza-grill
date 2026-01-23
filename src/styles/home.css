@@ -703,6 +703,14 @@
   box-shadow: var(--shadow-xl);
 }
 
+.cta-section .btn-primary.darkTitle {
+  color: black;
+}
+
+[data-theme="dark"] .cta-section .btn-primary.darkTitle {
+  color: white;
+}
+
 .cta-section .btn-primary:hover {
   background: rgba(255, 255, 255, 0.95);
   transform: translateY(-2px);

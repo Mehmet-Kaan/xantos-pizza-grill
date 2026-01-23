@@ -366,10 +366,11 @@
 }
 
 .modal-close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  position: sticky;
+  top: 0;
   z-index: 10;
+  justify-content: flex-end;
+  display: flex;
 }
 
 .modal-close-btn button {
@@ -416,8 +417,7 @@
 .modal-title {
   font-size: 1.4rem;
   font-weight: 700;
-  margin: 0 0.5rem 0.8rem;
-  margin: 1rem 0.5rem 1rem;
+  margin: -1rem 0.5rem 1rem;
   color: #1f2937;
   transition: color 0.3s ease;
 }

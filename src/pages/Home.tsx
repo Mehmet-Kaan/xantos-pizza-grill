@@ -554,9 +554,11 @@ export default function Home() {
             ) : mostPopularProducts.length === 0 ? (
               <div className="popular-empty">Ingen populære retter fundet.</div>
             ) : (
-              mostPopularProducts
-                .slice(0, 3)
-                .map((item: any) => <MenuCard key={item.id} item={item} />)
+              mostPopularProducts.slice(0, 3).map((item: any) => (
+                <ScrollReveal key={item.id}>
+                  <MenuCard item={item} />
+                </ScrollReveal>
+              ))
             )}
           </div>
         </section>
@@ -564,86 +566,97 @@ export default function Home() {
         {/* OPENING HOURS & CONTACT INFO */}
         <section className="section info-section">
           <div className="info-grid">
-            <div className="info-card hours-card">
-              <div className="info-card-header">
-                <span className="info-icon">🕒</span>
-                <h3>Åbningstider</h3>
-              </div>
-              <div className="hours-list">
-                <div className="hours-item">
-                  <span className="darkTitle">Mandag – Torsdag</span>
-                  <span className="hours-time">11:00 – 21:00</span>
+            <ScrollReveal>
+              <div className="info-card hours-card">
+                <div className="info-card-header">
+                  <span className="info-icon">🕒</span>
+                  <h3>Åbningstider</h3>
                 </div>
-                <div className="hours-item">
-                  <span className="darkTitle">Fredag – Søndag</span>
-                  <span className="hours-time">11:00 – 23:00</span>
+                <div className="hours-list">
+                  <div className="hours-item">
+                    <span className="darkTitle">Mandag – Torsdag</span>
+                    <span className="hours-time">11:00 – 21:00</span>
+                  </div>
+                  <div className="hours-item">
+                    <span className="darkTitle">Fredag – Søndag</span>
+                    <span className="hours-time">11:00 – 23:00</span>
+                  </div>
                 </div>
-              </div>
-              <div
-                className={`hours-status ${isOpenNow() ? "open" : "closed"}`}
-              >
-                <span className="status-dot"></span>
-                {isOpenNow() ? "Åben nu" : "Lukket"}
-              </div>
-            </div>
-
-            <div className="info-card contact-card">
-              <div className="info-card-header">
-                <span className="info-icon">📞</span>
-                <h3>Kontakt os</h3>
-              </div>
-              <div className="contact-info">
-                <a href="tel:70123456" className="contact-link">
-                  <span className="contact-label">Telefon:</span>
-                  <span className="contact-value">70 12 34 56</span>
-                </a>
-                <a href="mailto:info@pizza-grill.dk" className="contact-link">
-                  <span className="contact-label">E-mail:</span>
-                  <span className="contact-value">info@pizza-grill.dk</span>
-                </a>
-                <div className="contact-link">
-                  <span className="contact-label">Adresse:</span>
-                  <span className="contact-value">Hovedgade 123, 1234 By</span>
+                <div
+                  className={`hours-status ${isOpenNow() ? "open" : "closed"}`}
+                >
+                  <span className="status-dot"></span>
+                  {isOpenNow() ? "Åben nu" : "Lukket"}
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
+            <ScrollReveal>
+              <div className="info-card contact-card">
+                <div className="info-card-header">
+                  <span className="info-icon">📞</span>
+                  <h3>Kontakt os</h3>
+                </div>
+                <div className="contact-info">
+                  <a href="tel:70123456" className="contact-link">
+                    <span className="contact-label">Telefon:</span>
+                    <span className="contact-value">70 12 34 56</span>
+                  </a>
+                  <a href="mailto:info@pizza-grill.dk" className="contact-link">
+                    <span className="contact-label">E-mail:</span>
+                    <span className="contact-value">info@pizza-grill.dk</span>
+                  </a>
+                  <div className="contact-link">
+                    <span className="contact-label">Adresse:</span>
+                    <span className="contact-value">
+                      Hovedgade 123, 1234 By
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* REVIEWS SECTION */}
-        <section className="section reviews-section">
-          <div className="section-header">
-            <h2 className="section-title darkTitle">Hvad vores kunder siger</h2>
-            <p className="section-subtitle">
-              Anmeldelser fra vores glade kunder
-            </p>
-          </div>
-          {reviewsLoading ? (
-            <div className="reviews-loading">Indlæser anmeldelser...</div>
-          ) : reviews.length === 0 ? (
-            <div className="reviews-empty">
-              <p>Ingen anmeldelser endnu. Vær den første til at anmelde!</p>
-            </div>
-          ) : (
-            <>
-              <div className="reviews-grid">
-                {reviews.slice(0, 3).map((review) => (
-                  <div key={review.id} className="review-card">
-                    <div className="review-stars">
-                      {renderStars(review.rating)}
-                    </div>
-                    <p className="review-text">"{review.text}"</p>
-                    <p className="review-author darkTitle">— {review.author}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="reviews-average">
-                ⭐ {averageRating.toFixed(1)} gennemsnitlig vurdering fra{" "}
-                {totalReviews} anmeldelse{totalReviews !== 1 ? "r" : ""}
+        <ScrollReveal>
+          <section className="section reviews-section">
+            <div className="section-header">
+              <h2 className="section-title darkTitle">
+                Hvad vores kunder siger
+              </h2>
+              <p className="section-subtitle">
+                Anmeldelser fra vores glade kunder
               </p>
-            </>
-          )}
-        </section>
+            </div>
+            {reviewsLoading ? (
+              <div className="reviews-loading">Indlæser anmeldelser...</div>
+            ) : reviews.length === 0 ? (
+              <div className="reviews-empty">
+                <p>Ingen anmeldelser endnu. Vær den første til at anmelde!</p>
+              </div>
+            ) : (
+              <>
+                <div className="reviews-grid">
+                  {reviews.slice(0, 3).map((review) => (
+                    <div key={review.id} className="review-card">
+                      <div className="review-stars">
+                        {renderStars(review.rating)}
+                      </div>
+                      <p className="review-text">"{review.text}"</p>
+                      <p className="review-author darkTitle">
+                        — {review.author}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <p className="reviews-average">
+                  ⭐ {averageRating.toFixed(1)} gennemsnitlig vurdering fra{" "}
+                  {totalReviews} anmeldelse{totalReviews !== 1 ? "r" : ""}
+                </p>
+              </>
+            )}
+          </section>
+        </ScrollReveal>
 
         {/* CONTACT FORM SECTION */}
         {/* <section className="section contact-section">
@@ -699,17 +712,19 @@ export default function Home() {
         </section> */}
 
         {/* FINAL CTA */}
-        <section className="section cta-section">
-          <div className="cta-content">
-            <h2 className="cta-title">Klar til at bestille?</h2>
-            <p className="cta-subtitle">
-              Udforsk vores menu og bestil dine favoritter nu
-            </p>
-            <Link to="/bestil" className="btn-primary btn-large">
-              Bestil nu 🍕
-            </Link>
-          </div>
-        </section>
+        <ScrollReveal>
+          <section className="section cta-section">
+            <div className="cta-content">
+              <h2 className="cta-title">Klar til at bestille?</h2>
+              <p className="cta-subtitle">
+                Udforsk vores menu og bestil dine favoritter nu
+              </p>
+              <Link to="/bestil" className="btn-primary btn-large darkTitle">
+                Bestil nu 🍕
+              </Link>
+            </div>
+          </section>
+        </ScrollReveal>
       </main>
     </>
   );
