@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { MenuCard } from "../pages/Menu";
 import { PizzaIcon, ArrowRightIcon } from "../components/Icons";
 import { useState, useEffect } from "react";
-import type { FormEvent } from "react";
+// import type { FormEvent } from "react";
 import {
   getAllReviews,
   getReviewsMetadata,
@@ -115,11 +115,11 @@ const SPECIALS = [
 export default function Home() {
   const todayIndex = new Date().getDate() % SPECIALS.length;
   const special = SPECIALS[todayIndex];
-  const [contactForm, setContactForm] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+  // const [contactForm, setContactForm] = useState({
+  //   name: "",
+  //   email: "",
+  //   message: "",
+  // });
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(4.6);
@@ -292,12 +292,12 @@ export default function Home() {
     return currentTime >= openTime && currentTime < closeTime;
   }
 
-  function handleContactSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // Handle form submission (you can add API call here)
-    alert("Tak for din besked! Vi vender tilbage snarest.");
-    setContactForm({ name: "", email: "", message: "" });
-  }
+  // function handleContactSubmit(e: FormEvent<HTMLFormElement>) {
+  //   e.preventDefault();
+  //   // Handle form submission (you can add API call here)
+  //   alert("Tak for din besked! Vi vender tilbage snarest.");
+  //   setContactForm({ name: "", email: "", message: "" });
+  // }
 
   // Load reviews with caching logic
   useEffect(() => {
