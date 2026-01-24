@@ -1,7 +1,5 @@
 .checkout-page {
-  min-height: calc(100vh - 200px);
   padding: 2rem 1rem;
-  background: linear-gradient(to bottom, #fef3c7 0%, #ffffff 100%);
 }
 
 .checkout-container {
@@ -41,7 +39,7 @@
 
 .checkout-form {
   background: #fff;
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
@@ -331,7 +329,7 @@
 
 .checkout-summary {
   background: #fff;
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 1.75rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   position: sticky;
@@ -390,6 +388,18 @@
   align-items: flex-start;
   padding: 0.875rem 0;
   border-bottom: 1px solid #f3f4f6;
+  position: relative;
+  gap: 10px;
+}
+
+.checkout-item-img {
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .summary-item:last-child {
@@ -482,8 +492,9 @@
 }
 
 @media (max-width: 640px) {
-  .checkout-page {
-    padding: 1rem 0.75rem;
+  .checkout-item-img {
+    width: 70px;
+    height: 70px;
   }
 
   .checkout-title {
@@ -491,7 +502,7 @@
     margin-bottom: 1.5rem;
   }
 
-  .checkout-form {
+  .checkout-layout .checkout-form {
     padding: 1.5rem;
     border-radius: 16px;
   }
@@ -500,7 +511,11 @@
     padding: 1.25rem;
     border-radius: 16px;
   }
-
+  .summary-item-price {
+    position: absolute;
+    bottom: 0.875rem;
+    right: 5px;
+  }
   .checkout-actions {
     flex-direction: column;
   }

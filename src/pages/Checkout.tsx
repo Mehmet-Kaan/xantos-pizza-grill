@@ -117,6 +117,52 @@ export default function Checkout() {
           </div>
         ) : (
           <div className="checkout-layout">
+            <aside className="checkout-summary">
+              <div className="summary-header">
+                <h3>Din bestilling</h3>
+                <span className="summary-count">
+                  {items.length} {items.length === 1 ? "vare" : "varer"}
+                </span>
+              </div>
+              <div className="summary-items">
+                {items.map((item) => (
+                  <div key={item.id} className="summary-item">
+                    <img
+                      src={`./assets/${item.image}`}
+                      alt={item.name}
+                      className="checkout-item-img"
+                    />
+                    <div className="summary-item-info">
+                      <span className="summary-item-name">{item.name}</span>
+                      <span className="summary-item-qty">x{item.qty}</span>
+                    </div>
+                    <span className="summary-item-price">
+                      DKK {(item.price * item.qty).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="summary-total">
+                <div className="summary-total-row">
+                  <span>Subtotal</span>
+                  <span>DKK {(total * 0.75).toFixed(2)}</span>
+                </div>
+                <div className="summary-total-row">
+                  <span>Moms</span>
+                  <span>DKK {(total * 0.25).toFixed(2)}</span>
+                </div>
+                {method === "delivery" && (
+                  <div className="summary-total-row">
+                    <span>Leveringsgebyr</span>
+                    <span>DKK {DELIVERY_FEE.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="summary-total-row summary-total-final">
+                  <span>Total</span>
+                  <strong>DKK {finalTotal.toFixed(2)}</strong>
+                </div>
+              </div>
+            </aside>
             <form onSubmit={handlePlaceOrder} className="checkout-form">
               <section className="checkout-section">
                 <h3 className="checkout-section-title">Kontaktoplysninger</h3>
@@ -391,44 +437,6 @@ export default function Checkout() {
                   : "💳 Betaling sker ved afhentning. Vi ringer til dig, når din bestilling er klar!"}
               </p>
             </form>
-
-            <aside className="checkout-summary">
-              <div className="summary-header">
-                <h3>Din bestilling</h3>
-                <span className="summary-count">
-                  {items.length} {items.length === 1 ? "vare" : "varer"}
-                </span>
-              </div>
-              <div className="summary-items">
-                {items.map((item) => (
-                  <div key={item.id} className="summary-item">
-                    <div className="summary-item-info">
-                      <span className="summary-item-name">{item.name}</span>
-                      <span className="summary-item-qty">x{item.qty}</span>
-                    </div>
-                    <span className="summary-item-price">
-                      DKK {(item.price * item.qty).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="summary-total">
-                <div className="summary-total-row">
-                  <span>Subtotal</span>
-                  <span>DKK {total.toFixed(2)}</span>
-                </div>
-                {method === "delivery" && (
-                  <div className="summary-total-row">
-                    <span>Leveringsgebyr</span>
-                    <span>DKK {DELIVERY_FEE.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="summary-total-row summary-total-final">
-                  <span>Total</span>
-                  <strong>DKK {finalTotal.toFixed(2)}</strong>
-                </div>
-              </div>
-            </aside>
           </div>
         )}
       </div>

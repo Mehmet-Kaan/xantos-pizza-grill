@@ -1701,6 +1701,10 @@
   margin-top: 1.5rem;
 }
 
+.menu-grid.modal-open {
+  overflow: hidden;
+}
+
 .menu-sidebar {
   background: #fff;
   border-radius: 12px;

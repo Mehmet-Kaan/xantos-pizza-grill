@@ -241,7 +241,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
           </button>
         </div>
       ) : (
-        <div className="menu-cart-controls">
+        <Link to={"/cart"} className="menu-cart-controls">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -251,7 +251,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
           >
             +
           </button>
-        </div>
+        </Link>
       )}
     </div>
   );
@@ -618,12 +618,15 @@ export default function Menu() {
     // document.body.style.overflow = activeItem ? "hidden" : "auto";
     if (activeItem) {
       document.body.classList.add("modal-open");
+      document.querySelector(".menu-grid")?.classList.add("modal-open");
     } else {
       document.body.classList.remove("modal-open");
+      document.querySelector(".menu-grid")?.classList.remove("modal-open");
     }
     return () => {
       // document.body.style.overflow = "auto";
       document.body.classList.remove("modal-open");
+      document.querySelector(".menu-grid")?.classList.remove("modal-open");
     };
   }, [activeItem]);
 
