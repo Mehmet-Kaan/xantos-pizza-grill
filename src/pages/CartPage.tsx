@@ -96,16 +96,12 @@ export default function CartPage() {
                   const extrasTotal =
                     i.selectedIngredients?.reduce(
                       (s: number, ing: any) => s + (ing.extraPrice || 0),
-                      0
+                      0,
                     ) || 0;
 
                   const basePrice = i.price - extrasTotal;
                   const itemPrice = i.price;
                   const rowTotal = itemPrice * i.qty;
-                  // const itemVat = Math.round(
-                  //   (rowTotal * vatRate) / (1 + vatRate)
-                  // );
-                  // const itemSubtotal = rowTotal - itemVat;
 
                   return (
                     <div key={i.id} className="cart-item-card">
@@ -176,7 +172,7 @@ export default function CartPage() {
                                         </span>
                                       )}
                                     </span>
-                                  )
+                                  ),
                                 )}
                               </div>
                             </div>

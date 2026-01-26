@@ -1,0 +1,324 @@
+/* Layout */
+.confirmation-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.confirmation-card {
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* Header */
+.confirmation-header {
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.confirmation-icon {
+  width: 56px;
+  height: 56px;
+  color: #16a34a;
+  margin-bottom: 1rem;
+}
+
+.confirmation-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.confirmation-order-id {
+  font-size: 0.9rem;
+  color: white;
+}
+
+/* Content */
+.confirmation-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Items */
+.confirmation-section-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.confirmation-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.confirmation-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.confirmation-item:last-child {
+  border-bottom: none;
+}
+
+.confirmation-item-name {
+  font-weight: 500;
+}
+
+.confirmation-item-price {
+  font-weight: 500;
+}
+
+/* Total */
+.confirmation-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-top: 2px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+/* Info box */
+.confirmation-info {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+/* Actions */
+.confirmation-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.confirmation-btn {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmation-btn-primary {
+  background: #111827;
+  color: white;
+  border: none;
+}
+
+.confirmation-btn-primary:hover {
+  background: #1f2937;
+}
+
+.confirmation-btn-secondary {
+  background: transparent;
+  border: 1px solid #d1d5db;
+}
+
+.confirmation-btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+/* States */
+.confirmation-loading,
+.confirmation-error {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .confirmation-actions {
+    flex-direction: column;
+  }
+}
+
+/* Card entrance */
+.confirmation-card {
+  animation: card-fade-up 0.6s ease-out both;
+}
+
+@keyframes card-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animated check icon */
+.confirmation-icon {
+  width: 64px;
+  height: 64px;
+  color: #22c55e;
+  margin-bottom: 1rem;
+  animation: check-pop 0.5s ease-out 0.2s both;
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Draw circle */
+.check-circle {
+  stroke-dasharray: 63;
+  stroke-dashoffset: 63;
+  animation: draw-circle 0.6s ease-out 0.3s forwards;
+}
+
+@keyframes draw-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Draw check */
+.check-mark {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: draw-check 0.4s ease-out 0.8s forwards;
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Subtle glow pulse */
+.confirmation-icon {
+  filter: drop-shadow(0 0 0 rgba(34, 197, 94, 0.8));
+  animation:
+    check-pop 0.5s ease-out 0.2s both,
+    glow-pulse 1.6s ease-out 1s;
+}
+
+@keyframes glow-pulse {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(34, 197, 94, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.6));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(34, 197, 94, 0));
+  }
+}
+
+/* =========================
+   Dark mode
+   ========================= */
+[data-theme="dark"] .confirmation-page {
+  color: #e5e7eb;
+}
+
+/* Card */
+[data-theme="dark"] .confirmation-card {
+  background: #0f172a;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* Header */
+[data-theme="dark"] .confirmation-header {
+  background: linear-gradient(180deg, #052e24 0%, #064e3b 100%);
+}
+
+[data-theme="dark"] .confirmation-title {
+  color: #ecfdf5;
+}
+
+[data-theme="dark"] .confirmation-order-id {
+  color: #9ca3af;
+}
+
+/* Icon */
+[data-theme="dark"] .confirmation-icon {
+  color: #34d399;
+}
+
+/* Content */
+[data-theme="dark"] .confirmation-content {
+  background: transparent;
+}
+
+/* Items */
+[data-theme="dark"] .confirmation-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .confirmation-item-name {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .confirmation-item-price {
+  color: #d1d5db;
+}
+
+/* Total */
+[data-theme="dark"] .confirmation-total {
+  border-top: 2px solid rgba(255, 255, 255, 0.12);
+  color: #f9fafb;
+}
+
+/* Info box */
+[data-theme="dark"] .confirmation-info {
+  background: rgba(255, 255, 255, 0.04);
+  color: #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Buttons */
+[data-theme="dark"] .confirmation-btn-primary {
+  background: #22c55e;
+  color: #052e24;
+}
+
+[data-theme="dark"] .confirmation-btn-primary:hover {
+  background: #16a34a;
+}
+
+[data-theme="dark"] .confirmation-btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .confirmation-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Loading / error */
+[data-theme="dark"] .confirmation-loading,
+[data-theme="dark"] .confirmation-error {
+  background: #020617;
+  color: #e5e7eb;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+/* Glow animation tweak for dark */
+[data-theme="dark"] .confirmation-icon {
+  filter: drop-shadow(0 0 0 rgba(52, 211, 153, 0.9));
+}

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { ArrowRightIcon, PhoneIcon, CartIcon } from "../components/Icons";
-import { createOrder } from "../services/ordersService";
+import { createOrder, type Order } from "../services/ordersService";
 import "../styles/Checkout.css";
 
 const DELIVERY_FEE = 30;
@@ -24,6 +24,10 @@ export default function Checkout() {
 
   const finalTotal = method === "delivery" ? total + DELIVERY_FEE : total;
   const requiresPayment = method === "delivery";
+
+  const vatRate = 0.25;
+  const vat = Math.round((total * vatRate) / (1 + vatRate));
+  const subtotal = total - vat;
 
   function formatCardNumber(value: string) {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -71,8 +75,13 @@ export default function Checkout() {
         await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
       }
 
-      // Create order in Firebase
-      const orderId = await createOrder({
+      const resolvedPaymentMethod: "card" | "mobilepay" | "cash" =
+        requiresPayment ? (paymentMethod as "card" | "mobilepay") : "cash";
+
+      const resolvedPaymentStatus: "paid" | "pending" =
+        requiresPayment && paymentMethod === "card" ? "paid" : "pending";
+
+      const orderPayload = {
         items,
         total: finalTotal,
         name,
@@ -80,13 +89,19 @@ export default function Checkout() {
         address: method === "delivery" ? address : null,
         method: method as "pickup" | "delivery",
         note,
-        paymentMethod: requiresPayment
-          ? (paymentMethod as "card" | "mobilepay")
-          : "cash",
-        paymentStatus:
-          requiresPayment && paymentMethod === "card" ? "paid" : "pending",
-        status: "pending",
-      });
+        paymentMethod: resolvedPaymentMethod,
+        paymentStatus: resolvedPaymentStatus,
+        status: "pending" as Order["status"],
+        createdAt: Date.now(),
+      };
+
+      const orderId = await createOrder(orderPayload);
+
+      // ✅ Save to sessionStorage
+      sessionStorage.setItem(
+        `order:${orderId}`,
+        JSON.stringify({ id: orderId, ...orderPayload }),
+      );
 
       // Clear cart and go to confirmation
       clear();
@@ -137,7 +152,7 @@ export default function Checkout() {
                       <span className="summary-item-qty">x{item.qty}</span>
                     </div>
                     <span className="summary-item-price">
-                      DKK {(item.price * item.qty).toFixed(2)}
+                      {(item.price * item.qty).toFixed(2)} DKK
                     </span>
                   </div>
                 ))}
@@ -145,21 +160,21 @@ export default function Checkout() {
               <div className="summary-total">
                 <div className="summary-total-row">
                   <span>Subtotal</span>
-                  <span>DKK {(total * 0.75).toFixed(2)}</span>
+                  <span>{subtotal.toFixed(2)} DKK</span>
                 </div>
                 <div className="summary-total-row">
-                  <span>Moms</span>
-                  <span>DKK {(total * 0.25).toFixed(2)}</span>
+                  <span>Moms (25%)</span>
+                  <span>{vat.toFixed(2)} DKK</span>
                 </div>
                 {method === "delivery" && (
                   <div className="summary-total-row">
                     <span>Leveringsgebyr</span>
-                    <span>DKK {DELIVERY_FEE.toFixed(2)}</span>
+                    <span>{DELIVERY_FEE.toFixed(2)} DKK</span>
                   </div>
                 )}
                 <div className="summary-total-row summary-total-final">
                   <span>Total</span>
-                  <strong>DKK {finalTotal.toFixed(2)}</strong>
+                  <strong>{finalTotal.toFixed(2)} DKK</strong>
                 </div>
               </div>
             </aside>
