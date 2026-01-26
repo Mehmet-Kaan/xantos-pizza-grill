@@ -568,6 +568,7 @@
   background: rgba(0, 0, 0, 0.02);
   border-radius: 10px;
   transition: background 0.3s ease;
+  width: fit-content;
 }
 
 [data-theme="dark"] .cart-item-qty {
@@ -849,6 +850,9 @@
     flex-direction: column;
     padding: 1.25rem;
   }
+  .cart-item-card:hover {
+    transform: unset;
+  }
 
   .cart-item-image-wrapper {
     width: 100%;
@@ -860,11 +864,11 @@
     align-items: flex-start;
   } */
 
-  .cart-item-footer {
+  /* .cart-item-footer {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-  }
+  } */
 
   .cart-item-total {
     align-items: flex-start;

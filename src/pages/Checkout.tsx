@@ -150,6 +150,12 @@ export default function Checkout() {
                     <div className="summary-item-info">
                       <span className="summary-item-name">{item.name}</span>
                       <span className="summary-item-qty">x{item.qty}</span>
+
+                      <ul className="summary-item-ingredients-list">
+                        {item.selectedIngredients?.map((ing, idx) => (
+                          <li key={idx}>{ing.name}</li>
+                        ))}
+                      </ul>
                     </div>
                     <span className="summary-item-price">
                       {(item.price * item.qty).toFixed(2)} DKK

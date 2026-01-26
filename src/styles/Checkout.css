@@ -411,6 +411,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  margin-left: 5px;
 }
 
 .summary-item-name {
@@ -422,6 +423,35 @@
 .summary-item-qty {
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+.summary-item-ingredients-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.summary-item-ingredients-list li {
+  background-color: #ffffff;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] .summary-item-ingredients-list li {
+  background-color: #1f2937;
+  color: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .summary-item-price {
@@ -511,11 +541,10 @@
     padding: 1.25rem;
     border-radius: 16px;
   }
-  .summary-item-price {
+  /* .summary-item-price {
     position: absolute;
-    bottom: 0.875rem;
-    right: 5px;
-  }
+    bottom: 0rem;
+  } */
   .checkout-actions {
     flex-direction: column;
   }
@@ -523,5 +552,15 @@
   .btn-secondary,
   .btn-primary {
     width: 100%;
+  }
+  .summary-item-info {
+    margin: 0;
+  }
+  .summary-item-ingredients-list {
+    margin: 0;
+    gap: 0.5rem;
+  }
+  .summary-item-ingredients-list li {
+    padding: 0.5rem 0.7rem;
   }
 }
