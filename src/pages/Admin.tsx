@@ -87,7 +87,10 @@ function getStoredMostPopularIdsAdmin(): string[] | null {
       return Array.isArray(parsed) ? (parsed as string[]) : null;
     }
   } catch (error) {
-    console.error("Error reading most popular product IDs from localStorage:", error);
+    console.error(
+      "Error reading most popular product IDs from localStorage:",
+      error,
+    );
   }
   return null;
 }
@@ -96,7 +99,10 @@ function setStoredMostPopularIdsAdmin(ids: string[]): void {
   try {
     localStorage.setItem(MOST_POPULAR_IDS_KEY, JSON.stringify(ids));
   } catch (error) {
-    console.error("Error saving most popular product IDs to localStorage:", error);
+    console.error(
+      "Error saving most popular product IDs to localStorage:",
+      error,
+    );
   }
 }
 
@@ -419,7 +425,7 @@ export default function Admin() {
         setMostPopularProductIdsState(storedIds);
 
         // Check if we need to update from Firebase (single read to get both timestamp and IDs)
-        const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+        const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } =
           await getMostPopularMetadataAndIds();
 
         if (firebaseLastUpdated) {
@@ -435,9 +441,9 @@ export default function Admin() {
         }
       } else {
         // No cached data, fetch from Firebase (single read to get both timestamp and IDs)
-        const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } = 
+        const { lastUpdated: firebaseLastUpdated, productIds: fetchedIds } =
           await getMostPopularMetadataAndIds();
-        
+
         setMostPopularProductIdsState(fetchedIds);
         setStoredMostPopularIdsAdmin(fetchedIds);
 
@@ -691,17 +697,6 @@ export default function Admin() {
     }
   }
 
-  // async function handleInitializeReviews() {
-
-  //   try {
-  //     await initializeReviews();
-
-  //   } catch (err) {
-  //     console.error("Error initializing reviews:", err);
-
-  //   }
-  // }
-
   async function handleUpdateOrderStatus(id: string, status: Order["status"]) {
     try {
       await updateOrderStatus(id, status);
@@ -892,7 +887,7 @@ export default function Admin() {
               >
                 {ordersLoading ? "Indlæser..." : "🔄 Opdater"}
               </button>
-      </div>
+            </div>
 
             {/* All Today's Orders Subsection */}
             <div className="todays-orders-subsection">
@@ -946,7 +941,7 @@ export default function Admin() {
                       {allTodaysOrders.map((o) => (
                         <div key={o.id} className="order-card">
                           <div className="order-header">
-                <div>
+                            <div>
                               <div className="order-name">{o.name}</div>
                               <div className="order-meta">
                                 {o.method === "delivery"
@@ -971,20 +966,20 @@ export default function Admin() {
                                     o.createdAt as string | Date,
                                   ).toLocaleString("da-DK");
                                 })()}
-                  </div>
+                              </div>
                               <div className="order-phone">📞 {o.phone}</div>
                               {o.address && (
                                 <div className="order-address">
                                   📍 {o.address}
-                  </div>
+                                </div>
                               )}
-                </div>
+                            </div>
                             <div className="order-actions">
                               <div className="order-total">
                                 DKK {o.total.toFixed(2)}
                               </div>
-                    <select
-                      value={o.status}
+                              <select
+                                value={o.status}
                                 onChange={(e) =>
                                   handleUpdateOrderStatus(
                                     o.id!,
@@ -998,9 +993,9 @@ export default function Admin() {
                                 <option value="making">👨‍🍳 Tilbereder</option>
                                 <option value="ready">✅ Klar</option>
                                 <option value="collected">📦 Afhentet</option>
-                    </select>
-                  </div>
-                </div>
+                              </select>
+                            </div>
+                          </div>
                           <div className="order-items">
                             <strong>Varer:</strong>
                             <ul>
@@ -1011,7 +1006,7 @@ export default function Admin() {
                                 </li>
                               ))}
                             </ul>
-              </div>
+                          </div>
                           {o.note && (
                             <div className="order-note">
                               <strong>Bemærkning:</strong> {o.note}
@@ -1064,7 +1059,9 @@ export default function Admin() {
                             ).toLocaleString("da-DK");
                           })()}
                         </div>
-                        <div className="order-phone">📞 {o.phone}</div>
+                        <a href={`tel:${o.phone}`} className="order-phone">
+                          📞 {o.phone}
+                        </a>
                         {o.address && (
                           <div className="order-address">📍 {o.address}</div>
                         )}
@@ -1093,24 +1090,35 @@ export default function Admin() {
                     </div>
                     <div className="order-items">
                       <strong>Varer:</strong>
-                      <ul>
+                      <ul className="order-item-list">
                         {o.items.map((i: any) => (
-                    <li key={i.id}>
-                            {i.qty} × {i.name} — DKK{" "}
-                            {(i.price * i.qty).toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                          <li key={i.id}>
+                            <div className="order-item-list-header">
+                              <p>
+                                {i.qty} × {i.name}
+                              </p>
+                              <p>DKK {(i.price * i.qty).toFixed(2)}</p>
+                            </div>
+                            <ul className="item-ingredients-list">
+                              {i.selectedIngredients.map(
+                                (ing: any, idx: number) => (
+                                  <li key={idx}>{ing.name}</li>
+                                ),
+                              )}
+                            </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                     {o.note && (
                       <div className="order-note">
                         <strong>Bemærkning:</strong> {o.note}
                       </div>
                     )}
-            </div>
-          ))}
-        </div>
-      )}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
 

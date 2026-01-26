@@ -430,16 +430,42 @@ export default function Menu() {
   }, [count]);
 
   // Open cart drawer when item is added (mobile only)
+  // useEffect(() => {
+  //   const isMobile = window.innerWidth < 720;
+  //   const itemsIncreased = items.length > prevItemsCountRef.current;
+
+  //   if (isMobile && itemsIncreased && items.length > 0 && !cartDrawerOpen) {
+  //     setCartDrawerOpen(true);
+  //   }
+
+  //   prevItemsCountRef.current = items.length;
+  // }, [items.length, cartDrawerOpen]);
+
+  // Open cart drawer when item is added (mobile only) and if the cart drawer not already opened once already
   useEffect(() => {
     const isMobile = window.innerWidth < 720;
-    const itemsIncreased = items.length > prevItemsCountRef.current;
+    const prevCount = prevItemsCountRef.current;
+    const itemsIncreased = items.length > prevCount;
 
-    if (isMobile && itemsIncreased && items.length > 0 && !cartDrawerOpen) {
+    // Check if the cart drawer was already opened once
+    const cartDrawerOpenedOnce = sessionStorage.getItem(
+      "cart_drawer_opened_once",
+    );
+
+    // Open drawer only if items increased, not empty, and drawer hasn't been opened yet
+    if (
+      isMobile &&
+      itemsIncreased &&
+      items.length > 0 &&
+      !cartDrawerOpenedOnce
+    ) {
+      sessionStorage.setItem("cart_drawer_opened_once", "true");
       setCartDrawerOpen(true);
     }
 
+    // Update previous items count for next render
     prevItemsCountRef.current = items.length;
-  }, [items.length, cartDrawerOpen]);
+  }, [items.length]);
 
   useEffect(() => {
     if (cartDrawerOpen && cartItemsRef.current) {
