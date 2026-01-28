@@ -1,6 +1,6 @@
 import "../styles/home.css";
 import { Link } from "react-router-dom";
-import { MenuCard } from "../pages/Menu";
+import { MenuCard } from "./Menu";
 import { PizzaIcon, ArrowRightIcon } from "../components/Icons";
 import { useState, useEffect } from "react";
 // import type { FormEvent } from "react";

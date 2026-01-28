@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import Home from "../pages/Home";
+import Home from "./Home";
 import Menu from "./Menu";
 import CartPage from "./CartPage";
 import Checkout from "./Checkout";

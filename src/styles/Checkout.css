@@ -339,6 +339,23 @@
   flex-direction: column;
 }
 
+[data-theme="dark"] .checkout-summary {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+[data-theme="dark"] .checkout-summary .summary-header h3 {
+  color: #f8fafc;
+}
+[data-theme="dark"] .checkout-summary .summary-header .summary-count {
+  color: #f8fafc;
+}
+[data-theme="dark"] .checkout-summary {
+}
+
+[data-theme="dark"] .summary-item {
+  background: white;
+}
+
 .summary-header {
   display: flex;
   align-items: center;
@@ -365,7 +382,11 @@
   flex: 1;
   overflow-y: auto;
   margin-bottom: 1.5rem;
-  padding-right: 0.5rem;
+  /* padding-right: 0.5rem; */
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .summary-items::-webkit-scrollbar {
@@ -386,10 +407,11 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 0.875rem 0;
+  padding: 0.875rem;
   border-bottom: 1px solid #f3f4f6;
   position: relative;
   gap: 10px;
+  border-radius: 8px;
 }
 
 .checkout-item-img {
@@ -435,7 +457,7 @@
 }
 
 .summary-item-ingredients-list li {
-  background-color: #ffffff;
+  background-color: var(--color-border);
   border-radius: 12px;
   font-size: 0.75rem;
   padding: 0.75rem 1rem;
@@ -477,6 +499,10 @@
   margin-bottom: 0;
 }
 
+[data-theme="dark"] .summary-total-row {
+  color: #e5e7eb;
+}
+
 .summary-total-final {
   font-size: 1.25rem;
   color: #111827;
@@ -488,6 +514,10 @@
 .summary-total-final strong {
   font-size: 1.5rem;
   color: #dc2626;
+}
+
+.kommaTecken {
+  display: none;
 }
 
 @media (max-width: 968px) {
@@ -541,10 +571,14 @@
     padding: 1.25rem;
     border-radius: 16px;
   }
-  /* .summary-item-price {
+  .summary-item {
+    padding: 0.7rem;
+  }
+  .summary-item-price {
     position: absolute;
-    bottom: 0rem;
-  } */
+    right: 0.7rem;
+    font-size: 1rem;
+  }
   .checkout-actions {
     flex-direction: column;
   }
@@ -558,9 +592,21 @@
   }
   .summary-item-ingredients-list {
     margin: 0;
-    gap: 0.5rem;
+    gap: 0.35rem;
+  }
+  [data-theme="dark"] .summary-item-ingredients-list li {
+    all: unset;
+    font-size: 0.75rem;
+    color: black;
   }
   .summary-item-ingredients-list li {
-    padding: 0.5rem 0.7rem;
+    /* padding: 0.5rem 0.7rem; */
+    all: unset;
+    font-size: 0.75rem;
+    color: black;
+  }
+
+  .kommaTecken {
+    display: inline;
   }
 }

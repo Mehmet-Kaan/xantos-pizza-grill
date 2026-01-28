@@ -27,17 +27,17 @@ export interface Product {
   }>;
 }
 
-// Get all products
+// Get all menuItems
 export async function getAllProducts(): Promise<Product[]> {
   try {
-    const q = query(collection(db, "products"), orderBy("category"));
+    const q = query(collection(db, "menuItems"), orderBy("category"));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Product[];
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching menuItems:", error);
     throw error;
   }
 }
@@ -47,7 +47,7 @@ export async function createProduct(
   productData: Omit<Product, "id">,
 ): Promise<string> {
   try {
-    const docRef = await addDoc(collection(db, "products"), productData);
+    const docRef = await addDoc(collection(db, "menuItems"), productData);
     await updateProductsMetadata();
     return docRef.id;
   } catch (error) {
@@ -62,7 +62,7 @@ export async function updateProduct(
   productData: Partial<Product>,
 ): Promise<void> {
   try {
-    const productRef = doc(db, "products", productId);
+    const productRef = doc(db, "menuItems", productId);
     await updateDoc(productRef, productData);
     await updateProductsMetadata();
   } catch (error) {
@@ -74,7 +74,7 @@ export async function updateProduct(
 // Delete a product
 export async function deleteProduct(productId: string): Promise<void> {
   try {
-    const productRef = doc(db, "products", productId);
+    const productRef = doc(db, "menuItems", productId);
     await deleteDoc(productRef);
     await updateProductsMetadata();
   } catch (error) {
@@ -83,10 +83,10 @@ export async function deleteProduct(productId: string): Promise<void> {
   }
 }
 
-// Get products metadata (lastUpdated timestamp)
+// Get menuItems metadata (lastUpdated timestamp)
 export async function getProductsMetadata(): Promise<Date | null> {
   try {
-    const metadataRef = doc(db, "metadata", "products");
+    const metadataRef = doc(db, "metadata", "menuItems");
     const metadataSnap = await getDoc(metadataRef);
 
     if (metadataSnap.exists()) {
@@ -102,15 +102,15 @@ export async function getProductsMetadata(): Promise<Date | null> {
     }
     return null;
   } catch (error) {
-    console.error("Error fetching products metadata:", error);
+    console.error("Error fetching menuItems metadata:", error);
     return null;
   }
 }
 
-// Update products metadata (called when products are created/updated/deleted)
+// Update menuItems metadata (called when menuItems are created/updated/deleted)
 export async function updateProductsMetadata(): Promise<void> {
   try {
-    const metadataRef = doc(db, "metadata", "products");
+    const metadataRef = doc(db, "metadata", "menuItems");
     await setDoc(
       metadataRef,
       {
@@ -119,14 +119,14 @@ export async function updateProductsMetadata(): Promise<void> {
       { merge: true },
     );
   } catch (error) {
-    console.error("Error updating products metadata:", error);
+    console.error("Error updating menuItems metadata:", error);
   }
 }
 
 // Get most popular product IDs
 export async function getMostPopularProductIds(): Promise<string[]> {
   try {
-    const metadataRef = doc(db, "metadata", "products");
+    const metadataRef = doc(db, "metadata", "menuItems");
     const metadataSnap = await getDoc(metadataRef);
 
     if (metadataSnap.exists()) {
@@ -145,7 +145,7 @@ export async function setMostPopularProductIds(
   productIds: string[],
 ): Promise<void> {
   try {
-    const metadataRef = doc(db, "metadata", "products");
+    const metadataRef = doc(db, "metadata", "menuItems");
     await setDoc(
       metadataRef,
       {
@@ -164,7 +164,7 @@ export async function setMostPopularProductIds(
 // Get most popular metadata (lastUpdated timestamp)
 export async function getMostPopularMetadata(): Promise<Date | null> {
   try {
-    const metadataRef = doc(db, "metadata", "products");
+    const metadataRef = doc(db, "metadata", "menuItems");
     const metadataSnap = await getDoc(metadataRef);
 
     if (metadataSnap.exists()) {
@@ -191,7 +191,7 @@ export async function getMostPopularMetadataAndIds(): Promise<{
   productIds: string[];
 }> {
   try {
-    const metadataRef = doc(db, "metadata", "products");
+    const metadataRef = doc(db, "metadata", "menuItems");
     const metadataSnap = await getDoc(metadataRef);
 
     if (metadataSnap.exists()) {
@@ -216,3 +216,28 @@ export async function getMostPopularMetadataAndIds(): Promise<{
     return { lastUpdated: null, productIds: [] };
   }
 }
+
+// A function to migrate from a collection to another one
+// export async function migrateProductsToMenuItems() {
+//   const OLD_COLLECTION = "products";
+//   const NEW_COLLECTION = "menuItems";
+
+//   const snapshot = await getDocs(collection(db, OLD_COLLECTION));
+
+//   if (snapshot.empty) {
+//     console.log("❌ No documents found. Migration aborted.");
+//     return;
+//   }
+
+//   const batch = writeBatch(db);
+//   snapshot.docs.forEach((docSnapshot) => {
+//     const targetRef = doc(db, NEW_COLLECTION, docSnapshot.id);
+//     batch.set(targetRef, docSnapshot.data());
+//   });
+
+//   await batch.commit();
+
+//   console.log(
+//     `✅ Migration complete: ${snapshot.size} documents copied from '${OLD_COLLECTION}' → '${NEW_COLLECTION}'`,
+//   );
+// }

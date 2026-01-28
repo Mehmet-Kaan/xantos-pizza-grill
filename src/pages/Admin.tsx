@@ -214,6 +214,8 @@ function playNotificationSound() {
   }
 }
 
+// migrateProductsToMenuItems
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("orders");
 
@@ -852,7 +854,6 @@ export default function Admin() {
     <main className="admin-page">
       <div className="admin-container">
         <h1 className="admin-title">Admin Panel</h1>
-
         {/* Tabs */}
         <div className="admin-tabs">
           <button

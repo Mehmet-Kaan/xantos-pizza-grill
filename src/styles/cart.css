@@ -661,6 +661,10 @@
 .cart-summary-section {
   position: sticky;
   top: 100px;
+
+  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .cart-summary-card {

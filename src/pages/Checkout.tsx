@@ -153,7 +153,13 @@ export default function Checkout() {
 
                       <ul className="summary-item-ingredients-list">
                         {item.selectedIngredients?.map((ing, idx) => (
-                          <li key={idx}>{ing.name}</li>
+                          <li key={idx}>
+                            {ing.name}
+                            {idx !==
+                              (item.selectedIngredients?.length ?? 0) - 1 && (
+                              <span className="kommaTecken">,</span>
+                            )}
+                          </li>
                         ))}
                       </ul>
                     </div>
