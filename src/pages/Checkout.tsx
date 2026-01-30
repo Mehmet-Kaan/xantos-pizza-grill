@@ -617,7 +617,6 @@ export default function Checkout() {
   const [suggestions, setSuggestions] = useState([]);
   const [distanceError, setDistanceError] = useState("");
 
-  const phoneRegex = /^(\+45)?\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/; // Danish format: 12 34 56 78
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const isUnderDeliveryLimit = total < MIN_DELIVERY_LIMIT;
