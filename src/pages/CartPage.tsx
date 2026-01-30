@@ -140,17 +140,17 @@ export default function CartPage() {
                         <div className="cart-item-pricing">
                           <div className="cart-item-base-price">
                             <span>Basispris:</span>
-                            <span>{basePrice} kr</span>
+                            <span>{basePrice.toFixed(2)} kr</span>
                           </div>
                           {extrasTotal > 0 && (
                             <div className="cart-item-extras-price">
                               <span>Tilvalg:</span>
-                              <span>+{extrasTotal} kr</span>
+                              <span>+{extrasTotal.toFixed(2)} kr</span>
                             </div>
                           )}
                           <div className="cart-item-unit-price">
                             <span>Pris pr. stk:</span>
-                            <strong>{itemPrice} kr</strong>
+                            <strong>{itemPrice.toFixed(2)} kr</strong>
                           </div>
                         </div>
 
@@ -168,7 +168,7 @@ export default function CartPage() {
                                       {ing.name}
                                       {ing.extraPrice && (
                                         <span className="cart-ingredient-price">
-                                          +{ing.extraPrice} kr
+                                          +{ing.extraPrice.toFixed(2)} kr
                                         </span>
                                       )}
                                     </span>
@@ -205,7 +205,7 @@ export default function CartPage() {
                               I alt:
                             </span>
                             <span className="cart-item-total-price">
-                              {rowTotal} kr
+                              {rowTotal.toFixed(2)} kr
                             </span>
                           </div>
                         </div>

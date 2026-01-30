@@ -22,195 +22,6 @@ import {
 } from "../services/localStorageService";
 import ScrollReveal from "../utils/ScrollReveal";
 
-export const MENU: Product[] = [
-  {
-    id: "p-margherita",
-    category: "Pizza",
-    name: "Margherita",
-    desc: "Tomato, mozzarella, basil",
-    price: 79,
-    image: "margherita.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Basil", extraPrice: 5 },
-      { name: "Garlic", extraPrice: 5 },
-    ],
-  },
-  {
-    id: "p-pepperoni",
-    category: "Pizza",
-    name: "Pepperoni",
-    desc: "Spicy pepperoni, mozzarella",
-    price: 89,
-    image: "pepperoni.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Chili flakes" },
-      { name: "Garlic", extraPrice: 5 },
-    ],
-  },
-
-  // NEW PIZZAS
-  {
-    id: "p-hawaiian",
-    category: "Pizza",
-    name: "Hawaiian",
-    desc: "Tomato sauce, mozzarella, ham, pineapple",
-    price: 95,
-    image: "hawaiian.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Pineapple", extraPrice: 8 },
-      { name: "Ham", extraPrice: 12 },
-    ],
-  },
-  {
-    id: "p-veggie",
-    category: "Pizza",
-    name: "Veggie Deluxe",
-    desc: "Mozzarella, peppers, mushrooms, onions, olives",
-    price: 92,
-    image: "veggie.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Mushrooms", extraPrice: 6 },
-      { name: "Olives", extraPrice: 5 },
-    ],
-  },
-  {
-    id: "p-meatlover",
-    category: "Pizza",
-    name: "Meat Lover",
-    desc: "Pepperoni, minced beef, ham, bacon",
-    price: 109,
-    image: "meatlover.jpg",
-    ingredients: [
-      { name: "Extra bacon", extraPrice: 12 },
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Chili oil", extraPrice: 5 },
-    ],
-  },
-
-  // EXISTING GRILL
-  {
-    id: "g-chicken",
-    category: "Grill",
-    name: "Grilled Chicken",
-    desc: "Herb marinated chicken breast",
-    price: 99,
-    image: "chicken.jpg",
-    ingredients: [
-      { name: "Extra sauce", extraPrice: 8 },
-      { name: "Side salad", extraPrice: 12 },
-    ],
-  },
-  {
-    id: "g-ribs",
-    category: "Grill",
-    name: "BBQ Ribs",
-    desc: "Slow-cooked pork ribs",
-    price: 129,
-    image: "ribs.jpg",
-    ingredients: [
-      { name: "Extra BBQ sauce", extraPrice: 8 },
-      { name: "Corn on the cob", extraPrice: 10 },
-    ],
-  },
-
-  // NEW GRILL ITEMS
-  {
-    id: "g-steak",
-    category: "Grill",
-    name: "Beef Steak",
-    desc: "200g grilled steak with seasoning",
-    price: 149,
-    image: "steak.jpg",
-    ingredients: [
-      { name: "Pepper sauce", extraPrice: 10 },
-      { name: "Garlic butter", extraPrice: 6 },
-    ],
-  },
-  {
-    id: "g-burger",
-    category: "Grill",
-    name: "Classic Burger",
-    desc: "Beef patty, cheddar, lettuce, tomato",
-    price: 89,
-    image: "burger.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 8 },
-      { name: "Bacon", extraPrice: 10 },
-      { name: "Jalapeños", extraPrice: 5 },
-    ],
-  },
-
-  // SIDES
-  {
-    id: "s-fries",
-    category: "Sides",
-    name: "Pommes Frites",
-    desc: "Crispy golden fries",
-    price: 29,
-    image: "fries.jpg",
-    ingredients: [
-      { name: "Dip – Garlic", extraPrice: 5 },
-      { name: "Dip – Chili Mayo", extraPrice: 5 },
-    ],
-  },
-  {
-    id: "s-salad",
-    category: "Sides",
-    name: "Side Salad",
-    desc: "Fresh greens, cucumber, tomato",
-    price: 24,
-    image: "salad.jpg",
-    ingredients: [
-      { name: "Feta", extraPrice: 8 },
-      { name: "Olives", extraPrice: 6 },
-    ],
-  },
-
-  // EXISTING DRINKS
-  {
-    id: "d-cola",
-    category: "Drinks",
-    name: "Coca-Cola",
-    desc: "330ml",
-    price: 19,
-    image: "cocacola.jpg",
-    ingredients: [],
-  },
-  {
-    id: "d-water",
-    category: "Drinks",
-    name: "Mineral Water",
-    desc: "500ml",
-    price: 14,
-    image: "water.jpg",
-    ingredients: [],
-  },
-
-  // NEW DRINKS
-  {
-    id: "d-fanta",
-    category: "Drinks",
-    name: "Fanta",
-    desc: "330ml",
-    price: 19,
-    image: "fanta.jpg",
-    ingredients: [],
-  },
-  {
-    id: "d-sprite",
-    category: "Drinks",
-    name: "Sprite",
-    desc: "330ml",
-    price: 19,
-    image: "sprite.jpg",
-    ingredients: [],
-  },
-];
-
 export function MenuCard({ item }: { item: MenuItem }) {
   const { addItem, items, removeItem } = useCart();
 
@@ -223,7 +34,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
       />
       <div>
         <p className="menu-cart-item-name">{item.name}</p>
-        <p className="menu-cart-item-desc">{item.desc}</p>
+        <p className="menu-cart-item-description">{item.description}</p>
         <p className="menu-cart-item-price" style={{ fontWeight: "bold" }}>
           DKK {item.price.toFixed(2)}
         </p>
@@ -324,12 +135,14 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
               src={`./assets/${item.image}`}
               alt={item.image}
             />
-            <div className="modal-price-badge">{item.price} kr</div>
+            <div className="modal-price-badge">{item.price.toFixed(2)} kr</div>
           </div>
 
           <div className="modal-header-section">
             <h3 className="modal-title-text">Tilpas din {item.name}</h3>
-            {item.desc && <p className="modal-item-desc">{item.desc}</p>}
+            {item.description && (
+              <p className="modal-item-desc">{item.description}</p>
+            )}
           </div>
 
           {item.ingredients && item.ingredients.length > 0 && (
@@ -384,7 +197,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
             <button onClick={handleConfirm} className="modal-confirm">
               <span>
                 Tilføj til {window.innerWidth < 720 ? "" : "kurv"} •{" "}
-                {(item.price + extraPrice) * qty} kr
+                {((item.price + extraPrice) * qty).toFixed(2)} kr
               </span>
             </button>
             {animate && <div className="add-notify">Tilføjet!</div>}
@@ -754,7 +567,7 @@ export default function Menu() {
   const filteredItems = products.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.tags?.some((tag) =>
         tag.toLowerCase().includes(searchQuery.toLowerCase()),
       ) ||
@@ -1041,16 +854,16 @@ export default function Menu() {
             <div className="contact-box">
               <p className="contact-header">Kontakt os direkte</p>
 
-              <a href="tel:0723171061" className="contact-btn call">
-                📞 Ring: 0 (723) 17 10 61
+              <a href="tel:+4555376976" className="contact-btn call">
+                📞 Ring: 55 37 69 76
               </a>
 
-              <a href="sms:0723171061" className="contact-btn sms">
+              <a href="sms:+4555376976" className="contact-btn sms">
                 💬 Send SMS
               </a>
 
               <a
-                href="https://wa.me/0046723171061"
+                href="https://wa.me/004555376976"
                 className="contact-btn whatsapp"
                 target="_blank"
               >
@@ -1081,13 +894,13 @@ export default function Menu() {
               <h4 className="hours-title">Åbningstider</h4>
               <div className="hours-list">
                 <div className="hours-item">
-                  <span>Mandag – Torsdag</span>
+                  <span>Mandag – Søndag</span>
                   <span className="hours-time">11:00 – 21:00</span>
                 </div>
-                <div className="hours-item">
+                {/* <div className="hours-item">
                   <span>Fredag – Søndag</span>
                   <span className="hours-time">11:00 – 23:00</span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -1195,10 +1008,12 @@ export default function Menu() {
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
                           <span className="menu-item-simple-price">
-                            {item.price} kr
+                            {item.price.toFixed(2)} kr
                           </span>
                         </div>
-                        <p className="menu-item-simple-desc">{item.desc}</p>
+                        <p className="menu-item-simple-desc">
+                          {item.description}
+                        </p>
                         {item.tags && item.tags.length > 0 && (
                           <div className="menu-item-simple-tags">
                             {item.tags.slice(0, 2).map((tag) => (
@@ -1271,10 +1086,12 @@ export default function Menu() {
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
                           <span className="menu-item-simple-price">
-                            {item.price} kr
+                            {item.price.toFixed(2)} kr
                           </span>
                         </div>
-                        <p className="menu-item-simple-desc">{item.desc}</p>
+                        <p className="menu-item-simple-desc">
+                          {item.description}
+                        </p>
                         {item.tags && item.tags.length > 0 && (
                           <div className="menu-item-simple-tags">
                             {item.tags.slice(0, 2).map((tag) => (

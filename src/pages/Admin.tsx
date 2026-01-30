@@ -1284,7 +1284,7 @@ export default function Admin() {
                     const searchableText = [
                       product.name,
                       product.category,
-                      product.desc,
+                      product.description,
                       ...(product.tags || []),
                       ...(product.ingredients?.map((ing) => ing.name) || []),
                     ]
@@ -1328,7 +1328,9 @@ export default function Admin() {
                               DKK {product.price.toFixed(2)}
                             </div>
                           </div>
-                          <div className="product-desc">{product.desc}</div>
+                          <div className="product-desc">
+                            {product.description}
+                          </div>
                           {product.ingredients &&
                             product.ingredients.length > 0 && (
                               <div className="product-ingredients">
@@ -1382,7 +1384,7 @@ export default function Admin() {
                         const searchableText = [
                           product.name,
                           product.category,
-                          product.desc,
+                          product.description,
                           ...(product.tags || []),
                           ...(product.ingredients?.map((ing) => ing.name) ||
                             []),
@@ -1526,7 +1528,7 @@ function ProductEditForm({
   onCancel: () => void;
 }) {
   const [name, setName] = useState(product.name);
-  const [desc, setDesc] = useState(product.desc);
+  const [description, setDescription] = useState(product.description);
   const [price, setPrice] = useState(product.price.toString());
   const [category, setCategory] = useState(product.category);
   const [image, setImage] = useState(product.image);
@@ -1539,7 +1541,7 @@ function ProductEditForm({
     e.preventDefault();
     onSave({
       name,
-      desc,
+      description,
       price: parseFloat(price),
       category,
       image,
@@ -1607,8 +1609,8 @@ function ProductEditForm({
           <div className="form-group">
             <label>Beskrivelse</label>
             <textarea
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               required
               rows={3}
             />

@@ -644,6 +644,10 @@
   margin-bottom: var(--spacing-xs);
 }
 
+[data-theme="dark"] .form-group label {
+  color: white;
+}
+
 .form-group input,
 .form-group textarea {
   width: 100%;

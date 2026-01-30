@@ -7,9 +7,11 @@ export interface Product {
   id: string;
   category: string;
   name: string;
-  desc: string;
+  description: string;
   price: number;
   image: string;
+  stripePriceId?: string;
+  stripeProductId?: string;
   ingredients?: IngredientOption[];
   selectedIngredients?: IngredientOption[];
   tags?: string[];

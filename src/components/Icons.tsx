@@ -2,6 +2,42 @@ import type { SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
+// Navn Icon
+export function UserIcon(props: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      width="1em"
+      height="1em"
+      {...props}
+    >
+      <path
+        d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+// E-mail Icon
+export function MailIcon(props: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      width="1em"
+      height="1em"
+      {...props}
+    >
+      <path
+        d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function PhoneIcon(props: IconProps) {
   return (
     <svg

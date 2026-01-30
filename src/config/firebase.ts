@@ -23,10 +23,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import {
-  getStripePayments,
-  getProducts,
-} from "@invertase/firestore-stripe-payments";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -48,15 +44,15 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Stripe Payments
-export const payments = getStripePayments(app, {
-  productsCollection: "menuItems", // <- use your migrated collection
-  customersCollection: "customers", // <- you can keep this or rename
-});
+// export const payments = getStripePayments(app, {
+//   productsCollection: "menuItems", // <- use your migrated collection
+//   customersCollection: "customers", // <- you can keep this or rename
+// });
 
 // This only fetches products **already created in Stripe** via the extension
-const products = await getProducts(payments, {
-  includePrices: true,
-  activeOnly: true,
-});
+// const products = await getProducts(payments, {
+//   includePrices: true,
+//   activeOnly: true,
+// });
 
 export default app;

@@ -91,9 +91,9 @@ function Nav() {
         </nav>
 
         <div className="modern-header-actions">
-          <a href="tel:+4570123456" className="modern-header-phone">
+          <a href="tel:+4555376976" className="modern-header-phone">
             <PhoneIcon />
-            <span>70 12 34 56</span>
+            <span>55 37 69 76</span>
           </a>
 
           <Link to="/cart" className="modern-header-cart">

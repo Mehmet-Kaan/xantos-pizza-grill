@@ -28,7 +28,9 @@ export interface MenuItem {
   name: string;
   price: number;
   qty: number;
-  desc: string;
+  description: string;
+  stripePriceId?: string;
+  stipeProductId?: string;
   ingredients?: IngredientOption[];
   selectedIngredients?: IngredientOption[];
   [key: string]: unknown;
