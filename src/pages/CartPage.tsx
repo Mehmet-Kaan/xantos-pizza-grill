@@ -228,16 +228,16 @@ export default function CartPage() {
                   </div>
                   <div className="cart-summary-row">
                     <span>Subtotal (ekskl. moms)</span>
-                    <span>{subtotal} kr</span>
+                    <span>{subtotal.toFixed(2)} kr</span>
                   </div>
                   <div className="cart-summary-row cart-summary-vat">
                     <span>Moms (25%)</span>
-                    <span>{vat} kr</span>
+                    <span>{vat.toFixed(2)} kr</span>
                   </div>
                   <div className="cart-summary-divider"></div>
                   <div className="cart-summary-total">
                     <span>Total inkl. moms</span>
-                    <strong>{total} kr</strong>
+                    <strong>{total.toFixed(2)} kr</strong>
                   </div>
                 </div>
 

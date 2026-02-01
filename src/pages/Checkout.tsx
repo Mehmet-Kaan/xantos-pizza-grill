@@ -1,569 +1,3 @@
-// import { useEffect, useState, type FormEvent } from "react";
-// import { Link, useNavigate, useSearchParams } from "react-router-dom";
-// import { useCart } from "../contexts/CartContext";
-// import { ArrowRightIcon, PhoneIcon, CartIcon } from "../components/Icons";
-// import { createOrder, type Order } from "../services/ordersService";
-// import "../styles/Checkout.css";
-
-// const DELIVERY_FEE = 30;
-
-// export default function Checkout() {
-//   const { items, total, clear } = useCart();
-//   const [name, setName] = useState("");
-//   const [phone, setPhone] = useState("");
-//   const [address, setAddress] = useState("");
-//   const [method, setMethod] = useState("pickup");
-//   const [note, setNote] = useState("");
-//   const [paymentMethod, setPaymentMethod] = useState("card");
-//   // const [cardNumber, setCardNumber] = useState("");
-//   // const [cardName, setCardName] = useState("");
-//   // const [cardExpiry, setCardExpiry] = useState("");
-//   // const [cardCvv, setCardCvv] = useState("");
-//   const [isProcessing, setIsProcessing] = useState(false);
-//   const navigate = useNavigate();
-//   const [searchParams] = useSearchParams();
-
-//   const finalTotal = method === "delivery" ? total + DELIVERY_FEE : total;
-//   const requiresPayment = method === "delivery";
-
-//   const vatRate = 0.25;
-//   const vat = Math.round((total * vatRate) / (1 + vatRate));
-//   const subtotal = total - vat;
-
-//   useEffect(() => {
-//     if (searchParams.get("status") === "cancelled") {
-//       alert(
-//         "Betalingen blev annulleret. Dine oplysninger er gemt, så du kan prøve igen.",
-//       );
-//     }
-//   }, [searchParams]);
-
-//   // Save to local storage whenever name, phone, or address changes
-//   useEffect(() => {
-//     const formData = { name, phone, address, method, note };
-//     localStorage.setItem("checkout_draft", JSON.stringify(formData));
-//   }, [name, phone, address, method, note]);
-
-//   // Load it when the component starts
-//   useEffect(() => {
-//     const saved = localStorage.getItem("checkout_draft");
-//     if (saved) {
-//       const parsed = JSON.parse(saved);
-//       setName(parsed.name);
-//       setPhone(parsed.phone);
-//       setAddress(parsed.address);
-//       setMethod(parsed.method);
-//       setNote(parsed.note);
-//     }
-//   }, []);
-
-//   // function formatCardNumber(value: string) {
-//   //   const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-//   //   const matches = v.match(/\d{4,16}/g);
-//   //   const match = (matches && matches[0]) || "";
-//   //   const parts = [];
-//   //   for (let i = 0, len = match.length; i < len; i += 4) {
-//   //     parts.push(match.substring(i, i + 4));
-//   //   }
-//   //   if (parts.length) {
-//   //     return parts.join(" ");
-//   //   } else {
-//   //     return v;
-//   //   }
-//   // }
-
-//   // function formatExpiry(value: string) {
-//   //   const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-//   //   if (v.length >= 2) {
-//   //     return v.substring(0, 2) + "/" + v.substring(2, 4);
-//   //   }
-//   //   return v;
-//   // }
-
-//   // async function handlePlaceOrder(e: FormEvent<HTMLFormElement>) {
-//   //   e.preventDefault();
-
-//   //   // Validate payment if required
-//   //   if (requiresPayment && paymentMethod === "card") {
-//   //     if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
-//   //       alert("Udfyld venligst alle betalingsoplysninger");
-//   //       return;
-//   //     }
-//   //     if (cardNumber.replace(/\s/g, "").length < 16) {
-//   //       alert("Ugyldigt kortnummer");
-//   //       return;
-//   //     }
-//   //   }
-
-//   //   setIsProcessing(true);
-
-//   //   try {
-//   //     // Simulate payment processing
-//   //     if (requiresPayment && paymentMethod === "card") {
-//   //       await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-//   //     }
-
-//   //     const resolvedPaymentMethod: "card" | "mobilepay" | "cash" =
-//   //       requiresPayment ? (paymentMethod as "card" | "mobilepay") : "cash";
-
-//   //     const resolvedPaymentStatus: "paid" | "pending" =
-//   //       requiresPayment && paymentMethod === "card" ? "paid" : "pending";
-
-//   //     const orderPayload = {
-//   //       items,
-//   //       total: finalTotal,
-//   //       name,
-//   //       phone,
-//   //       address: method === "delivery" ? address : null,
-//   //       method: method as "pickup" | "delivery",
-//   //       note,
-//   //       paymentMethod: resolvedPaymentMethod,
-//   //       paymentStatus: resolvedPaymentStatus,
-//   //       status: "pending" as Order["status"],
-//   //       createdAt: Date.now(),
-//   //     };
-
-//   //     const orderId = await createOrder(orderPayload);
-
-//   //     // ✅ Save to sessionStorage
-//   //     sessionStorage.setItem(
-//   //       `order:${orderId}`,
-//   //       JSON.stringify({ id: orderId, ...orderPayload }),
-//   //     );
-
-//   //     // Clear cart and go to confirmation
-//   //     clear();
-//   //     setIsProcessing(false);
-//   //     navigate("/confirmation/" + orderId);
-//   //   } catch (error) {
-//   //     console.error("Error placing order:", error);
-//   //     alert("Der opstod en fejl ved placering af ordren. Prøv venligst igen.");
-//   //     setIsProcessing(false);
-//   //   }
-//   // }
-
-//   async function handlePlaceOrder(e: FormEvent<HTMLFormElement>) {
-//     e.preventDefault();
-//     setIsProcessing(true);
-
-//     try {
-//       // 1. Create the Order in Firestore first (Status: 'pending')
-//       const orderPayload = {
-//         items,
-//         total: finalTotal,
-//         name,
-//         phone,
-//         address: method === "delivery" ? address : null,
-//         method: method as "pickup" | "delivery",
-//         note,
-//         paymentMethod: paymentMethod as "card" | "mobilepay" | "cash",
-//         paymentStatus: "pending" as "pending" | "paid",
-//         status: "pending" as Order["status"],
-//         createdAt: Date.now(),
-//       };
-
-//       const orderId = await createOrder(orderPayload);
-
-//       // 2. If it's a Card payment, send them to Stripe
-//       if (requiresPayment && paymentMethod === "card") {
-//         const response = await fetch(import.meta.env.STRIPE_FUNCTION_URL, {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({
-//             // We send the items so Stripe knows what's in the cart
-//             // Make sure your items have the 'stripePriceId' we synced earlier!
-//             cartItems: items.map((item) => ({
-//               price: item.stripePriceId, // Use the ID from your sync function
-//               quantity: item.qty,
-//             })),
-//             orderId: orderId, // Pass the orderId so we can link it later
-//           }),
-//         });
-
-//         const session = await response.json();
-
-//         if (session.url) {
-//           // Redirect to Stripe Checkout
-//           window.location.href = session.url;
-//           return; // Stop execution here
-//         } else {
-//           throw new Error("Kunne ikke oprette Stripe session");
-//         }
-//       }
-
-//       // 3. For Cash/Pickup (No Stripe needed)
-//       sessionStorage.setItem(
-//         `order:${orderId}`,
-//         JSON.stringify({ id: orderId, ...orderPayload }),
-//       );
-
-//       clear();
-//       setIsProcessing(false);
-//       navigate("/confirmation/" + orderId);
-//     } catch (error) {
-//       console.error("Error:", error);
-//       alert("Der opstod en fejl. Prøv venligst igen.");
-//       setIsProcessing(false);
-//     }
-//   }
-
-//   return (
-//     <main className="checkout-page">
-//       <div className="checkout-container">
-//         <h2 className="checkout-title">
-//           <CartIcon
-//             style={{ marginRight: "0.5rem", verticalAlign: "middle" }}
-//           />
-//           Gennemfør bestilling
-//         </h2>
-//         {items.length === 0 ? (
-//           <div className="checkout-empty">
-//             <p>Din kurv er tom —</p>
-//             <Link to="/bestil" className="checkout-link">
-//               Se menuen
-//             </Link>
-//           </div>
-//         ) : (
-//           <div className="checkout-layout">
-//             <aside className="checkout-summary">
-//               <div className="summary-header">
-//                 <h3>Din bestilling</h3>
-//                 <span className="summary-count">
-//                   {items.length} {items.length === 1 ? "vare" : "varer"}
-//                 </span>
-//               </div>
-//               <div className="summary-items">
-//                 {items.map((item) => (
-//                   <div key={item.id} className="summary-item">
-//                     <img
-//                       src={`./assets/${item.image}`}
-//                       alt={item.name}
-//                       className="checkout-item-img"
-//                     />
-//                     <div className="summary-item-info">
-//                       <span className="summary-item-name">{item.name}</span>
-//                       <span className="summary-item-qty">x{item.qty}</span>
-
-//                       <ul className="summary-item-ingredients-list">
-//                         {item.selectedIngredients?.map((ing, idx) => (
-//                           <li key={idx}>
-//                             {ing.name}
-//                             {idx !==
-//                               (item.selectedIngredients?.length ?? 0) - 1 && (
-//                               <span className="kommaTecken">,</span>
-//                             )}
-//                           </li>
-//                         ))}
-//                       </ul>
-//                     </div>
-//                     <span className="summary-item-price">
-//                       {(item.price * item.qty).toFixed(2)} DKK
-//                     </span>
-//                   </div>
-//                 ))}
-//               </div>
-//               <div className="summary-total">
-//                 <div className="summary-total-row">
-//                   <span>Subtotal</span>
-//                   <span>{subtotal.toFixed(2)} DKK</span>
-//                 </div>
-//                 <div className="summary-total-row">
-//                   <span>Moms (25%)</span>
-//                   <span>{vat.toFixed(2)} DKK</span>
-//                 </div>
-//                 {method === "delivery" && (
-//                   <div className="summary-total-row">
-//                     <span>Leveringsgebyr</span>
-//                     <span>{DELIVERY_FEE.toFixed(2)} DKK</span>
-//                   </div>
-//                 )}
-//                 <div className="summary-total-row summary-total-final">
-//                   <span>Total</span>
-//                   <strong>{finalTotal.toFixed(2)} DKK</strong>
-//                 </div>
-//               </div>
-//             </aside>
-//             <form onSubmit={handlePlaceOrder} className="checkout-form">
-//               <section className="checkout-section">
-//                 <h3 className="checkout-section-title">Kontaktoplysninger</h3>
-//                 <div className="form-group">
-//                   <label className="form-label">Navn</label>
-//                   <input
-//                     type="text"
-//                     required
-//                     value={name}
-//                     onChange={(e) => setName(e.target.value)}
-//                     className="form-input"
-//                     placeholder="Indtast dit navn"
-//                   />
-//                 </div>
-//                 <div className="form-group">
-//                   <label className="form-label">
-//                     <PhoneIcon
-//                       style={{
-//                         marginRight: "0.35rem",
-//                         verticalAlign: "middle",
-//                       }}
-//                     />
-//                     Telefonnummer
-//                   </label>
-//                   <input
-//                     type="tel"
-//                     required
-//                     value={phone}
-//                     onChange={(e) => setPhone(e.target.value)}
-//                     className="form-input"
-//                     placeholder="+45 12 34 56 78"
-//                   />
-//                 </div>
-//               </section>
-
-//               <section className="checkout-section">
-//                 <h3 className="checkout-section-title">
-//                   Afhentning eller levering
-//                 </h3>
-//                 <div className="method-selector">
-//                   <label
-//                     className={`method-option ${method === "pickup" ? "active" : ""}`}
-//                   >
-//                     <input
-//                       type="radio"
-//                       name="method"
-//                       value="pickup"
-//                       checked={method === "pickup"}
-//                       onChange={(e) => setMethod(e.target.value)}
-//                     />
-//                     <div className="method-content">
-//                       <span className="method-icon">🚗</span>
-//                       <div>
-//                         <div className="method-title">Afhentning</div>
-//                         <div className="method-desc">
-//                           Hent din bestilling i butikken
-//                         </div>
-//                       </div>
-//                     </div>
-//                   </label>
-//                   <label
-//                     className={`method-option ${method === "delivery" ? "active" : ""}`}
-//                   >
-//                     <input
-//                       type="radio"
-//                       name="method"
-//                       value="delivery"
-//                       checked={method === "delivery"}
-//                       onChange={(e) => setMethod(e.target.value)}
-//                     />
-//                     <div className="method-content">
-//                       <span className="method-icon">🚴</span>
-//                       <div>
-//                         <div className="method-title">Levering</div>
-//                         <div className="method-desc">
-//                           Vi bringer det til dig
-//                         </div>
-//                       </div>
-//                     </div>
-//                   </label>
-//                 </div>
-
-//                 {method === "delivery" && (
-//                   <div className="form-group" style={{ marginTop: "1rem" }}>
-//                     <label className="form-label">Leveringsadresse</label>
-//                     <input
-//                       type="text"
-//                       required={method === "delivery"}
-//                       value={address}
-//                       onChange={(e) => setAddress(e.target.value)}
-//                       className="form-input"
-//                       placeholder="Gadenavn og nummer"
-//                     />
-//                   </div>
-//                 )}
-//               </section>
-
-//               <section className="checkout-section">
-//                 <h3 className="checkout-section-title">
-//                   Bemærkninger (valgfrit)
-//                 </h3>
-//                 <div className="form-group">
-//                   <textarea
-//                     value={note}
-//                     onChange={(e) => setNote(e.target.value)}
-//                     className="form-textarea"
-//                     placeholder="Har du nogen særlige ønsker eller allergener?"
-//                     rows={4}
-//                   />
-//                 </div>
-//               </section>
-
-//               {requiresPayment && (
-//                 <section className="checkout-section">
-//                   <h3 className="checkout-section-title">💳 Betalingsmetode</h3>
-//                   <div className="payment-methods">
-//                     <label
-//                       className={`payment-method-option ${paymentMethod === "card" ? "active" : ""}`}
-//                     >
-//                       <input
-//                         type="radio"
-//                         name="payment"
-//                         value="card"
-//                         checked={paymentMethod === "card"}
-//                         onChange={(e) => setPaymentMethod(e.target.value)}
-//                       />
-//                       <div className="payment-method-content">
-//                         <span className="payment-icon">💳</span>
-//                         <div>
-//                           <div className="payment-method-title">
-//                             Kortbetaling
-//                           </div>
-//                           <div className="payment-method-desc">
-//                             Visa, Mastercard, Dankort
-//                           </div>
-//                         </div>
-//                       </div>
-//                     </label>
-//                     <label
-//                       className={`payment-method-option ${paymentMethod === "mobilepay" ? "active" : ""}`}
-//                     >
-//                       <input
-//                         type="radio"
-//                         name="payment"
-//                         value="mobilepay"
-//                         checked={paymentMethod === "mobilepay"}
-//                         onChange={(e) => setPaymentMethod(e.target.value)}
-//                       />
-//                       <div className="payment-method-content">
-//                         <span className="payment-icon">📱</span>
-//                         <div>
-//                           <div className="payment-method-title">MobilePay</div>
-//                           <div className="payment-method-desc">
-//                             Betal med MobilePay
-//                           </div>
-//                         </div>
-//                       </div>
-//                     </label>
-//                   </div>
-
-//                   {/* {paymentMethod === "card" && (
-//                     <div className="payment-form">
-//                       <div className="form-group">
-//                         <label className="form-label">Navn på kort</label>
-//                         <input
-//                           type="text"
-//                           required={paymentMethod === "card"}
-//                           value={cardName}
-//                           onChange={(e) => setCardName(e.target.value)}
-//                           className="form-input"
-//                           placeholder="Fulde navn"
-//                         />
-//                       </div>
-//                       <div className="form-group">
-//                         <label className="form-label">Kortnummer</label>
-//                         <input
-//                           type="text"
-//                           required={paymentMethod === "card"}
-//                           value={cardNumber}
-//                           onChange={(e) =>
-//                             setCardNumber(formatCardNumber(e.target.value))
-//                           }
-//                           className="form-input"
-//                           placeholder="1234 5678 9012 3456"
-//                           maxLength={19}
-//                         />
-//                       </div>
-//                       <div className="form-row">
-//                         <div className="form-group" style={{ flex: 1 }}>
-//                           <label className="form-label">Udløbsdato</label>
-//                           <input
-//                             type="text"
-//                             required={paymentMethod === "card"}
-//                             value={cardExpiry}
-//                             onChange={(e) =>
-//                               setCardExpiry(formatExpiry(e.target.value))
-//                             }
-//                             className="form-input"
-//                             placeholder="MM/ÅÅ"
-//                             maxLength={5}
-//                           />
-//                         </div>
-//                         <div className="form-group" style={{ flex: 1 }}>
-//                           <label className="form-label">CVV</label>
-//                           <input
-//                             type="text"
-//                             required={paymentMethod === "card"}
-//                             value={cardCvv}
-//                             onChange={(e) =>
-//                               setCardCvv(
-//                                 e.target.value.replace(/\D/g, "").slice(0, 3),
-//                               )
-//                             }
-//                             className="form-input"
-//                             placeholder="123"
-//                             maxLength={3}
-//                           />
-//                         </div>
-//                       </div>
-//                     </div>
-//                   )} */}
-
-//                   {paymentMethod === "mobilepay" && (
-//                     <div className="mobilepay-info">
-//                       <p>
-//                         Du vil blive omdirigeret til MobilePay for at gennemføre
-//                         betalingen.
-//                       </p>
-//                     </div>
-//                   )}
-//                 </section>
-//               )}
-
-//               <div className="checkout-actions">
-//                 <button
-//                   type="button"
-//                   onClick={() => navigate("/cart")}
-//                   className="btn-secondary"
-//                   disabled={isProcessing}
-//                 >
-//                   Tilbage
-//                 </button>
-//                 <button
-//                   type="submit"
-//                   className="btn-primary"
-//                   disabled={isProcessing}
-//                 >
-//                   {isProcessing ? (
-//                     <>
-//                       <span className="spinner"></span>
-//                       Behandler...
-//                     </>
-//                   ) : (
-//                     <>
-//                       {requiresPayment
-//                         ? "Betal og placer ordre"
-//                         : "Placer ordre"}
-//                       <ArrowRightIcon
-//                         style={{
-//                           marginLeft: "0.5rem",
-//                           verticalAlign: "middle",
-//                         }}
-//                       />
-//                     </>
-//                   )}
-//                 </button>
-//               </div>
-
-//               <p className="checkout-note">
-//                 {requiresPayment
-//                   ? "🔒 Din betaling er sikker og krypteret. Vi ringer til dig, når din bestilling er klar!"
-//                   : "💳 Betaling sker ved afhentning. Vi ringer til dig, når din bestilling er klar!"}
-//               </p>
-//             </form>
-//           </div>
-//         )}
-//       </div>
-//     </main>
-//   );
-// }
-
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
@@ -847,13 +281,6 @@ export default function Checkout() {
     e.preventDefault();
 
     // Validate Phone
-    // if (!phoneRegex.test(phone)) {
-    //   showNotification(
-    //     "Indtast venligst et gyldigt dansk telefonnummer (8 cifre).",
-    //   );
-    //   return;
-    // }
-
     const cleanPhone = phone.replace(/\s/g, "");
 
     if (cleanPhone.length !== 8) {
@@ -923,29 +350,74 @@ export default function Checkout() {
       const orderId = await createOrder(orderPayload);
 
       // 3. Conditional Payment Logic
+      // if (paymentMethod === "card") {
+      //   // Redirect to Stripe
+      //   const response = await fetch(import.meta.env.VITE_STRIPE_FUNCTION_URL, {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({
+      //       cartItems: items.map((item) => ({
+      //         price: item.stripePriceId, // Ensure your menu items have this!
+      //         quantity: item.qty,
+      //       })),
+      //       orderId: orderId,
+      //     }),
+      //   });
+
+      //   const session = await response.json();
+
+      //   console.log(session);
+
+      //   if (session.url) {
+      //     window.location.href = session.url;
+      //     return; // Browser leaves our site here
+      //   } else {
+      //     throw new Error("Stripe session creation failed");
+      //   }
+      // }
+
+      // 3. Conditional Payment Logic
       if (paymentMethod === "card") {
-        // Redirect to Stripe
-        const response = await fetch(import.meta.env.VITE_STRIPE_FUNCTION_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cartItems: items.map((item) => ({
-              price: item.stripePriceId, // Ensure your menu items have this!
-              quantity: item.qty,
-            })),
-            orderId: orderId,
-          }),
-        });
+        try {
+          const response = await fetch(
+            import.meta.env.VITE_STRIPE_FUNCTION_URL,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                cartItems: items.map((item) => ({
+                  price: item.stripePriceId,
+                  quantity: item.qty,
+                })),
+                orderId: orderId,
+                // Pro tip: Send the email to Stripe to pre-fill the checkout page!
+                customerEmail: email.trim(),
+              }),
+            },
+          );
 
-        const session = await response.json();
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Kunne ikke oprette betaling");
+          }
 
-        console.log(session);
+          const session = await response.json();
 
-        if (session.url) {
-          window.location.href = session.url;
-          return; // Browser leaves our site here
-        } else {
-          throw new Error("Stripe session creation failed");
+          if (session.url) {
+            // Clear local storage before leaving so the cart is empty when they return
+            clear();
+            localStorage.removeItem("checkout_draft");
+
+            window.location.href = session.url;
+            return;
+          } else {
+            throw new Error("Stripe session URL manglede i svaret");
+          }
+        } catch (err) {
+          console.error("Stripe Error:", err);
+          showNotification("Der opstod en fejl med betalingen. Prøv igen.");
+          setIsProcessing(false);
+          return;
         }
       }
 
@@ -1221,6 +693,7 @@ export default function Checkout() {
                           color: "#ff4d4d",
                           fontSize: "0.85rem",
                           marginTop: "0.5rem",
+                          marginBottom: "0",
                         }}
                       >
                         ⚠️ {distanceError}

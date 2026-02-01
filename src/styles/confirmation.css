@@ -60,10 +60,18 @@
   justify-content: space-between;
   padding: 0.75rem 0;
   border-bottom: 1px solid #e5e7eb;
+  flex-direction: column;
 }
 
 .confirmation-item:last-child {
   border-bottom: none;
+}
+
+.confirmation-item-details,
+.confirmation-item-ingredients {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .confirmation-item-name {
@@ -72,6 +80,20 @@
 
 .confirmation-item-price {
   font-weight: 500;
+}
+
+.confirmation-item-ingredients {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.confirmation-item-ingredients li {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 10px;
 }
 
 /* Total */

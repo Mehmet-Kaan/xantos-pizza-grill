@@ -165,12 +165,32 @@ export default function Confirmation({ orderId }: { orderId: string }) {
             <ul className="confirmation-items">
               {order.items.map((item: any) => (
                 <li key={item.id} className="confirmation-item">
-                  <span className="confirmation-item-name">
-                    {item.qty} × {item.name}
-                  </span>
-                  <span className="confirmation-item-price">
-                    {item.price * item.qty},-
-                  </span>
+                  <div className="confirmation-item-details">
+                    <span className="confirmation-item-name">
+                      {item.qty} × {item.name}
+                    </span>
+                    <span className="confirmation-item-price">
+                      {(item.price * item.qty).toFixed(2)},-
+                    </span>
+                  </div>
+
+                  {item.selectedIngredients &&
+                    item.selectedIngredients.length > 0 && (
+                      <div className="confirmation-item-ingredients">
+                        {item.selectedIngredients.map(
+                          (ing: any, idx: number) => (
+                            <li key={idx}>
+                              <span>{ing.name}</span>
+                              <span>
+                                {ing.extraPrice
+                                  ? `${ing.extraPrice.toFixed(2)},-`
+                                  : ""}
+                              </span>
+                            </li>
+                          ),
+                        )}
+                      </div>
+                    )}
                 </li>
               ))}
             </ul>
@@ -178,13 +198,10 @@ export default function Confirmation({ orderId }: { orderId: string }) {
 
           <div className="confirmation-total">
             <span>Total</span>
-            <span>{order.total},-</span>
+            <span>{order.total.toFixed(2)},-</span>
           </div>
 
           <div className="confirmation-info">
-            {/* 📞 Vi ringer til dig på <strong>{order.phone}</strong>, når din
-            ordre er klar. */}
-
             {order.method === "delivery" ? (
               <p>
                 🚚 Maden bliver leveret til: <strong>{order.address}</strong>
@@ -194,7 +211,8 @@ export default function Confirmation({ orderId }: { orderId: string }) {
             )}
             {order.paymentMethod !== "card" && (
               <p className="payment-reminder">
-                Husk at have <strong>{order.total},-</strong> klar til{" "}
+                Husk at have <strong>{order.total.toFixed(2)},-</strong> klar
+                til{" "}
                 {order.paymentMethod === "mobilepay"
                   ? "MobilePay"
                   : "kontant betaling"}
