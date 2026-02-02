@@ -6,10 +6,12 @@ import { Link } from "react-router-dom";
 import { db } from "../config/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import confetti from "canvas-confetti";
+import { useCart } from "../contexts/CartContext";
 
 export default function Confirmation({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Inside Confirmation.tsx
+  const { clear } = useCart();
 
   useEffect(() => {
     if (!orderId) return;
@@ -100,6 +102,9 @@ export default function Confirmation({ orderId }: { orderId: string }) {
           colors: ["#e63946", "#f1faee", "#a8dadc", "#457b9d"],
         });
         hasCelebrated.current = true;
+
+        clear();
+        localStorage.removeItem("checkout_draft");
       }, 300);
 
       return () => clearTimeout(timer);
