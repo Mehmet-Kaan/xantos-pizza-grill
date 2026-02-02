@@ -10,6 +10,8 @@ import {
 } from "../components/Icons";
 import { createOrder, type Order } from "../services/ordersService";
 import "../styles/Checkout.css";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 const DELIVERY_FEE = 30;
 // 2. Minimum order logic
@@ -86,6 +88,41 @@ export default function Checkout() {
   //   }
   // }, []);
 
+  // Handle BFCache (Back-Forward Cache) scenarios
+  useEffect(() => {
+    // Define the cleanup logic once
+    const cleanupLoadingState = () => {
+      if (isProcessing) {
+        setIsProcessing(false);
+        setNotification(null);
+      }
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      // Detects returns from the "Frozen" browser cache
+      if (event.persisted && isProcessing) {
+        cleanupLoadingState();
+        showNotification(
+          "Bestillingen blev afbrudt. Du kan prøve igen.",
+          "error",
+        );
+      }
+    };
+
+    // 1. Listen for the Back/Forward button clicks
+    window.addEventListener("popstate", cleanupLoadingState);
+
+    // 2. Listen for the page being restored (specifically for PWAs/Mac Dock apps)
+    window.addEventListener("pageshow", handlePageShow);
+
+    // 3. Clean up listeners when the user eventually leaves the page
+    return () => {
+      window.removeEventListener("popstate", cleanupLoadingState);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [isProcessing]); // Re-syncs whenever the spinner starts or stops
+
+  // Handle Visibility Change (Tab focus/blur)
   useEffect(() => {
     const handleVisibilityChange = () => {
       // If the user comes back to the app and we are still "processing"
@@ -294,6 +331,13 @@ export default function Checkout() {
     }
   }
 
+  async function updateOrderInFirestore(orderId: string, data: any) {
+    const orderRef = doc(db, "orders", orderId);
+    // merge: true ensures we don't overwrite internal fields like stripeSessionId
+    // if you decide to add them later on the backend
+    return await setDoc(orderRef, data, { merge: true });
+  }
+
   async function handlePlaceOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -363,37 +407,90 @@ export default function Checkout() {
         createdAt: Date.now(),
       };
 
-      // 2. Create Order in Firestore (Always do this first!)
-      const orderId = await createOrder(orderPayload);
+      //   // 2. Create Order in Firestore (Always do this first!)
+      //   const orderId = await createOrder(orderPayload);
 
-      // 3. Conditional Payment Logic
-      // if (paymentMethod === "card") {
-      //   // Redirect to Stripe
-      //   const response = await fetch(import.meta.env.VITE_STRIPE_FUNCTION_URL, {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({
-      //       cartItems: items.map((item) => ({
-      //         price: item.stripePriceId, // Ensure your menu items have this!
-      //         quantity: item.qty,
-      //       })),
-      //       orderId: orderId,
-      //     }),
-      //   });
+      //   // 3. Conditional Payment Logic
+      //   if (paymentMethod === "card") {
+      //     try {
+      //       const response = await fetch(
+      //         import.meta.env.VITE_STRIPE_FUNCTION_URL,
+      //         {
+      //           method: "POST",
+      //           headers: { "Content-Type": "application/json" },
+      //           body: JSON.stringify({
+      //             cartItems: items.map((item) => ({
+      //               price: item.stripePriceId,
+      //               quantity: item.qty,
+      //             })),
+      //             orderId: orderId,
+      //             // Pro tip: Send the email to Stripe to pre-fill the checkout page!
+      //             customerEmail: email.trim(),
+      //           }),
+      //         },
+      //       );
 
-      //   const session = await response.json();
+      //       if (!response.ok) {
+      //         const errorData = await response.json();
+      //         throw new Error(errorData.error || "Kunne ikke oprette betaling");
+      //       }
 
-      //   console.log(session);
+      //       const session = await response.json();
 
-      //   if (session.url) {
-      //     window.location.href = session.url;
-      //     return; // Browser leaves our site here
-      //   } else {
-      //     throw new Error("Stripe session creation failed");
+      //       console.log("Stripe Session Response:", session);
+
+      //       if (session.url) {
+      //         window.location.href = session.url;
+      //         return;
+      //       } else {
+      //         throw new Error("Stripe session URL manglede i svaret");
+      //       }
+      //     } catch (err) {
+      //       console.error("Stripe Error:", err);
+      //       showNotification("Der opstod en fejl med betalingen. Prøv igen.");
+      //       setIsProcessing(false);
+      //       return;
+      //     }
       //   }
+
+      //   // 4. Fallback for Cash / MobilePay (Manual handling)
+      //   sessionStorage.setItem(
+      //     `order:${orderId}`,
+      //     JSON.stringify({ id: orderId, ...orderPayload }),
+      //   );
+
+      //   clear();
+      //   localStorage.removeItem("checkout_draft");
+      //   setIsProcessing(false);
+
+      //   // If it's cash/pickup, show success for a moment then navigate
+      //   setNotification({
+      //     message: "Ordre modtaget! Vi ringer hvis der er noget.",
+      //     type: "success",
+      //   });
+      //   setTimeout(() => {
+      //     navigate("/confirmation/" + orderId);
+      //   }, 2000);
+      // } catch (error) {
+      //   console.error("Error:", error);
+      //   setIsProcessing(false);
+      //   showNotification("Der opstod en fejl. Prøv venligst igen.");
       // }
 
-      // 3. Conditional Payment Logic
+      // --- RETRY LOGIC ENGINE ---
+      let currentOrderId = sessionStorage.getItem("pending_order_id");
+
+      if (currentOrderId) {
+        // User hit 'back' or 'X' and is trying again. Update the old record.
+        await updateOrderInFirestore(currentOrderId, orderPayload);
+        console.log("Re-using existing order ID:", currentOrderId);
+      } else {
+        // First attempt. Create a fresh record.
+        currentOrderId = await createOrder(orderPayload);
+        sessionStorage.setItem("pending_order_id", currentOrderId);
+      }
+
+      // --- PAYMENT FLOW ---
       if (paymentMethod === "card") {
         try {
           const response = await fetch(
@@ -406,60 +503,46 @@ export default function Checkout() {
                   price: item.stripePriceId,
                   quantity: item.qty,
                 })),
-                orderId: orderId,
-                // Pro tip: Send the email to Stripe to pre-fill the checkout page!
+                orderId: currentOrderId, // Use the ID from our retry logic
                 customerEmail: email.trim(),
               }),
             },
           );
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Kunne ikke oprette betaling");
-          }
+          if (!response.ok) throw new Error("Stripe session failed");
 
           const session = await response.json();
-
-          console.log("Stripe Session Response:", session);
-
           if (session.url) {
-            // Clear local storage before leaving so the cart is empty when they return
-            // clear();
-            // localStorage.removeItem("checkout_draft");
-
+            // We DON'T clear cart here, so it's still there if they hit 'back'
             window.location.href = session.url;
             return;
-          } else {
-            throw new Error("Stripe session URL manglede i svaret");
           }
         } catch (err) {
           console.error("Stripe Error:", err);
-          showNotification("Der opstod en fejl med betalingen. Prøv igen.");
+          showNotification("Betalingsfejl. Prøv venligst igen.");
           setIsProcessing(false);
           return;
         }
+      } else {
+        // --- CASH / MOBILEPAY FALLBACK ---
+        // 1. Success UI
+        setNotification({
+          message: "Ordre modtaget! Vi ringer hvis der er noget.",
+          type: "success",
+        });
+
+        // 2. Cleanup (Order is final, no more retries needed)
+        sessionStorage.removeItem("pending_order_id");
+        clear();
+        localStorage.removeItem("checkout_draft");
+
+        // 3. Navigate
+        setTimeout(() => {
+          navigate("/confirmation/" + currentOrderId);
+        }, 2000);
       }
-
-      // 4. Fallback for Cash / MobilePay (Manual handling)
-      sessionStorage.setItem(
-        `order:${orderId}`,
-        JSON.stringify({ id: orderId, ...orderPayload }),
-      );
-
-      clear();
-      localStorage.removeItem("checkout_draft");
-      setIsProcessing(false);
-
-      // If it's cash/pickup, show success for a moment then navigate
-      setNotification({
-        message: "Ordre modtaget! Vi ringer hvis der er noget.",
-        type: "success",
-      });
-      setTimeout(() => {
-        navigate("/confirmation/" + orderId);
-      }, 2000);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("General Error:", error);
       setIsProcessing(false);
       showNotification("Der opstod en fejl. Prøv venligst igen.");
     }
