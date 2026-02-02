@@ -756,6 +756,7 @@ export default function Menu() {
       <main className="menuPageContainer max-w-6xl">
         <div style={{ textAlign: "center", padding: "4rem" }}>
           <p>Indlæser menuen...</p>
+          <div className="notification-spinner"></div>
         </div>
       </main>
     );

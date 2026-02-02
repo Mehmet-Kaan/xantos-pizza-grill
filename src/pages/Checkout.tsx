@@ -86,21 +86,43 @@ export default function Checkout() {
   //   }
   // }, []);
 
-  // Handle Cancelled payments from Stripe
   useEffect(() => {
-    const status = searchParams.get("status");
-    // const orderId = searchParams.get("orderId");
+    const handleVisibilityChange = () => {
+      // If the user comes back to the app and we are still "processing"
+      if (document.visibilityState === "visible" && isProcessing) {
+        // Small delay to allow potential URL params to be parsed first
+        setTimeout(() => {
+          const status = new URLSearchParams(window.location.search).get(
+            "status",
+          );
+          if (!status) {
+            setIsProcessing(false);
+            setNotification(null);
+          }
+        }, 500);
+      }
+    };
 
-    if (status === "cancelled") {
-      showNotification(
-        "Betalingen blev ikke gennemført. Du kan prøve igen eller vælge en anden betalingsmetode.",
-        "error",
-      );
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isProcessing]);
 
-      // Clean up the URL so the message doesn't pop up again on refresh
-      navigate("/checkout", { replace: true });
-    }
-  }, [searchParams]);
+  // Handle Cancelled payments from Stripe
+  // useEffect(() => {
+  //   const status = searchParams.get("status");
+  //   // const orderId = searchParams.get("orderId");
+
+  //   if (status === "cancelled") {
+  //     showNotification(
+  //       "Betalingen blev ikke gennemført. Du kan prøve igen eller vælge en anden betalingsmetode.",
+  //       "error",
+  //     );
+
+  //     // Clean up the URL so the message doesn't pop up again on refresh
+  //     navigate("/checkout", { replace: true });
+  //   }
+  // }, [searchParams]);
 
   // Persistence: Save draft to localStorage
   useEffect(() => {
