@@ -47,8 +47,11 @@ export default function Checkout() {
   const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const [suggestions, setSuggestions] = useState([]);
   const [distanceError, setDistanceError] = useState("");
@@ -81,12 +84,14 @@ export default function Checkout() {
   const vat = Math.round((total * vatRate) / (1 + vatRate));
   const subtotal = total - vat;
 
-  // useEffect(() => {
-  //   // document.title = "Checkout - Xantos Pizza";
-  //   if (items.length === 0) {
+  //   useEffect(() => {
+  //   // Only redirect if we've loaded the draft, the cart is truly empty,
+  //   // and we aren't currently returning from a payment attempt.
+  //   const status = searchParams.get("status");
+  //   if (isHydrated && items.length === 0 && !status && !isProcessing) {
   //     navigate("/menu");
   //   }
-  // }, []);
+  // }, [items.length, isHydrated, isProcessing, searchParams]);
 
   // Handle BFCache (Back-Forward Cache) scenarios
   useEffect(() => {
@@ -164,8 +169,27 @@ export default function Checkout() {
     }
   }, [searchParams]);
 
-  // Persistence: Save draft to localStorage
+  // Load draft on mount
   useEffect(() => {
+    const saved = localStorage.getItem("checkout_draft");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setName(parsed.name || "");
+      setEmail(parsed.email || "");
+      setPhone(parsed.phone || "");
+      setAddress(parsed.address || "");
+      setIsAddressValid(parsed.isAddressValid || false);
+      setMethod(parsed.method || "pickup");
+      setNote(parsed.note || "");
+    }
+    setIsHydrated(true); // 👈 Tell the app we are done loading
+  }, []);
+
+  // 3. Update your SAVE effect
+  useEffect(() => {
+    // 👈 Only save if we have finished the initial load
+    if (!isHydrated) return;
+
     const formData = {
       name,
       email,
@@ -176,22 +200,7 @@ export default function Checkout() {
       note,
     };
     localStorage.setItem("checkout_draft", JSON.stringify(formData));
-  }, [name, email, phone, address, isAddressValid, method, note]);
-
-  // Load draft on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("checkout_draft");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setName(parsed.name);
-      setEmail(parsed.email);
-      setPhone(parsed.phone);
-      setAddress(parsed.address);
-      setIsAddressValid(parsed.isAddressValid || false);
-      setMethod(parsed.method);
-      setNote(parsed.note);
-    }
-  }, []);
+  }, [name, email, phone, address, isAddressValid, method, note, isHydrated]);
 
   // Handle Address Search
   async function handleAddressChange(input: string) {
@@ -505,6 +514,7 @@ export default function Checkout() {
                 })),
                 orderId: currentOrderId, // Use the ID from our retry logic
                 customerEmail: email.trim(),
+                customerName: name.trim(),
               }),
             },
           );
