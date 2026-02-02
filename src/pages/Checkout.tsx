@@ -79,12 +79,12 @@ export default function Checkout() {
   const vat = Math.round((total * vatRate) / (1 + vatRate));
   const subtotal = total - vat;
 
-  useEffect(() => {
-    // document.title = "Checkout - Xantos Pizza";
-    if (items.length === 0) {
-      navigate("/menu");
-    }
-  }, []);
+  // useEffect(() => {
+  //   // document.title = "Checkout - Xantos Pizza";
+  //   if (items.length === 0) {
+  //     navigate("/menu");
+  //   }
+  // }, []);
 
   // Handle Cancelled payments from Stripe
   useEffect(() => {
@@ -101,14 +101,6 @@ export default function Checkout() {
       navigate("/checkout", { replace: true });
     }
   }, [searchParams]);
-
-  // useEffect(() => {
-  //   if (searchParams.get("status") === "cancelled") {
-  //     showNotification(
-  //       "Betalingen blev annulleret. Dine oplysninger er gemt, så du kan prøve igen.",
-  //     );
-  //   }
-  // }, [searchParams]);
 
   // Persistence: Save draft to localStorage
   useEffect(() => {
@@ -402,6 +394,8 @@ export default function Checkout() {
           }
 
           const session = await response.json();
+
+          console.log("Stripe Session Response:", session);
 
           if (session.url) {
             // Clear local storage before leaving so the cart is empty when they return
