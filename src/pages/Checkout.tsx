@@ -409,6 +409,7 @@ export default function Checkout() {
         phone,
         address: method === "delivery" ? address : null,
         method: method as "pickup" | "delivery",
+        email: trimmedEmail,
         note,
         paymentMethod: paymentMethod as "card" | "mobilepay" | "cash",
         paymentStatus: "pending" as "pending" | "paid",
