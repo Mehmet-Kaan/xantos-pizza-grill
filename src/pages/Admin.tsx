@@ -1101,7 +1101,7 @@ export default function Admin() {
                               <p>DKK {(i.price * i.qty).toFixed(2)}</p>
                             </div>
                             <ul className="item-ingredients-list">
-                              {i.selectedIngredients.map(
+                              {i.selectedIngredients?.map(
                                 (ing: any, idx: number) => (
                                   <li key={idx}>{ing.name}</li>
                                 ),

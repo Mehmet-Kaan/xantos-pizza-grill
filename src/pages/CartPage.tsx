@@ -111,10 +111,10 @@ export default function CartPage() {
                             src={`./assets/${(i as any).image}`}
                             alt={i.name}
                             className="cart-item-image"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                "./assets/pizza-placeholder.jpg";
-                            }}
+                            // onError={(e) => {
+                            //   (e.target as HTMLImageElement).src =
+                            //     "./assets/pizza-placeholder.jpg";
+                            // }}
                           />
                         )}
                       </div>

@@ -184,14 +184,14 @@ export default function Confirmation({ orderId }: { orderId: string }) {
                       <div className="confirmation-item-ingredients">
                         {item.selectedIngredients.map(
                           (ing: any, idx: number) => (
-                            <li key={idx}>
+                            <div key={idx}>
                               <span>{ing.name}</span>
                               <span>
                                 {ing.extraPrice
                                   ? `${ing.extraPrice.toFixed(2)},-`
                                   : ""}
                               </span>
-                            </li>
+                            </div>
                           ),
                         )}
                       </div>

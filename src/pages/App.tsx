@@ -135,7 +135,8 @@ function AppContent() {
 
 export default function App() {
   return (
-    <Router basename="/xantos-pizza-grill/">
+    // <Router basename="/xantos-pizza-grill/">
+    <Router>
       <CartProvider>
         <AppContent />
       </CartProvider>

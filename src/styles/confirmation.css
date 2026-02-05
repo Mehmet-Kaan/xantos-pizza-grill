@@ -90,7 +90,7 @@
   flex-direction: column;
   gap: 0.25rem;
 }
-.confirmation-item-ingredients li {
+.confirmation-item-ingredients div {
   display: flex;
   justify-content: space-between;
   padding-left: 10px;
