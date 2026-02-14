@@ -10,8 +10,10 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { MENU } from "./menuItems";
 
 export interface Product {
   id?: string;
@@ -20,12 +22,30 @@ export interface Product {
   description: string;
   price: number;
   image: string;
+  imageLarge: string;
   tags?: string[];
-  ingredients: Array<{
+  size?: Array<{
+    name: string;
+    extraPrice?: number;
+  }>;
+  type?: Array<{
+    name: string;
+    extraPrice?: number;
+  }>;
+  chooseOne?: Array<{
+    name: string;
+    extraPrice?: number;
+  }>;
+  addOns?: Array<{
+    name: string;
+    extraPrice?: number;
+  }>;
+  addOnsExtra?: Array<{
     name: string;
     extraPrice?: number;
   }>;
 }
+console.log("MENU:", MENU);
 
 // Get all menuItems
 export async function getAllProducts(): Promise<Product[]> {
@@ -217,194 +237,135 @@ export async function getMostPopularMetadataAndIds(): Promise<{
   }
 }
 
-export const MENU: Product[] = [
-  {
-    id: "p-margherita",
-    category: "Pizza",
-    name: "Margherita",
-    description: "Tomato, mozzarella, basil",
-    price: 79,
-    image: "margherita.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Basil", extraPrice: 5 },
-      { name: "Garlic", extraPrice: 5 },
-    ],
-  },
-  {
-    id: "p-pepperoni",
-    category: "Pizza",
-    name: "Pepperoni",
-    description: "Spicy pepperoni, mozzarella",
-    price: 89,
-    image: "pepperoni.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Chili flakes" },
-      { name: "Garlic", extraPrice: 5 },
-    ],
-  },
+export const resetAndUploadMenu = async () => {
+  const collectionRef = collection(db, "menuItems");
 
-  // NEW PIZZAS
-  {
-    id: "p-hawaiian",
-    category: "Pizza",
-    name: "Hawaiian",
-    description: "Tomato sauce, mozzarella, ham, pineapple",
-    price: 95,
-    image: "hawaiian.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Pineapple", extraPrice: 8 },
-      { name: "Ham", extraPrice: 12 },
-    ],
-  },
-  {
-    id: "p-veggie",
-    category: "Pizza",
-    name: "Veggie Deluxe",
-    description: "Mozzarella, peppers, mushrooms, onions, olives",
-    price: 92,
-    image: "veggie.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Mushrooms", extraPrice: 6 },
-      { name: "Olives", extraPrice: 5 },
-    ],
-  },
-  {
-    id: "p-meatlover",
-    category: "Pizza",
-    name: "Meat Lover",
-    description: "Pepperoni, minced beef, ham, bacon",
-    price: 109,
-    image: "meatlover.jpg",
-    ingredients: [
-      { name: "Extra bacon", extraPrice: 12 },
-      { name: "Extra cheese", extraPrice: 10 },
-      { name: "Chili oil", extraPrice: 5 },
-    ],
-  },
+  try {
+    // console.log("Emptying collection...");
 
-  // EXISTING GRILL
-  {
-    id: "g-chicken",
-    category: "Grill",
-    name: "Grilled Chicken",
-    description: "Herb marinated chicken breast",
-    price: 99,
-    image: "chicken.jpg",
-    ingredients: [
-      { name: "Extra sauce", extraPrice: 8 },
-      { name: "Side salad", extraPrice: 12 },
-    ],
-  },
-  {
-    id: "g-ribs",
-    category: "Grill",
-    name: "BBQ Ribs",
-    description: "Slow-cooked pork ribs",
-    price: 129,
-    image: "ribs.jpg",
-    ingredients: [
-      { name: "Extra BBQ sauce", extraPrice: 8 },
-      { name: "Corn on the cob", extraPrice: 10 },
-    ],
-  },
+    // 1. Get all current documents
+    const snapshot = await getDocs(collectionRef);
 
-  // NEW GRILL ITEMS
-  {
-    id: "g-steak",
-    category: "Grill",
-    name: "Beef Steak",
-    description: "200g grilled steak with seasoning",
-    price: 149,
-    image: "steak.jpg",
-    ingredients: [
-      { name: "Pepper sauce", extraPrice: 10 },
-      { name: "Garlic butter", extraPrice: 6 },
-    ],
-  },
-  {
-    id: "g-burger",
-    category: "Grill",
-    name: "Classic Burger",
-    description: "Beef patty, cheddar, lettuce, tomato",
-    price: 89,
-    image: "burger.jpg",
-    ingredients: [
-      { name: "Extra cheese", extraPrice: 8 },
-      { name: "Bacon", extraPrice: 10 },
-      { name: "Jalapeños", extraPrice: 5 },
-    ],
-  },
+    // 2. Delete existing items using a Batch (more efficient)
+    const deleteBatch = writeBatch(db);
+    snapshot.docs.forEach((document) => {
+      deleteBatch.delete(document.ref);
+    });
+    await deleteBatch.commit();
+    console.log("Collection erased.");
 
-  // SIDES
-  {
-    id: "s-fries",
-    category: "Sides",
-    name: "Pommes Frites",
-    description: "Crispy golden fries",
-    price: 29,
-    image: "fries.jpg",
-    ingredients: [
-      { name: "Dip – Garlic", extraPrice: 5 },
-      { name: "Dip – Chili Mayo", extraPrice: 5 },
-    ],
-  },
-  {
-    id: "s-salad",
-    category: "Sides",
-    name: "Side Salad",
-    description: "Fresh greens, cucumber, tomato",
-    price: 24,
-    image: "salad.jpg",
-    ingredients: [
-      { name: "Feta", extraPrice: 8 },
-      { name: "Olives", extraPrice: 6 },
-    ],
-  },
+    // 3. Upload new items
+    console.log("Uploading new menu items...");
+    const uploadBatch = writeBatch(db);
 
-  // EXISTING DRINKS
-  {
-    id: "d-cola",
-    category: "Drinks",
-    name: "Coca-Cola",
-    description: "330ml",
-    price: 19,
-    image: "cocacola.jpg",
-    ingredients: [],
-  },
-  {
-    id: "d-water",
-    category: "Drinks",
-    name: "Mineral Water",
-    description: "500ml",
-    price: 14,
-    image: "water.jpg",
-    ingredients: [],
-  },
+    MENU.forEach((item) => {
+      // Use the 'id' we defined in the array as the document ID
+      const docRef = doc(db, "menuItems", item.id!);
+      uploadBatch.set(docRef, item);
+    });
 
-  // NEW DRINKS
-  {
-    id: "d-fanta",
-    category: "Drinks",
-    name: "Fanta",
-    description: "330ml",
-    price: 19,
-    image: "fanta.jpg",
-    ingredients: [],
-  },
-  {
-    id: "d-sprite",
-    category: "Drinks",
-    name: "Sprite",
-    description: "330ml",
-    price: 19,
-    image: "sprite.jpg",
-    ingredients: [],
-  },
-];
+    await uploadBatch.commit();
+    console.log("✅ Success! Menu has been fully reset and updated.");
+    alert("Menuet er blevet opdateret!");
+  } catch (error) {
+    console.error("Error resetting menu:", error);
+    alert("Der opstod en fejl under opdateringen.");
+  }
+};
+
+//Partly upload for double checking
+// export const resetAndUploadMenu = async () => {
+//   const collectionRef = collection(db, "menuItems");
+
+//   try {
+//     console.log("Emptying collection...");
+
+//     // 1. Get all current documents
+//     const snapshot = await getDocs(collectionRef);
+
+//     // 2. Delete existing items
+//     const deleteBatch = writeBatch(db);
+//     snapshot.docs.forEach((document) => {
+//       deleteBatch.delete(document.ref);
+//     });
+//     await deleteBatch.commit();
+//     console.log("Collection erased.");
+
+//     // 3. Upload only the first 20 items
+//     console.log("Uploading first 20 menu items for testing...");
+//     const uploadBatch = writeBatch(db);
+
+//     // .slice(0, 20) takes items from index 0 up to (but not including) 20
+//     const limitedMenu = MENU.slice(100, 117);
+
+//     console.log(limitedMenu);
+
+//     limitedMenu.forEach((item) => {
+//       // Logic from earlier: use item.id or generate one if missing
+//       const docId = item.id || item.name.toLowerCase().replace(/\s+/g, "-");
+//       const docRef = doc(db, "menuItems", docId);
+
+//       uploadBatch.set(docRef, item);
+//     });
+
+//     await uploadBatch.commit();
+//     console.log(`✅ Success! ${limitedMenu.length} items uploaded.`);
+//     alert(`Menuet er opdateret med de første ${limitedMenu.length} emner!`);
+//   } catch (error) {
+//     console.error("Error resetting menu:", error);
+//     alert("Der opstod en fejl under opdateringen.");
+//   }
+// };
+
+export const verifyMenuSync = async () => {
+  const collectionRef = collection(db, "menuItems");
+
+  try {
+    console.log("Checking synchronization...");
+
+    // 1. Fetch all documents currently in Firebase
+    const snapshot = await getDocs(collectionRef);
+    const firebaseItems = snapshot.docs.map((doc) => doc.id);
+
+    // 2. Extract IDs from your local MASTER_MENU
+    const localItems = MENU.map((item) => item.id).filter(
+      (id): id is string => id !== undefined,
+    );
+
+    // 3. Find missing items
+    const missingInFirebase = localItems.filter(
+      (id) => !firebaseItems.includes(id),
+    );
+    const extraInFirebase = firebaseItems.filter(
+      (id) => !localItems.includes(id),
+    );
+
+    // 4. Report results
+    console.log("--- Sync Report ---");
+    console.log(`Local items: ${localItems.length}`);
+    console.log(`Firebase items: ${firebaseItems.length}`);
+
+    if (missingInFirebase.length === 0 && extraInFirebase.length === 0) {
+      console.log("✅ Perfect Sync: Firebase matches your local MENU exactly.");
+      alert("Alt er synkroniseret korrekt!");
+    } else {
+      if (missingInFirebase.length > 0) {
+        console.warn("❌ Missing in Firebase:", missingInFirebase);
+      }
+      if (extraInFirebase.length > 0) {
+        console.warn(
+          "⚠️ Extra items in Firebase (not in local MENU):",
+          extraInFirebase,
+        );
+      }
+      alert(
+        `Sync advarsel! Tjek konsollen for detaljer. Mangler: ${missingInFirebase.length}`,
+      );
+    }
+  } catch (error) {
+    console.error("Verification failed:", error);
+  }
+};
 
 // A function to migrate from a collection to another one
 // export async function migrateProductsToMenuItems() {
@@ -471,3 +432,38 @@ export const MENU: Product[] = [
 //     `✅ Success! Updated ${changeCount} documents. 'desc' is now 'description'.`,
 //   );
 // }
+
+// export const updateMenuImages = async () => {
+//   try {
+//     console.log("Fixing image paths on existing items...");
+
+//     const uploadBatch = writeBatch(db);
+
+//     MENU.forEach((item) => {
+//       const docRef = doc(db, "menuItems", item.id!);
+
+//       uploadBatch.update(docRef, {
+//         image: item.image, // only this field will change
+//       });
+//     });
+
+//     await uploadBatch.commit();
+
+//     console.log("✅ Success! All image fields updated.");
+//     alert("Billederne er blevet rettet!");
+//   } catch (error) {
+//     console.error("Error updating images:", error);
+//     alert("Der opstod en fejl under opdatering af billeder.");
+//   }
+// };
+
+// export const addLargeImagesToMenu = () => {
+//   MENU.forEach((item) => {
+//     if (!item.image) return;
+
+//     const base = item.image.replace(/\.jpeg$/i, "");
+//     item.imageLarge = `${base}-large.jpeg`;
+//   });
+
+//   console.log("✅ imageLarge keys generated locally", MENU);
+// };

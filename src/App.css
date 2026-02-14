@@ -492,6 +492,14 @@ body:hover {
   opacity: 0.95;
 }
 
+button.modern-nav-link {
+  background: none;
+}
+
+[data-theme="dark"] button.modern-nav-link:hover {
+  color: #fca5a5;
+}
+
 .modern-nav-link::after {
   content: "";
   position: absolute;
@@ -775,7 +783,8 @@ body:hover {
   max-width: 100%;
 }
 
-.modern-mobile-nav a {
+.modern-mobile-nav a,
+.modern-mobile-nav button:not(.mobile-theme-toggle) {
   color: #ffffff;
   text-decoration: none;
   font-weight: 600;
@@ -797,13 +806,21 @@ body:hover {
   width: 100%;
   min-height: 56px;
   margin: 0;
+
+  text-transform: uppercase;
 }
 
-.modern-mobile-nav a span {
+.modern-mobile-nav button:not(.mobile-theme-toggle) {
+  flex-direction: row;
+}
+
+.modern-mobile-nav a span,
+.modern-mobile-nav button:not(.mobile-theme-toggle) span {
   flex: 1;
 }
 
-.modern-mobile-nav a::before {
+.modern-mobile-nav a::before,
+.modern-mobile-nav button:not(.mobile-theme-toggle)::before {
   content: "";
   position: absolute;
   left: 0;
@@ -840,7 +857,8 @@ body:hover {
   stroke-width: 1.8;
 }
 
-.modern-mobile-nav a:hover {
+.modern-mobile-nav a:hover,
+.modern-mobile-nav button:not(.mobile-theme-toggle):hover {
   background: rgba(255, 255, 255, 0.08);
   border-bottom-color: rgba(255, 255, 255, 0.25);
   transform: translateX(0);
@@ -848,21 +866,25 @@ body:hover {
   color: #ffffff;
 }
 
-.modern-mobile-nav a:hover .mobile-nav-icon {
+.modern-mobile-nav a:hover .mobile-nav-icon,
+.modern-mobile-nav button:not(.mobile-theme-toggle):hover .mobile-nav-icon {
   opacity: 1;
   transform: scale(1.1);
 }
 
-.modern-mobile-nav a:hover::before {
+.modern-mobile-nav a:hover::before,
+.modern-mobile-nav button:not(.mobile-theme-toggle):hover::before {
   width: 4px;
 }
 
-.modern-mobile-nav a:hover::after {
+.modern-mobile-nav a:hover::after,
+.modern-mobile-nav button:not(.mobile-theme-toggle):hover::after {
   opacity: 0.8;
   transform: translateX(4px);
 }
 
-.modern-mobile-nav a:active {
+.modern-mobile-nav a:active,
+.modern-mobile-nav button:not(.mobile-theme-toggle):active {
   background: rgba(255, 255, 255, 0.12);
   transform: translateX(0) scale(1);
 }
@@ -871,11 +893,13 @@ body:hover {
   border-bottom: none;
 }
 
-[data-theme="dark"] .modern-mobile-nav a {
+[data-theme="dark"] .modern-mobile-nav a,
+[data-theme="dark"] .modern-mobile-nav button:not(.mobile-theme-toggle) {
   border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
-[data-theme="dark"] .modern-mobile-nav a:hover {
+[data-theme="dark"] .modern-mobile-nav a:hover,
+[data-theme="dark"] .modern-mobile-nav button:not(.mobile-theme-toggle):hover {
   background: rgba(255, 255, 255, 0.1);
   border-bottom-color: rgba(255, 255, 255, 0.2);
 }
@@ -1056,6 +1080,7 @@ body.mobile-menu-open {
     right: 0.75rem;
     z-index: 1000;
   }
+
   .modern-header-actions {
     flex: unset;
   }
@@ -1072,17 +1097,20 @@ body.mobile-menu-open {
     gap: 0;
   }
 
-  .modern-mobile-nav a {
+  .modern-mobile-nav a,
+  .modern-mobile-nav button:not(.mobile-theme-toggle) {
     font-size: 1rem;
     padding: 1.125rem 1.25rem;
     min-height: 56px;
   }
 
-  .modern-mobile-nav a:hover {
+  .modern-mobile-nav a:hover,
+  .modern-mobile-nav button:not(.mobile-theme-toggle):hover {
     padding-left: 1.75rem;
   }
 
-  .modern-mobile-nav a::after {
+  .modern-mobile-nav a::after,
+  .modern-mobile-nav button:not(.mobile-theme-toggle)::after {
     right: 1.25rem;
     font-size: 1.625rem;
   }
@@ -1701,4 +1729,8 @@ textarea:focus {
   .form-input {
     padding: 12px; /* Give it more room on touch screens */
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }

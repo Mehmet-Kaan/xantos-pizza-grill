@@ -7,7 +7,7 @@ import {
   CartIcon,
   MailIcon,
   UserIcon,
-} from "../components/Icons";
+} from "../utils/Icons";
 import { createOrder, type Order } from "../services/ordersService";
 import "../styles/Checkout.css";
 import { doc, setDoc } from "firebase/firestore";
@@ -589,24 +589,72 @@ export default function Checkout() {
                 {items.map((item) => (
                   <div key={item.id} className="summary-item">
                     <img
-                      src={`./assets/${item.image}`}
+                      src={`./assets/menuItems/Large/${item.imageLarge}`}
                       alt={item.name}
                       className="checkout-item-img"
+                      loading="lazy"
+                      onError={(e) => {
+                        let target = e.target as HTMLImageElement;
+                        target.src = "./assets/placeholderIMG.jpg";
+                        target.onerror = null;
+                        // target.style.display = "none";
+                      }}
                     />
+
                     <div className="summary-item-info">
                       <span className="summary-item-name">{item.name}</span>
                       <span className="summary-item-qty">x{item.qty}</span>
-                      <ul className="summary-item-ingredients-list">
-                        {item.selectedIngredients?.map((ing, idx) => (
-                          <li key={idx}>
-                            {ing.name}
-                            {idx !==
-                              (item.selectedIngredients?.length ?? 0) - 1 && (
-                              <span className="kommaTecken">,</span>
-                            )}
+                      {item.selectedSize && (
+                        <ul className="summary-item-ingredients-list">
+                          <li>
+                            <strong>Størlek: </strong>
+                            {item.selectedSize.name}
                           </li>
-                        ))}
-                      </ul>
+                        </ul>
+                      )}
+                      {item.selectedType && (
+                        <ul className="summary-item-ingredients-list">
+                          <li>
+                            <strong>Væld: </strong> {item.selectedType.name}
+                          </li>
+                        </ul>
+                      )}
+                      {item.selectedChooseOne && (
+                        <ul className="summary-item-ingredients-list">
+                          <li>
+                            <strong>Væld: </strong>{" "}
+                            {item.selectedChooseOne.name}
+                          </li>
+                        </ul>
+                      )}
+                      {item.selectedaddOns &&
+                        item.selectedaddOns?.length > 0 && (
+                          <ul className="summary-item-ingredients-list addOnLists">
+                            {item.selectedaddOns?.map((ing, idx) => (
+                              <li key={idx}>
+                                {ing.name}
+                                {idx !==
+                                  (item.selectedaddOns?.length ?? 0) - 1 && (
+                                  <span className="kommaTecken">,</span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                      {item.selectedaddOnsExtra &&
+                        item.selectedaddOnsExtra?.length > 0 && (
+                          <ul className="summary-item-ingredients-list addOnLists">
+                            {item.selectedaddOnsExtra?.map((ing, idx) => (
+                              <li key={idx}>
+                                {ing.name}
+                                {idx !==
+                                  (item.selectedaddOnsExtra?.length ?? 0) -
+                                    1 && <span className="kommaTecken">,</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                     </div>
                     <span className="summary-item-price">
                       {(item.price * item.qty).toFixed(2)} DKK

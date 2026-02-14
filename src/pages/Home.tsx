@@ -1,7 +1,7 @@
 import "../styles/home.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MenuCard } from "./Menu";
-import { PizzaIcon, ArrowRightIcon } from "../components/Icons";
+import { PizzaIcon, ArrowRightIcon } from "../utils/Icons";
 import { useState, useEffect } from "react";
 // import type { FormEvent } from "react";
 import {
@@ -26,6 +26,7 @@ import {
 } from "../services/localStorageService";
 import ScrollReveal from "../utils/ScrollReveal";
 import type { Product } from "../hooks/types";
+import FeedbackModal from "../components/FeedbackModal";
 
 // localStorage keys
 const REVIEWS_STORAGE_KEY = "xanthos_reviews";
@@ -113,13 +114,26 @@ const SPECIALS = [
 ];
 
 export default function Home() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const scrollToId = (location.state as any)?.scrollTo;
+
+    if (scrollToId) {
+      // Wait a bit for the PageTransition to finish mounting
+      setTimeout(() => {
+        const el = document.getElementById(scrollToId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 200);
+    }
+  }, [location]);
+
   const todayIndex = new Date().getDate() % SPECIALS.length;
   const special = SPECIALS[todayIndex];
-  // const [contactForm, setContactForm] = useState({
-  //   name: "",
-  //   email: "",
-  //   message: "",
-  // });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(4.6);
@@ -446,9 +460,9 @@ export default function Home() {
                 Bestil takeaway
                 <ArrowRightIcon />
               </Link>
-              <Link to="/menu" className="btn-secondary">
+              {/* <Link to="/menu" className="btn-secondary">
                 Se menu
-              </Link>
+              </Link> */}
             </div>
           </div>
           <ScrollReveal>
@@ -505,7 +519,7 @@ export default function Home() {
         </section>
 
         {/* ABOUT US SECTION */}
-        <section className="section about-section">
+        <section id="about" className="section about-section">
           <ScrollReveal>
             <div className="section-header">
               <h2 className="section-title darkTitle">Om os</h2>
@@ -563,8 +577,36 @@ export default function Home() {
           </div>
         </section>
 
+        <ScrollReveal>
+          <section className="section map-section">
+            <div className="section-header">
+              <h2 className="section-title darkTitle">Find os her</h2>
+              <p className="section-subtitle">Algade 16, 4760 Vordingborg</p>
+            </div>
+
+            <div className="map-card">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m19!1m8!1m3!1d4575.553424571688!2d11.9024109!3d55.012079!3m2!1i1024!2i768!4f13.1!4m8!3e6!4m0!4m5!1s0x4652c94eed2c57ef%3A0xe462818a9ef3b84f!2sXanthos%2C%20Algade%2016%2C%204760%20Vordingborg%2C%20Danmark!3m2!1d55.012079!2d11.9024109!5e0!3m2!1ssv!2sse!4v1770909234070!5m2!1ssv!2sse"
+                className="map-iframe"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+
+              <a
+                href="https://www.google.com/maps/dir/?api=1&destination=Algade+16+4760+Vordingborg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="map-button"
+              >
+                Få rutevejledning →
+              </a>
+            </div>
+          </section>
+        </ScrollReveal>
+
         {/* OPENING HOURS & CONTACT INFO */}
-        <section className="section info-section">
+        <section id="contact" className="section info-section">
           <div className="info-grid">
             <ScrollReveal>
               <div className="info-card hours-card">
@@ -597,9 +639,9 @@ export default function Home() {
                   <h3>Kontakt os</h3>
                 </div>
                 <div className="contact-info">
-                  <a href="tel:70123456" className="contact-link">
+                  <a href="tel:004555376976" className="contact-link">
                     <span className="contact-label">Telefon:</span>
-                    <span className="contact-value">70 12 34 56</span>
+                    <span className="contact-value">55 37 69 76</span>
                   </a>
                   <a href="mailto:info@pizza-grill.dk" className="contact-link">
                     <span className="contact-label">E-mail:</span>
@@ -608,7 +650,7 @@ export default function Home() {
                   <div className="contact-link">
                     <span className="contact-label">Adresse:</span>
                     <span className="contact-value">
-                      Hovedgade 123, 1234 By
+                      Algade 16, 4760 Vordingborg, Danmark
                     </span>
                   </div>
                 </div>
@@ -658,58 +700,14 @@ export default function Home() {
           </section>
         </ScrollReveal>
 
-        {/* CONTACT FORM SECTION */}
-        {/* <section className="section contact-section">
-          <div className="section-header">
-            <h2 className="section-title darkTitle">Skriv til os</h2>
-            <p className="section-subtitle">
-              Har du spørgsmål til allergener, levering, større bestillinger
-              eller bare lyst til at bestille over telefonen? Du er altid
-              velkommen til at kontakte os.
-            </p>
-          </div>
-          <form className="contact-form" onSubmit={handleContactSubmit}>
-            <div className="form-group">
-              <label htmlFor="name">Navn</label>
-              <input
-                type="text"
-                id="name"
-                value={contactForm.name}
-                onChange={(e) =>
-                  setContactForm({ ...contactForm, name: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                value={contactForm.email}
-                onChange={(e) =>
-                  setContactForm({ ...contactForm, email: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="message">Besked</label>
-              <textarea
-                id="message"
-                rows={5}
-                value={contactForm.message}
-                onChange={(e) =>
-                  setContactForm({ ...contactForm, message: e.target.value })
-                }
-                required
-              ></textarea>
-            </div>
-            <button type="submit" className="btn-primary btn-submit">
-              Send besked
-            </button>
-          </form>
-        </section> */}
+        <button
+          className="feedback-trigger-btn"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <span>⭐</span> Feed-Back
+        </button>
+
+        {isModalOpen && <FeedbackModal onClose={() => setIsModalOpen(false)} />}
 
         {/* FINAL CTA */}
         <ScrollReveal>

@@ -218,6 +218,7 @@ function playNotificationSound() {
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("orders");
+  const [isPopularCollapsed, setIsPopularCollapsed] = useState(true); // Start collapsed to save space
 
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
@@ -1136,20 +1137,6 @@ export default function Admin() {
                 >
                   {productsLoading ? "Indlæser..." : "🔄 Opdater"}
                 </button>
-                {/* <button
-                  onClick={handleInitializeProducts}
-                  className="btn-init"
-                  disabled={initializing}
-                >
-                  {initializing ? "Initialiserer..." : "➕ Initialiser Produkter"}
-                </button> */}
-                {/* <button
-                  onClick={handleInitializeReviews}
-                  className="btn-init"
-                  disabled={initializing}
-                >
-                Initialiser Reviews
-                </button> */}
               </div>
             </div>
 
@@ -1189,7 +1176,7 @@ export default function Admin() {
                 )}
 
                 {/* Most Popular Products Selector */}
-                <div className="most-popular-selector">
+                {/* <div className="most-popular-selector">
                   <div className="most-popular-header">
                     <label className="most-popular-label">
                       ⭐ Mest Populære Produkter:
@@ -1233,6 +1220,10 @@ export default function Admin() {
                             src={`./assets/${product.image}`}
                             alt={product.name}
                             className="most-popular-product-image"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
+                            }}
                           />
                           <div className="most-popular-product-info">
                             <div className="most-popular-product-name">
@@ -1245,6 +1236,112 @@ export default function Admin() {
                         </div>
                       );
                     })}
+                  </div>
+                  {mostPopularProductIds.length > 0 && (
+                    <div className="most-popular-summary">
+                      <strong>{mostPopularProductIds.length}</strong> produkt
+                      {mostPopularProductIds.length !== 1 ? "er" : ""} valgt til
+                      "Most Popular"
+                    </div>
+                  )}
+                </div> */}
+
+                <div
+                  className={`most-popular-selector ${isPopularCollapsed ? "is-collapsed" : ""}`}
+                  onClick={() => setIsPopularCollapsed(!isPopularCollapsed)}
+                >
+                  <div className="most-popular-header">
+                    <div className="header-title-group">
+                      <label className="most-popular-label">
+                        ⭐ Mest Populære Produkter (
+                        {mostPopularProductIds.length})
+                      </label>
+                      <span
+                        className={`collapse-arrow ${isPopularCollapsed ? "" : "open"}`}
+                      >
+                        ▶
+                      </span>
+                      {savingPopularProducts && (
+                        <div className="saving-indicator">
+                          <div
+                            className="notification-spinner"
+                            style={{
+                              margin: "0",
+                              width: "25px",
+                              height: "25px",
+                              borderWidth: "3px",
+                            }}
+                          ></div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className="header-actions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {mostPopularProductIds.length > 0 && (
+                        <button
+                          onClick={handleClearAllMostPopular}
+                          className="btn-clear-popular"
+                          disabled={savingPopularProducts}
+                        >
+                          ✕ Fjern Alle
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Wrap content in a container designed for animation */}
+                  <div
+                    className={`most-popular-collapse-wrapper ${isPopularCollapsed ? "collapsed" : "expanded"}`}
+                  >
+                    <div className="most-popular-content-padding">
+                      <p className="most-popular-info">
+                        Vælg produkter der skal vises i "Most Popular"
+                        sektionen.
+                      </p>
+
+                      <div className="most-popular-products-grid">
+                        {products.map((product) => {
+                          const isPopular = mostPopularProductIds.includes(
+                            product.id || "",
+                          );
+                          return (
+                            <div
+                              key={product.id}
+                              className={`most-popular-product-card ${isPopular ? "is-popular" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                !savingPopularProducts &&
+                                  handleToggleMostPopular(product.id!);
+                              }}
+                            >
+                              <div className="most-popular-product-checkbox">
+                                {isPopular ? "✓" : ""}
+                              </div>
+                              <img
+                                src={`./assets/menuItems/${product.image}`}
+                                alt={product.name}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display =
+                                    "none";
+                                }}
+                                className="most-popular-product-image"
+                              />
+                              <div className="most-popular-product-info">
+                                <div className="most-popular-product-name">
+                                  {product.name}
+                                </div>
+                                <div className="most-popular-product-category">
+                                  {product.category}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                   {mostPopularProductIds.length > 0 && (
                     <div className="most-popular-summary">
@@ -1286,7 +1383,10 @@ export default function Admin() {
                       product.category,
                       product.description,
                       ...(product.tags || []),
-                      ...(product.ingredients?.map((ing) => ing.name) || []),
+                      ...(product.size?.map((ing) => ing.name) || []),
+                      ...(product.type?.map((ing) => ing.name) || []),
+                      ...(product.addOns?.map((ing) => ing.name) || []),
+                      ...(product.addOnsExtra?.map((ing) => ing.name) || []),
                     ]
                       .join(" ")
                       .toLowerCase();
@@ -1314,8 +1414,18 @@ export default function Admin() {
                         <div key={product.id} className="product-card">
                           <div className="product-header">
                             <img
-                              src={`./assets/${product.image}`}
+                              src={`./assets/menuItems/${product.image}`}
                               alt={product.name}
+                              // onError={(e) => {
+                              //   const target = e.target as HTMLImageElement;
+                              //   target.src =
+                              //     "./assets/menuItems/placeholderIMG.jpg"; // Path to a default image
+                              //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
+                              // }}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display =
+                                  "none";
+                              }}
                             />
 
                             <div>
@@ -1331,16 +1441,78 @@ export default function Admin() {
                           <div className="product-desc">
                             {product.description}
                           </div>
-                          {product.ingredients &&
-                            product.ingredients.length > 0 && (
+                          {product.size && product.size.length > 0 && (
+                            <div className="product-ingredients">
+                              <strong>Størlek:</strong>
+                              <ul>
+                                {product.size.map((ing, idx) => (
+                                  <li key={idx}>
+                                    {ing.name}
+                                    {ing.extraPrice &&
+                                      ing.extraPrice > 0 &&
+                                      ` ( - ${ing.extraPrice} DKK)`}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {product.type && product.type.length > 0 && (
+                            <div className="product-ingredients">
+                              <strong>Type:</strong>
+                              <ul>
+                                {product.type.map((ing, idx) => (
+                                  <li key={idx}>
+                                    {ing.name}
+                                    {ing.extraPrice &&
+                                      ing.extraPrice > 0 &&
+                                      ` ( - ${ing.extraPrice} DKK)`}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {product.chooseOne &&
+                            product.chooseOne.length > 0 && (
                               <div className="product-ingredients">
-                                <strong>Tilvalg:</strong>
+                                <strong>Choose one:</strong>
                                 <ul>
-                                  {product.ingredients.map((ing, idx) => (
+                                  {product.chooseOne.map((ing, idx) => (
                                     <li key={idx}>
                                       {ing.name}
                                       {ing.extraPrice &&
-                                        ` (+DKK ${ing.extraPrice})`}
+                                        ing.extraPrice > 0 &&
+                                        ` ( - ${ing.extraPrice} DKK)`}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          {product.addOns && product.addOns.length > 0 && (
+                            <div className="product-ingredients">
+                              <strong>Tilvalg:</strong>
+                              <ul>
+                                {product.addOns.map((ing, idx) => (
+                                  <li key={idx}>
+                                    {ing.name}
+                                    {ing.extraPrice &&
+                                      ing.extraPrice > 0 &&
+                                      ` ( +${ing.extraPrice} DKK)`}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {product.addOnsExtra &&
+                            product.addOnsExtra.length > 0 && (
+                              <div className="product-ingredients">
+                                <strong>Tilvalg:</strong>
+                                <ul>
+                                  {product.addOnsExtra.map((ing, idx) => (
+                                    <li key={idx}>
+                                      {ing.name}
+                                      {ing.extraPrice &&
+                                        ing.extraPrice > 0 &&
+                                        ` ( +${ing.extraPrice} DKK)`}
                                     </li>
                                   ))}
                                 </ul>
@@ -1386,7 +1558,11 @@ export default function Admin() {
                           product.category,
                           product.description,
                           ...(product.tags || []),
-                          ...(product.ingredients?.map((ing) => ing.name) ||
+                          ...(product.size?.map((ing) => ing.name) || []),
+                          ...(product.type?.map((ing) => ing.name) || []),
+                          ...(product.chooseOne?.map((ing) => ing.name) || []),
+                          ...(product.addOns?.map((ing) => ing.name) || []),
+                          ...(product.addOnsExtra?.map((ing) => ing.name) ||
                             []),
                         ]
                           .join(" ")
@@ -1464,6 +1640,13 @@ export default function Admin() {
                             ).toLocaleString("da-DK");
                           })()}
                         </div>
+                        <div
+                          className="review-date"
+                          style={{ marginTop: "5px" }}
+                        >
+                          {review.type && `Type: ${review.type}`}{" "}
+                          {review.mail && ` - E-mail: ${review.mail}`}
+                        </div>
                       </div>
                       <div className="review-status">
                         {review.approved === true ? (
@@ -1535,7 +1718,7 @@ function ProductEditForm({
   const [tags, setTags] = useState<string[]>(product.tags || []);
   const [ingredients, setIngredients] = useState<
     Array<{ name: string; extraPrice?: number }>
-  >(product.ingredients || []);
+  >(product.addOns || []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -1546,7 +1729,7 @@ function ProductEditForm({
       category,
       image,
       tags: tags.length > 0 ? tags : [],
-      ingredients: ingredients.length > 0 ? ingredients : [],
+      addOns: ingredients.length > 0 ? ingredients : [],
     });
   }
 

@@ -1,7 +1,8 @@
 // Utility script to initialize products in Firebase
 // Run this once to populate your Firestore with initial products
 
-import { createProduct, MENU } from "../services/productsService";
+import { MENU } from "../services/menuItems";
+import { createProduct } from "../services/productsService";
 
 export async function initializeProducts() {
   try {
@@ -14,7 +15,12 @@ export async function initializeProducts() {
         description: product.description,
         price: product.price,
         image: product.image,
-        ingredients: product.ingredients || [],
+        imageLarge: product.imageLarge,
+        size: product.size || [],
+        type: product.type || [],
+        chooseOne: product.chooseOne || [],
+        addOns: product.addOns || [],
+        addOnsExtra: product.addOnsExtra || [],
       });
       console.log(`Created product: ${product.name}`);
     }

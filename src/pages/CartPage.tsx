@@ -1,7 +1,7 @@
 import "../styles/cart.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
-import { CartIcon, TrashIcon } from "../components/Icons";
+import { CartIcon, TrashIcon } from "../utils/Icons";
 import { useState } from "react";
 
 export default function CartPage() {
@@ -93,28 +93,62 @@ export default function CartPage() {
               <h2 className="cart-section-title">Varer</h2>
               <div className="cart-items-list">
                 {items.map((i) => {
+                  // 1. The price of the pizza itself based on chosen size
+                  // If no size is selected yet, fall back to the default item.price
+                  // const basePrice = i.selectedSize
+                  //   ? i.selectedSize.extraPrice
+                  //   : i.price || 0;
+
+                  // 2. The cost of everything else (Type + Extras)
+                  let selectedTypeCost = i.selectedType
+                    ? i.selectedType.extraPrice || 0
+                    : 0;
+
+                  let chooseOneCost = i.selectedChooseOne
+                    ? i.selectedChooseOne.extraPrice || 0
+                    : 0;
+
+                  let addOnsCost = i.selectedaddOns
+                    ? i.selectedaddOns.reduce(
+                        (acc, i) => acc + (i.extraPrice || 0),
+                        0,
+                      )
+                    : 0;
+
+                  let addOnsExtrasCost = i.selectedaddOnsExtra
+                    ? i.selectedaddOnsExtra.reduce(
+                        (acc, i) => acc + (i.extraPrice || 0),
+                        0,
+                      )
+                    : 0;
+
                   const extrasTotal =
-                    i.selectedIngredients?.reduce(
-                      (s: number, ing: any) => s + (ing.extraPrice || 0),
-                      0,
-                    ) || 0;
+                    selectedTypeCost +
+                    chooseOneCost +
+                    addOnsExtrasCost +
+                    addOnsCost;
 
                   const basePrice = i.price - extrasTotal;
                   const itemPrice = i.price;
                   const rowTotal = itemPrice * i.qty;
 
+                  // 3. The final display price
+                  // const finalPrice = basePrice || 0 + extrasTotal;
+
                   return (
                     <div key={i.id} className="cart-item-card">
                       <div className="cart-item-image-wrapper">
-                        {(i as any).image && (
+                        {(i as any).imageLarge && (
                           <img
-                            src={`./assets/${(i as any).image}`}
+                            src={`/assets/menuItems/Large/${(i as any).imageLarge}`}
                             alt={i.name}
                             className="cart-item-image"
-                            // onError={(e) => {
-                            //   (e.target as HTMLImageElement).src =
-                            //     "./assets/pizza-placeholder.jpg";
-                            // }}
+                            loading="lazy"
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              img.onerror = null;
+                              img.src = "/assets/placeholderIMG.jpg";
+                            }}
                           />
                         )}
                       </div>
@@ -154,19 +188,88 @@ export default function CartPage() {
                           </div>
                         </div>
 
-                        {i.selectedIngredients &&
-                          i.selectedIngredients.length > 0 && (
+                        {i.selectedSize && (
+                          <div className="cart-item-ingredients">
+                            <p className="cart-ingredients-label">Størlek:</p>
+                            <div className="cart-ingredients-list">
+                              <span className="cart-ingredient-tag">
+                                {i.selectedSize.name}
+                                {i.selectedSize.extraPrice &&
+                                  i.selectedSize.extraPrice > 0 && (
+                                    <span className="cart-ingredient-price">
+                                      +{i.selectedSize.extraPrice.toFixed(2)} kr
+                                    </span>
+                                  )}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {(i.selectedType || i.selectedChooseOne) && (
+                          <div className="cart-item-ingredients">
+                            <p className="cart-ingredients-label">Tilvalg:</p>
+                            <div className="cart-ingredients-list">
+                              {i.selectedType && (
+                                <span className="cart-ingredient-tag">
+                                  {i.selectedType.name}
+                                  {i.selectedType.extraPrice &&
+                                    i.selectedType.extraPrice > 0 && (
+                                      <span className="cart-ingredient-price">
+                                        +{i.selectedType.extraPrice.toFixed(2)}{" "}
+                                        kr
+                                      </span>
+                                    )}
+                                </span>
+                              )}
+                              {i.selectedChooseOne && (
+                                <span className="cart-ingredient-tag">
+                                  {i.selectedChooseOne.name}
+                                  {i.selectedChooseOne.extraPrice &&
+                                    i.selectedChooseOne.extraPrice > 0 && (
+                                      <span className="cart-ingredient-price">
+                                        +
+                                        {i.selectedChooseOne.extraPrice.toFixed(
+                                          2,
+                                        )}{" "}
+                                        kr
+                                      </span>
+                                    )}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {i.selectedaddOns && i.selectedaddOns.length > 0 && (
+                          <div className="cart-item-ingredients">
+                            <p className="cart-ingredients-label">Tilvalg:</p>
+                            <div className="cart-ingredients-list">
+                              {i.selectedaddOns.map((ing: any, idx: number) => (
+                                <span key={idx} className="cart-ingredient-tag">
+                                  {ing.name}
+                                  {ing.extraPrice > 0 && (
+                                    <span className="cart-ingredient-price">
+                                      +{ing.extraPrice.toFixed(2)} kr
+                                    </span>
+                                  )}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {i.selectedaddOnsExtra &&
+                          i.selectedaddOnsExtra.length > 0 && (
                             <div className="cart-item-ingredients">
                               <p className="cart-ingredients-label">Tilvalg:</p>
                               <div className="cart-ingredients-list">
-                                {i.selectedIngredients.map(
+                                {i.selectedaddOnsExtra.map(
                                   (ing: any, idx: number) => (
                                     <span
                                       key={idx}
                                       className="cart-ingredient-tag"
                                     >
                                       {ing.name}
-                                      {ing.extraPrice && (
+                                      {ing.extraPrice > 0 && (
                                         <span className="cart-ingredient-price">
                                           +{ing.extraPrice.toFixed(2)} kr
                                         </span>
@@ -234,7 +337,7 @@ export default function CartPage() {
                     <span>Moms (25%)</span>
                     <span>{vat.toFixed(2)} kr</span>
                   </div>
-                  <div className="cart-summary-divider"></div>
+                  {/* <div className="cart-summary-divider"></div> */}
                   <div className="cart-summary-total">
                     <span>Total inkl. moms</span>
                     <strong>{total.toFixed(2)} kr</strong>

@@ -5,6 +5,7 @@ import {
   Route,
   Link,
   useLocation,
+  useParams,
 } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
@@ -14,11 +15,9 @@ import CartPage from "./CartPage";
 import Checkout from "./Checkout";
 import Confirmation from "./Confirmation";
 import Admin from "./Admin";
-import OmOs from "./OmOs";
-import Kontakt from "./Kontakt";
 import Privacy from "./PrivacyPolicy";
 import { CartProvider } from "../contexts/CartContext";
-import ScrollToTop from "../components/ScrollToTop";
+import ScrollToTop from "../utils/ScrollToTop";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "../utils/PageTransition";
 
@@ -27,6 +26,13 @@ import PageTransition from "../utils/PageTransition";
 function AppContent() {
   const location = useLocation();
 
+  // Prevents the browser from trying to restore old scroll positions.
+  // useEffect(() => {
+  //   if ("scrollRestoration" in window.history) {
+  //     window.history.scrollRestoration = "manual";
+  //   }
+  // }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Nav />
@@ -34,7 +40,7 @@ function AppContent() {
       <div className="flex-1 app-bg">
         <ScrollToTop />
         <AnimatePresence mode="wait" initial={false}>
-          <Routes location={location} key={location.pathname}>
+          <Routes location={location} key={location.pathname + location.hash}>
             <Route
               path="/"
               element={
@@ -59,7 +65,7 @@ function AppContent() {
                 </PageTransition>
               }
             />
-            <Route
+            {/* <Route
               path="/om-os"
               element={
                 <PageTransition>
@@ -74,9 +80,9 @@ function AppContent() {
                   <Kontakt />
                 </PageTransition>
               }
-            />
+            /> */}
             <Route
-              path="/privacy"
+              path="/privacypolicy"
               element={
                 <PageTransition>
                   <Privacy />
@@ -144,11 +150,16 @@ export default function App() {
   );
 }
 
+// function ConfirmationWrapper() {
+//   // react-router v6: use params inside component
+//   const params = window.location.pathname.split("/");
+//   const orderId = params[params.length - 1];
+//   return <Confirmation orderId={orderId} />;
+// }
+
 function ConfirmationWrapper() {
-  // react-router v6: use params inside component
-  const params = window.location.pathname.split("/");
-  const orderId = params[params.length - 1];
-  return <Confirmation orderId={orderId} />;
+  const { orderId } = useParams();
+  return <Confirmation orderId={orderId!} />;
 }
 
 function NotFound() {

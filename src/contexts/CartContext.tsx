@@ -7,7 +7,7 @@ import {
 } from "react";
 
 // Ingredient option type
-export interface IngredientOption {
+export interface AddOnOption {
   name: string;
   extraPrice?: number; // optional extra cost
 }
@@ -18,7 +18,11 @@ export interface CartItem {
   name: string;
   price: number; // base price
   qty: number;
-  selectedIngredients?: IngredientOption[];
+  selectedSize?: AddOnOption;
+  selectedType?: AddOnOption;
+  selectedChooseOne?: AddOnOption;
+  selectedaddOns?: AddOnOption[];
+  selectedaddOnsExtra?: AddOnOption[];
   [key: string]: unknown;
 }
 
@@ -31,8 +35,11 @@ export interface MenuItem {
   description: string;
   stripePriceId?: string;
   stipeProductId?: string;
-  ingredients?: IngredientOption[];
-  selectedIngredients?: IngredientOption[];
+  selectedSize?: AddOnOption;
+  selectedType?: AddOnOption;
+  selectedChooseOne?: AddOnOption;
+  selectedaddOns?: AddOnOption[];
+  selectedaddOnsExtra?: AddOnOption[];
   [key: string]: unknown;
 }
 
@@ -67,32 +74,58 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   // Helper to calculate price including selected ingredient extras
-  const calculateTotalPrice = (item: MenuItem) => {
-    const extras =
-      item.selectedIngredients?.reduce(
-        (sum, ing) => sum + (ing.extraPrice || 0),
-        0,
-      ) || 0;
-    return item.price + extras;
+  const calculateTotalPrice = (menuItem: MenuItem) => {
+    // Use size as the base price. If size.extraPrice is 0 (like for 'Alm'), it uses that.
+    const base = menuItem.selectedSize
+      ? menuItem.selectedSize.extraPrice || 0
+      : menuItem.price;
+
+    const typeExtra = menuItem.selectedType?.extraPrice || 0;
+    const chooseOneExtra = menuItem.selectedChooseOne?.extraPrice || 0;
+
+    const ingredientsExtra = menuItem.selectedaddOns?.reduce(
+      (sum, ing) => sum + (ing.extraPrice || 0),
+      0,
+    );
+    const ingredientsExtraExtra = menuItem.selectedaddOnsExtra?.reduce(
+      (sum, ing) => sum + (ing.extraPrice || 0),
+      0,
+    );
+
+    return (
+      base +
+      typeExtra +
+      chooseOneExtra +
+      (ingredientsExtra ?? 0) +
+      (ingredientsExtraExtra ?? 0)
+    );
   };
 
   function addItem(menuItem: MenuItem) {
     setItems((prev: CartItem[]) => {
-      // Generate a unique key if ingredients differ (so same pizza with different toppings is separate)
-      const uniqueId =
-        menuItem.id +
-        (menuItem.selectedIngredients
+      // Generate a unique key if addOns differ (so same pizza with different toppings is separate)
+      let itemQty = menuItem.qty || 1;
+
+      // We combine ID + Size Name + Type Name + Sorted Extras
+      const sizeKey = menuItem.selectedSize?.name || "default";
+      const typeKey = menuItem.selectedType?.name || "none";
+      const extrasKey =
+        menuItem.selectedaddOns
           ?.map((i) => i.name)
           .sort()
-          .join("-") || "");
+          .join("-") || "no-extras";
+
+      const uniqueId = `${menuItem.id}-${sizeKey}-${typeKey}-${extrasKey}`;
 
       const found = prev.find((i) => i.id === uniqueId);
 
       const totalPrice = calculateTotalPrice(menuItem);
 
+      console.log(itemQty);
+
       if (found) {
         return prev.map((i) =>
-          i.id === uniqueId ? { ...i, qty: i.qty + menuItem.qty } : i,
+          i.id === uniqueId ? { ...i, qty: i.qty + itemQty } : i,
         );
       }
 
@@ -101,7 +134,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         {
           ...menuItem,
           id: uniqueId,
-          qty: menuItem.qty,
+          qty: itemQty,
           price: totalPrice,
         },
       ];

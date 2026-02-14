@@ -2,7 +2,7 @@ import "../styles/floatingCartButton.css";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
-import { CartIcon } from "./Icons";
+import { CartIcon } from "../utils/Icons";
 
 export default function FloatingCart() {
   const { items } = useCart();

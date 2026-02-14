@@ -2,9 +2,9 @@ import "../styles/menu.css";
 import { useCart, type MenuItem } from "../contexts/CartContext";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import type { IngredientOption, Product } from "../hooks/types";
+import type { AddOnOption, Product } from "../hooks/types";
 import { CloseIcon } from "../hooks/icons";
-import { CartIcon, TrashIcon } from "../components/Icons";
+import { CartIcon, ClearCircleIcon, TrashIcon } from "../utils/Icons";
 import {
   getAllProducts,
   getProductsMetadata,
@@ -21,6 +21,7 @@ import {
   setStoredMostPopularLastUpdated,
 } from "../services/localStorageService";
 import ScrollReveal from "../utils/ScrollReveal";
+import { LazyImage } from "../components/lazyLoad";
 
 export function MenuCard({ item }: { item: MenuItem }) {
   const { addItem, items, removeItem } = useCart();
@@ -28,10 +29,19 @@ export function MenuCard({ item }: { item: MenuItem }) {
   return (
     <div key={item.id} className="menu-item-simple homePopularItemsDiv">
       <img
-        src={`./assets/${item.image}`}
+        src={`./assets/menuItems/${item.image}`}
         alt={item.name}
         className="menu-item-simple-img"
+        // onError={(e) => {
+        //   const target = e.target as HTMLImageElement;
+        //   target.src = "./assets/placeholderIMG.jpg"; // Path to a default image
+        //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
+        // }}
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = "none";
+        }}
       />
+
       <div>
         <p className="menu-cart-item-name">{item.name}</p>
         <p className="menu-cart-item-description">{item.description}</p>
@@ -71,21 +81,47 @@ export function MenuCard({ item }: { item: MenuItem }) {
 interface ModifyModalProps {
   item: Product;
   onClose: () => void;
-  onConfirm: (selectedIngredients: IngredientOption[], qty: number) => void;
+  onConfirm: (
+    selectedSize: AddOnOption | null,
+    selectedType: AddOnOption | null,
+    selectedChooseOne: AddOnOption | null,
+    selectedaddOns: AddOnOption[],
+    selectedExtras: AddOnOption[],
+    qty: number,
+  ) => void;
 }
 
 function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
-  const [selected, setSelected] = useState<IngredientOption[]>([]);
   const [animate, setAnimate] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [qty, setQty] = useState(1);
+  const [selectedSize, setSelectedSize] = useState<AddOnOption | null>(
+    item.size?.[0] ?? null,
+  );
+  const [selectedType, setSelectedType] = useState<AddOnOption | null>(
+    item.type?.[0] ?? null,
+  );
+  const [selectedChooseOne, setSelectedChooseOne] =
+    useState<AddOnOption | null>(item.chooseOne?.[0] ?? null);
+  const [addOns, setAddOns] = useState<AddOnOption[]>([]);
+  const [addOnsExtras, setAddOnsExtras] = useState<AddOnOption[]>([]);
+
+  const [imageExists, setImageExists] = useState<boolean | null>(null);
 
   const increaseQty = () => setQty((q) => q + 1);
   const decreaseQty = () => setQty((q) => (q > 1 ? q - 1 : 1));
 
-  const toggle = (ing: IngredientOption) => {
-    setSelected((prev) =>
+  const toggleAddOn = (ing: AddOnOption) => {
+    setAddOns((prev) =>
       prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing],
+    );
+  };
+
+  const toggleAddOnExtra = (extra: AddOnOption) => {
+    setAddOnsExtras((prev) =>
+      prev.find((i) => i.name === extra.name)
+        ? prev.filter((i) => i.name !== extra.name)
+        : [...prev, extra],
     );
   };
 
@@ -93,7 +129,14 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
     setAnimate(true); // Start animation
     setTimeout(() => {
       setAnimate(false);
-      onConfirm(selected, qty);
+      onConfirm(
+        selectedSize ?? null,
+        selectedType ?? null,
+        selectedChooseOne ?? null,
+        addOns,
+        addOnsExtras,
+        qty,
+      );
     }, 600); // matches CSS animation duration
   };
 
@@ -107,7 +150,36 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
   };
 
   // Calculate extra price for display
-  const extraPrice = selected.reduce((acc, i) => acc + (i.extraPrice || 0), 0);
+  // const extraPrice = selected.reduce((acc, i) => acc + (i.extraPrice || 0), 0);
+
+  // 1. The price of the pizza itself based on chosen size
+  // If no size is selected yet, fall back to the default item.price
+  const basePrice = selectedSize ? selectedSize.extraPrice : item.price || 0;
+
+  // 2. The cost of everything else (Type + Extras)
+  let selectedTypeCost = selectedType ? selectedType.extraPrice || 0 : 0;
+
+  let chooseOneCost = selectedChooseOne ? selectedChooseOne.extraPrice || 0 : 0;
+
+  let addOnsCost = addOns.reduce((acc, i) => acc + (i.extraPrice || 0), 0);
+
+  let addOnsExtrasCost = addOnsExtras.reduce(
+    (acc, i) => acc + (i.extraPrice || 0),
+    0,
+  );
+
+  const additionalCosts =
+    selectedTypeCost + chooseOneCost + addOnsCost + addOnsExtrasCost;
+
+  // 3. The final display price
+  const finalPrice = (basePrice || item.price) + additionalCosts;
+
+  let addOnExist =
+    item.size ||
+    item.chooseOne ||
+    item.type ||
+    (item.addOns && item.addOns.length > 0) ||
+    (item.addOnsExtra && item.addOnsExtra.length > 0);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -129,48 +201,194 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content">
-          <div className="modal-image-wrapper">
-            <img
-              className="modalImage"
-              src={`./assets/${item.image}`}
-              alt={item.image}
-            />
-            <div className="modal-price-badge">{item.price.toFixed(2)} kr</div>
-          </div>
+          <LazyImage
+            item={item}
+            addClassToContainer="modal-image-wrapper"
+            addClassToImg="modalImage"
+            large={true}
+            badge={true}
+            onImageStatusChange={setImageExists}
+          />
 
-          <div className="modal-header-section">
+          <div
+            className={`modal-header-section ${addOnExist ? "addOnExist" : imageExists ? "imageExist" : "noneExist"}`}
+          >
+            {item.category && (
+              <p className="modal-item-category">{item.category}</p>
+            )}
             <h3 className="modal-title-text">Tilpas din {item.name}</h3>
             {item.description && (
               <p className="modal-item-desc">{item.description}</p>
             )}
           </div>
+          <div className="modal-content-infoBox">
+            {item.size && item.size.length > 0 && (
+              <>
+                <div className="modal-section-divider"></div>
+                <div className="ingredients-title singularPick">
+                  <p className="modal-desc">Vælg en:</p>
+                </div>
+                <div className="modal-ingredients">
+                  {item.size.map((ing) => (
+                    <label key={ing.name} className="modal-ingredient">
+                      <input
+                        type="radio"
+                        name="pizza-size"
+                        checked={selectedSize?.name === ing.name}
+                        onChange={() => setSelectedSize(ing)}
+                        className="modal-radio-input"
+                      />
+                      <span className="custom-radio" />{" "}
+                      <span className="ingredient-label">
+                        <span className="ingredient-name">{ing.name}</span>
+                        {ing.extraPrice ? (
+                          <span className="ingredient-price">
+                            +{ing.extraPrice} kr
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
 
-          {item.ingredients && item.ingredients.length > 0 && (
-            <>
-              <div className="modal-section-divider"></div>
-              <p className="modal-desc">Vælg tilvalg:</p>
-              <div className="modal-ingredients">
-                {item.ingredients.map((ing) => (
-                  <label key={ing.name} className="modal-ingredient">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(ing)}
-                      onChange={() => toggle(ing)}
-                    />
-                    <span className="custom-checkbox" />
-                    <span className="ingredient-label">
-                      <span className="ingredient-name">{ing.name}</span>
-                      {ing.extraPrice ? (
-                        <span className="ingredient-price">
-                          +{ing.extraPrice} kr
-                        </span>
-                      ) : null}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </>
-          )}
+            {item.type && item.type.length > 0 && (
+              <>
+                <div className="modal-section-divider"></div>
+                <div className="ingredients-title singularPick">
+                  <p className="modal-desc">Vælg en:</p>
+                </div>
+                <div className="modal-ingredients">
+                  {item.type.map((ing) => (
+                    <label key={ing.name} className="modal-ingredient">
+                      <input
+                        type="radio"
+                        name="product-type"
+                        checked={selectedType?.name === ing.name}
+                        onChange={() => setSelectedType(ing)}
+                        className="modal-radio-input"
+                      />
+                      <span className="custom-radio" />
+                      <span className="ingredient-label">
+                        <span className="ingredient-name">{ing.name}</span>
+                        {ing.extraPrice ? (
+                          <span className="ingredient-price">
+                            +{ing.extraPrice} kr
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+            {item.chooseOne && item.chooseOne.length > 0 && (
+              <>
+                <div className="modal-section-divider"></div>
+                <div className="ingredients-title singularPick">
+                  <p className="modal-desc">Vælg en:</p>
+                </div>
+                <div className="modal-ingredients">
+                  {item.chooseOne.map((ing) => (
+                    <label key={ing.name} className="modal-ingredient">
+                      <input
+                        type="radio"
+                        name="product-chooseOne"
+                        checked={selectedChooseOne?.name === ing.name}
+                        onChange={() => setSelectedChooseOne(ing)}
+                        className="modal-radio-input"
+                      />
+                      <span className="custom-radio" />
+                      <span className="ingredient-label">
+                        <span className="ingredient-name">{ing.name}</span>
+                        {ing.extraPrice ? (
+                          <span className="ingredient-price">
+                            +{ing.extraPrice} kr
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {item.addOns && item.addOns.length > 0 && (
+              <>
+                <div className="modal-section-divider"></div>
+                <div className="ingredients-header">
+                  <div className="ingredients-title">
+                    <p className="modal-desc">Vælg tilvalg:</p>
+                    {addOnsCost > 0 && (
+                      <p className="modal-desc">+ {addOnsCost} kr</p>
+                    )}
+                  </div>
+                  <p className="ingredients-header-desc">
+                    Vælg så mange du vill
+                  </p>
+                </div>
+                <div className="modal-ingredients">
+                  {item.addOns.map((ing) => (
+                    <label key={ing.name} className="modal-ingredient">
+                      <input
+                        type="checkbox"
+                        checked={addOns.includes(ing)}
+                        onChange={() => toggleAddOn(ing)}
+                      />
+                      <span className="custom-checkbox" />
+                      <span className="ingredient-label">
+                        <span className="ingredient-name">{ing.name}</span>
+                        {ing.extraPrice ? (
+                          <span className="ingredient-price">
+                            +{ing.extraPrice} kr
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+            {item.addOnsExtra && item.addOnsExtra.length > 0 && (
+              <>
+                <div className="modal-section-divider"></div>
+
+                <div className="ingredients-header">
+                  <div className="ingredients-title">
+                    <p className="modal-desc">Vælg tilvalg:</p>
+                    {addOnsExtrasCost > 0 && (
+                      <p className="modal-desc">+ {addOnsExtrasCost} kr</p>
+                    )}
+                  </div>
+                  <p className="ingredients-header-desc">
+                    Vælg så mange du vill
+                  </p>
+                </div>
+
+                <div className="modal-ingredients">
+                  {item.addOnsExtra.map((ing) => (
+                    <label key={ing.name} className="modal-ingredient">
+                      <input
+                        type="checkbox"
+                        checked={addOnsExtras.includes(ing)}
+                        onChange={() => toggleAddOnExtra(ing)}
+                      />
+                      <span className="custom-checkbox" />
+                      <span className="ingredient-label">
+                        <span className="ingredient-name">{ing.name}</span>
+                        {ing.extraPrice ? (
+                          <span className="ingredient-price">
+                            + {ing.extraPrice} kr
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <button onClick={handleClose} className="modal-cancel">
@@ -197,7 +415,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
             <button onClick={handleConfirm} className="modal-confirm">
               <span>
                 Tilføj til {window.innerWidth < 720 ? "" : "kurv"} •{" "}
-                {((item.price + extraPrice) * qty).toFixed(2)} kr
+                {(finalPrice * qty).toFixed(2)} kr
               </span>
             </button>
             {animate && <div className="add-notify">Tilføjet!</div>}
@@ -446,10 +664,23 @@ export default function Menu() {
 
   const confirmAdd = (
     item: Product,
-    selectedIngredients: IngredientOption[],
+    selectedSize: AddOnOption | null,
+    selectedType: AddOnOption | null,
+    selectedChooseOne: AddOnOption | null,
+    selectedaddOns: AddOnOption[],
+    selectedExtras: AddOnOption[],
     qty: number,
   ) => {
-    addItem({ ...item, selectedIngredients, qty });
+    addItem({
+      ...item,
+      selectedSize: selectedSize ?? undefined,
+      selectedType: selectedType ?? undefined,
+      selectedChooseOne: selectedChooseOne ?? undefined,
+      selectedaddOns,
+      selectedExtras,
+      qty: qty,
+    });
+
     setActiveItem(null);
   };
 
@@ -591,6 +822,7 @@ export default function Menu() {
     setSelectedCategory(cat);
     const target =
       cat === "Most Popular" ? popularRef.current : sectionRefs.current[cat];
+
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -622,6 +854,9 @@ export default function Menu() {
         // Already correct, just mark as initialized
         hasInitializedCategoryRef.current = true;
       }
+    } else {
+      hasInitializedCategoryRef.current = true;
+      setSelectedCategory(categories[0]);
     }
   }, [
     loading,
@@ -666,6 +901,44 @@ export default function Menu() {
       // Smooth scroll to the button
       revealContainer.scrollTo({
         left: scrollLeft,
+        behavior: "smooth",
+      });
+    }
+  }, [selectedCategory, loading, products.length]);
+
+  // Auto-scroll the active category button into view in side categoriesContainer
+  useEffect(() => {
+    if (loading || products.length === 0 || !selectedCategory) return;
+
+    // Only scroll if the reveal container is visible
+    const sideCategoriesContainer = document.querySelector(
+      ".categoriesContainer",
+    ) as HTMLElement;
+    if (!sideCategoriesContainer) {
+      return;
+    }
+
+    // Find the active button by text content
+    const buttons = sideCategoriesContainer.querySelectorAll("button");
+    let targetButton: HTMLElement | null = null;
+    buttons.forEach((btn) => {
+      if (btn.textContent?.trim() === selectedCategory) {
+        targetButton = btn;
+      }
+    });
+
+    if (targetButton && sideCategoriesContainer) {
+      const containerRect = sideCategoriesContainer.getBoundingClientRect();
+      const buttonRect = (targetButton as HTMLElement).getBoundingClientRect();
+
+      const scrollTop =
+        sideCategoriesContainer.scrollTop +
+        (buttonRect.top - containerRect.top) -
+        containerRect.height / 2 +
+        buttonRect.height / 2;
+
+      sideCategoriesContainer.scrollTo({
+        top: scrollTop,
         behavior: "smooth",
       });
     }
@@ -751,9 +1024,19 @@ export default function Menu() {
     };
   }, [loading, products.length, selectedCategory]);
 
+  useEffect(() => {
+    if (!searchQuery) {
+      if (popularItems.length > 0) {
+        setSelectedCategory("Most Popular");
+      } else if (categories.length > 0) {
+        setSelectedCategory(categories[0]);
+      }
+    }
+  }, [searchQuery]);
+
   if (loading) {
     return (
-      <main className="menuPageContainer max-w-6xl">
+      <main className="menuPageContainer">
         <div style={{ textAlign: "center", padding: "4rem" }}>
           <p>Indlæser menuen...</p>
           <div className="notification-spinner"></div>
@@ -764,7 +1047,7 @@ export default function Menu() {
 
   if (error) {
     return (
-      <main className="menuPageContainer max-w-6xl">
+      <main className="menuPageContainer">
         <div style={{ textAlign: "center", padding: "4rem" }}>
           <p style={{ color: "red" }}>{error}</p>
         </div>
@@ -773,7 +1056,7 @@ export default function Menu() {
   }
 
   return (
-    <main className="menuPageContainer max-w-7xl">
+    <main className="menuPageContainer">
       <div className="menu-header">
         <div>
           <p className="menu-subtitle">
@@ -917,6 +1200,15 @@ export default function Menu() {
             className="menu-search"
           />
           <span className="search-icon">🔍</span>
+          <button
+            className={searchQuery ? "clear-search-btn" : "hide"}
+            aria-label="Clear search"
+            onClick={() => {
+              setSearchQuery("");
+            }}
+          >
+            <ClearCircleIcon className="clear-icon" />
+          </button>
         </div>
         <aside className="menu-sidebar">
           <div className="categoriesContainer">
@@ -956,6 +1248,16 @@ export default function Menu() {
                   className="menu-search"
                 />
                 <span className="search-icon">🔍</span>
+
+                <button
+                  className={searchQuery ? "clear-search-btn" : "hide"}
+                  aria-label="Clear search"
+                  onClick={() => {
+                    setSearchQuery("");
+                  }}
+                >
+                  <ClearCircleIcon className="clear-icon" />
+                </button>
               </div>
             </ScrollReveal>
             <ScrollReveal>
@@ -995,16 +1297,28 @@ export default function Menu() {
                       className="menu-item-simple"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (item.ingredients && item.ingredients.length > 0) {
-                          openModal(item);
-                        }
+                        openModal(item);
+                        // if (item.addOns && item.addOns.length > 0) {
+                        // }
                       }}
                     >
-                      <img
-                        src={`./assets/${item.image}`}
+                      <LazyImage
+                        item={item}
+                        addClassToImg="menu-item-simple-img"
+                      />
+                      {/* <img
+                        src={`./assets/menuItems/${item.image}`}
                         alt={item.name}
                         className="menu-item-simple-img"
-                      />
+                        // onError={(e) => {
+                        //   const target = e.target as HTMLImageElement;
+                        //   target.src = "./assets/placeholderIMG.jpg"; // Path to a default image
+                        //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
+                        // }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      /> */}
                       <div className="menu-item-simple-content">
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
@@ -1029,11 +1343,13 @@ export default function Menu() {
                         className="menu-item-simple-add"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (item.ingredients && item.ingredients.length > 0) {
-                            openModal(item);
-                          } else {
-                            confirmAdd(item, [], 1);
-                          }
+                          openModal(item);
+
+                          // if (item.addOns && item.addOns.length > 0) {
+                          //   openModal(item);
+                          // } else {
+                          //   confirmAdd(item, [], 1);
+                          // }
                         }}
                       >
                         +
@@ -1073,16 +1389,30 @@ export default function Menu() {
                       className="menu-item-simple"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (item.ingredients && item.ingredients.length > 0) {
-                          openModal(item);
-                        }
+                        openModal(item);
+                        // if (item.addOns && item.addOns.length > 0) {
+                        // }
                       }}
                     >
-                      <img
-                        src={`./assets/${item.image}`}
+                      {/* <img
+                        src={`./assets/menuItems/${item.image}`}
                         alt={item.name}
+                        // onError={(e) => {
+                        //   const target = e.target as HTMLImageElement;
+                        //   target.src = "./assets/placeholderIMG.jpg"; // Path to a default image
+                        //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
+                        // }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
                         className="menu-item-simple-img"
+                      /> */}
+
+                      <LazyImage
+                        item={item}
+                        addClassToImg="menu-item-simple-img"
                       />
+
                       <div className="menu-item-simple-content">
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
@@ -1107,11 +1437,11 @@ export default function Menu() {
                         className="menu-item-simple-add"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (item.ingredients && item.ingredients.length > 0) {
-                            openModal(item);
-                          } else {
-                            confirmAdd(item, [], 1);
-                          }
+                          openModal(item);
+                          // if (item.addOns && item.addOns.length > 0) {
+                          // } else {
+                          //   confirmAdd(item, [], 1);
+                          // }
                         }}
                       >
                         +
@@ -1127,8 +1457,23 @@ export default function Menu() {
             <ModifyModal
               item={activeItem}
               onClose={closeModal}
-              onConfirm={(ingredients, qty) =>
-                confirmAdd(activeItem, ingredients, qty)
+              onConfirm={(
+                selectedSize,
+                selectedType,
+                selectedChooseOne,
+                selectedaddOns,
+                selectedExtras,
+                qty,
+              ) =>
+                confirmAdd(
+                  activeItem,
+                  selectedSize,
+                  selectedType,
+                  selectedChooseOne,
+                  selectedaddOns,
+                  selectedExtras,
+                  qty,
+                )
               }
             />
           )}
@@ -1222,24 +1567,65 @@ export default function Menu() {
                     <div key={item.id} className="menu-cart-item">
                       <div>
                         <p className="menu-cart-item-name">{item.name}</p>
-                        {item.selectedIngredients &&
-                          item.selectedIngredients.length > 0 && (
-                            <p className="menu-cart-item-ingredients">
-                              {item.selectedIngredients.map((ing, idx) => (
-                                <span key={idx}>
-                                  {ing.name}
-                                  {ing.extraPrice
-                                    ? ` (+${ing.extraPrice} kr)`
-                                    : ""}
-                                  {idx < item.selectedIngredients!.length - 1
-                                    ? ", "
-                                    : ""}
-                                </span>
-                              ))}
-                            </p>
+                        {item.selectedSize && (
+                          <p className="menu-cart-item-ingredients onlyOption">
+                            <strong>Størlek:</strong> {item.selectedSize.name}
+                          </p>
+                        )}
+                        {item.selectedType && (
+                          <p className="menu-cart-item-ingredients onlyOption">
+                            <strong>Vald:</strong> {item.selectedType.name}
+                          </p>
+                        )}
+                        {item.selectedChooseOne && (
+                          <p className="menu-cart-item-ingredients onlyOption">
+                            <strong>Vald:</strong> {item.selectedChooseOne.name}
+                          </p>
+                        )}
+
+                        {item.selectedaddOns &&
+                          item.selectedaddOns.length > 0 && (
+                            <div className="menu-cart-item-ingredients addOnListContainer">
+                              <strong>Extras:</strong>
+                              <ul className="addOnList">
+                                {item.selectedaddOns.map((ing, idx) => (
+                                  <li key={idx} className="addOnList-item">
+                                    - {ing.name}
+                                    {ing.extraPrice
+                                      ? ` (+${ing.extraPrice} kr)`
+                                      : ""}
+                                    {idx < item.selectedaddOns!.length - 1
+                                      ? ", "
+                                      : ""}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           )}
+                        {item.selectedaddOnsExtra &&
+                          item.selectedaddOnsExtra.length > 0 && (
+                            <div className="menu-cart-item-ingredients addOnListContainer">
+                              <strong>Extras:</strong>
+                              <ul className="addOnList">
+                                {item.selectedaddOnsExtra.map((ing, idx) => (
+                                  <li key={idx} className="addOnList-item">
+                                    - {ing.name}
+                                    {ing.extraPrice
+                                      ? ` (+${ing.extraPrice} kr)`
+                                      : ""}
+                                    {idx < item.selectedaddOnsExtra!.length - 1
+                                      ? ", "
+                                      : ""}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
                         <p className="menu-cart-item-price">
-                          DKK {(item.price * item.qty).toFixed(2)}
+                          <strong>
+                            DKK {(item.price * item.qty).toFixed(2)}
+                          </strong>
                         </p>
                       </div>
                       <div className="menu-cart-controls">
@@ -1365,24 +1751,64 @@ export default function Menu() {
                   <div key={item.id} className="menu-cart-item">
                     <div>
                       <p className="menu-cart-item-name">{item.name}</p>
-                      {item.selectedIngredients &&
-                        item.selectedIngredients.length > 0 && (
-                          <p className="menu-cart-item-ingredients">
-                            {item.selectedIngredients.map((ing, idx) => (
-                              <span key={idx}>
-                                {ing.name}
-                                {ing.extraPrice
-                                  ? ` (+${ing.extraPrice} kr)`
-                                  : ""}
-                                {idx < item.selectedIngredients!.length - 1
-                                  ? ", "
-                                  : ""}
-                              </span>
-                            ))}
-                          </p>
+                      {item.selectedSize && (
+                        <p className="menu-cart-item-ingredients">
+                          <strong>Størlek:</strong> {item.selectedSize.name}
+                        </p>
+                      )}
+                      {item.selectedType && (
+                        <p className="menu-cart-item-ingredients">
+                          <strong>Vald:</strong> {item.selectedType.name}
+                        </p>
+                      )}
+                      {item.selectedChooseOne && (
+                        <p className="menu-cart-item-ingredients">
+                          <strong>Vald:</strong> {item.selectedChooseOne.name}
+                        </p>
+                      )}
+
+                      {item.selectedaddOns &&
+                        item.selectedaddOns.length > 0 && (
+                          <div className="menu-cart-item-ingredients addOnListContainer">
+                            <strong>Extras:</strong>
+                            <ul className="addOnList">
+                              {item.selectedaddOns.map((ing, idx) => (
+                                <li key={idx} className="addOnList-item">
+                                  - {ing.name}
+                                  {ing.extraPrice
+                                    ? ` (+${ing.extraPrice} kr)`
+                                    : ""}
+                                  {idx < item.selectedaddOns!.length - 1
+                                    ? ", "
+                                    : ""}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      {item.selectedaddOnsExtra &&
+                        item.selectedaddOnsExtra.length > 0 && (
+                          <div className="menu-cart-item-ingredients addOnListContainer">
+                            <strong>Extras:</strong>
+                            <ul className="addOnList">
+                              {item.selectedaddOnsExtra.map((ing, idx) => (
+                                <li key={idx} className="addOnList-item">
+                                  - {ing.name}
+                                  {ing.extraPrice
+                                    ? ` (+${ing.extraPrice} kr)`
+                                    : ""}
+                                  {idx < item.selectedaddOnsExtra!.length - 1
+                                    ? ", "
+                                    : ""}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       <p className="menu-cart-item-price">
-                        DKK {(item.price * item.qty).toFixed(2)}
+                        <strong>
+                          DKK {(item.price * item.qty).toFixed(2)}
+                        </strong>
                       </p>
                     </div>
                     <div className="menu-cart-controls">

@@ -539,6 +539,53 @@
   gap: 1rem;
 }
 
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Container for the collapsible content */
+.most-popular-collapse-wrapper {
+  overflow: hidden;
+  transition:
+    max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease;
+}
+
+/* State when closed */
+.most-popular-collapse-wrapper.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none; /* Prevent clicking items while invisible */
+}
+
+/* State when open - Set max-height to a value larger than your list will ever be */
+.most-popular-collapse-wrapper.expanded {
+  max-height: 2000px;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: scroll;
+}
+
+/* Extra padding inside so the animation doesn't cut off text harshly */
+.most-popular-content-padding {
+  position: relative;
+  padding: 20px 0;
+}
+
+/* Smooth arrow rotation */
+.collapse-arrow {
+  display: inline-block;
+  margin-right: 5px;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 0.8rem;
+}
+
+.collapse-arrow.open {
+  transform: rotate(90deg);
+}
+
 .most-popular-label {
   font-weight: 600;
   font-size: 1.125rem;
@@ -553,6 +600,8 @@
   color: #6b7280;
   font-size: 0.875rem;
   font-style: italic;
+  display: flex;
+  gap: 10px;
 }
 
 [data-theme="dark"] .saving-indicator {

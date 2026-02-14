@@ -416,8 +416,7 @@
 }
 
 .checkout-item-img {
-  width: 150px;
-  height: 150px;
+  width: 210px;
   border-radius: 10px;
 
   object-fit: cover;
@@ -475,6 +474,9 @@
   background-color: #1f2937;
   color: #f9fafb;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.addOnLists {
 }
 
 .summary-item-price {
@@ -733,6 +735,7 @@
     position: absolute;
     right: 0.7rem;
     font-size: 1rem;
+    bottom: 0.2rem;
   }
   .checkout-actions {
     flex-direction: column;
@@ -744,6 +747,7 @@
   }
   .summary-item-info {
     margin: 0;
+    margin-bottom: 20px;
   }
   .summary-item-ingredients-list {
     margin: 0;

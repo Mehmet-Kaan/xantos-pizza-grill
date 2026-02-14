@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import {
   CartIcon,
@@ -8,7 +8,7 @@ import {
   PizzaIcon,
   InfoIcon,
   ContactIcon,
-} from "./Icons";
+} from "../utils/Icons";
 import { SunIcon, MoonIcon } from "../hooks/icons";
 
 function Nav() {
@@ -21,6 +21,18 @@ function Nav() {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleScroll = (id: string) => {
+    if (location.pathname === "/") {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/", { state: { scrollTo: id } });
+    }
+  };
 
   useEffect(() => {
     const html = document.documentElement;
@@ -82,12 +94,19 @@ function Nav() {
           <Link to="/menu" className="modern-nav-link">
             Menu
           </Link>
-          <Link to="/om-os" className="modern-nav-link">
+
+          <button
+            className="modern-nav-link"
+            onClick={() => handleScroll("about")}
+          >
             Om os
-          </Link>
-          <Link to="/kontakt" className="modern-nav-link">
+          </button>
+          <button
+            className="modern-nav-link"
+            onClick={() => handleScroll("contact")}
+          >
             Kontakt
-          </Link>
+          </button>
         </nav>
 
         <div className="modern-header-actions">
@@ -135,22 +154,34 @@ function Nav() {
             <PizzaIcon className="mobile-nav-icon" />
             <span>Menu</span>
           </Link>
-          <Link to="/om-os" onClick={() => setOpen(false)}>
+          <button
+            className="modern-mobile-nav"
+            onClick={() => {
+              handleScroll("about");
+              setOpen(false);
+            }}
+          >
             <InfoIcon className="mobile-nav-icon" />
             <span>Om os</span>
-          </Link>
-          <Link to="/kontakt" onClick={() => setOpen(false)}>
+          </button>
+          <button
+            className="modern-mobile-nav"
+            onClick={() => {
+              handleScroll("contact");
+              setOpen(false);
+            }}
+          >
             <ContactIcon className="mobile-nav-icon" />
             <span>Kontakt</span>
-          </Link>
+          </button>
           <Link to="/cart" onClick={() => setOpen(false)}>
             <CartIcon className="mobile-nav-icon" />
             <span>Kurv {count > 0 && `(${count})`}</span>
           </Link>
           <div className="contact-and-theme-div">
-            <a href="tel:+4570123456" onClick={() => setOpen(false)}>
+            <a href="tel:+4555376976" onClick={() => setOpen(false)}>
               <PhoneIcon className="mobile-nav-icon" />
-              <span>+45 70 12 34 56</span>
+              <span>55 37 69 76</span>
             </a>
             <button
               className="mobile-theme-toggle"

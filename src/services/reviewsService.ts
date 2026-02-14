@@ -19,35 +19,37 @@ export interface Review {
   id?: string;
   author: string;
   text: string;
+  mail?: string; // Optional email field if you want to store it
   rating: number; // 1-5 stars
+  type: string; // For filtering out technical issues from public reviews
   createdAt: Date | Timestamp;
   approved?: boolean; // For moderation
 }
 
 // Get all approved reviews, ordered by date (newest first)
-export async function getAllReviews(limitCount?: number, includeUnapproved: boolean = false): Promise<Review[]> {
+export async function getAllReviews(
+  limitCount?: number,
+  includeUnapproved: boolean = false,
+): Promise<Review[]> {
   try {
-    let q = query(
-      collection(db, "reviews"),
-      orderBy("createdAt", "desc")
-    );
-    
+    let q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+
     if (limitCount) {
       q = query(q, limit(limitCount));
     }
-    
+
     const querySnapshot = await getDocs(q);
     const reviews = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       const createdAt = data.createdAt;
-      
+
       return {
         id: doc.id,
         ...data,
         createdAt: createdAt?.toDate ? createdAt.toDate() : new Date(createdAt),
       } as Review;
     });
-    
+
     // Filter to only show approved reviews unless includeUnapproved is true
     if (includeUnapproved) {
       return reviews;
@@ -60,7 +62,9 @@ export async function getAllReviews(limitCount?: number, includeUnapproved: bool
 }
 
 // Create a new review
-export async function createReview(reviewData: Omit<Review, "id" | "createdAt">): Promise<string> {
+export async function createReview(
+  reviewData: Omit<Review, "id" | "createdAt">,
+): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, "reviews"), {
       ...reviewData,
@@ -76,7 +80,10 @@ export async function createReview(reviewData: Omit<Review, "id" | "createdAt">)
 }
 
 // Update a review
-export async function updateReview(reviewId: string, reviewData: Partial<Review>): Promise<void> {
+export async function updateReview(
+  reviewId: string,
+  reviewData: Partial<Review>,
+): Promise<void> {
   try {
     const reviewRef = doc(db, "reviews", reviewId);
     await updateDoc(reviewRef, reviewData);
@@ -92,7 +99,7 @@ export async function getReviewsMetadata(): Promise<Date | null> {
   try {
     const metadataRef = doc(db, "metadata", "reviews");
     const metadataSnap = await getDoc(metadataRef);
-    
+
     if (metadataSnap.exists()) {
       const data = metadataSnap.data();
       const lastUpdated = data.lastUpdated;
@@ -115,9 +122,13 @@ export async function getReviewsMetadata(): Promise<Date | null> {
 export async function updateReviewsMetadata(): Promise<void> {
   try {
     const metadataRef = doc(db, "metadata", "reviews");
-    await setDoc(metadataRef, {
-      lastUpdated: serverTimestamp(),
-    }, { merge: true });
+    await setDoc(
+      metadataRef,
+      {
+        lastUpdated: serverTimestamp(),
+      },
+      { merge: true },
+    );
   } catch (error) {
     console.error("Error updating reviews metadata:", error);
   }
@@ -134,8 +145,6 @@ export async function deleteReview(reviewId: string): Promise<void> {
     throw error;
   }
 }
-
-
 
 export const REVIEWS = [
   {
@@ -203,17 +212,19 @@ export const REVIEWS = [
 export async function initializeReviews() {
   try {
     console.log("Initializing reviews in Firebase...");
-    
+
     for (const review of REVIEWS) {
       await createReview({
         author: review.name,
         text: review.text,
         rating: review.rating,
+        mail: "", // No email for static reviews, but you can add if needed
+        type: "service", // Assuming these are all service reviews
         approved: true,
       });
       console.log(`Created review: ${review.name}`);
     }
-    
+
     console.log("All reviews initialized successfully!");
   } catch (error) {
     console.error("Error initializing reviews:", error);
