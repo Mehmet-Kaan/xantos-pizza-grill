@@ -156,6 +156,12 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
   // If no size is selected yet, fall back to the default item.price
   const basePrice = selectedSize ? selectedSize.extraPrice : item.price || 0;
 
+  let priceDifferencesBetweenBaseAndSelectedSize = selectedSize
+    ? (selectedSize.extraPrice ?? 0) - item.price
+    : 0;
+
+  console.log(priceDifferencesBetweenBaseAndSelectedSize);
+
   // 2. The cost of everything else (Type + Extras)
   let selectedTypeCost = selectedType ? selectedType.extraPrice || 0 : 0;
 
@@ -227,6 +233,11 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
                 <div className="modal-section-divider"></div>
                 <div className="ingredients-title singularPick">
                   <p className="modal-desc">Vælg en:</p>
+                  {priceDifferencesBetweenBaseAndSelectedSize > 0 && (
+                    <p className="modal-desc">
+                      + {priceDifferencesBetweenBaseAndSelectedSize} kr
+                    </p>
+                  )}
                 </div>
                 <div className="modal-ingredients">
                   {item.size.map((ing) => (
@@ -258,6 +269,9 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
                 <div className="modal-section-divider"></div>
                 <div className="ingredients-title singularPick">
                   <p className="modal-desc">Vælg en:</p>
+                  {selectedTypeCost > 0 && (
+                    <p className="modal-desc">+ {selectedTypeCost} kr</p>
+                  )}
                 </div>
                 <div className="modal-ingredients">
                   {item.type.map((ing) => (
@@ -288,6 +302,9 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
                 <div className="modal-section-divider"></div>
                 <div className="ingredients-title singularPick">
                   <p className="modal-desc">Vælg en:</p>
+                  {chooseOneCost > 0 && (
+                    <p className="modal-desc">+ {chooseOneCost} kr</p>
+                  )}
                 </div>
                 <div className="modal-ingredients">
                   {item.chooseOne.map((ing) => (
