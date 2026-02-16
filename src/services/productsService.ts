@@ -21,7 +21,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  image: string;
+  imageExist?: boolean;
+  image?: string;
   imageLarge: string;
   tags?: string[];
   size?: Array<{
@@ -45,7 +46,9 @@ export interface Product {
     extraPrice?: number;
   }>;
 }
-console.log("MENU:", MENU);
+
+export const IMAGE_BASE_URL =
+  "https://pub-39a4907928c142a280dd8f2259dc0380.r2.dev";
 
 // Get all menuItems
 export async function getAllProducts(): Promise<Product[]> {
@@ -450,6 +453,33 @@ export const verifyMenuSync = async () => {
 //     await uploadBatch.commit();
 
 //     console.log("✅ Success! All image fields updated.");
+//     alert("Billederne er blevet rettet!");
+//   } catch (error) {
+//     console.error("Error updating images:", error);
+//     alert("Der opstod en fejl under opdatering af billeder.");
+//   }
+// };
+
+// export const updateMenuImagesExist = async () => {
+//   try {
+//     console.log("Fixing imageExist key on existing items...");
+
+//     const uploadBatch = writeBatch(db);
+
+//     MENU.forEach((item) => {
+//       const docRef = doc(db, "menuItems", item.id!);
+//       let itemImageExist = false;
+//       if (item.imageExist) {
+//         itemImageExist = true;
+//       }
+//       uploadBatch.update(docRef, {
+//         imageExist: itemImageExist,
+//       });
+//     });
+
+//     await uploadBatch.commit();
+
+//     console.log("✅ Success! All imageExist fields updated.");
 //     alert("Billederne er blevet rettet!");
 //   } catch (error) {
 //     console.error("Error updating images:", error);

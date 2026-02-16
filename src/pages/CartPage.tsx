@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { CartIcon, TrashIcon } from "../utils/Icons";
 import { useState } from "react";
+import { IMAGE_BASE_URL } from "../services/productsService";
 
 export default function CartPage() {
   const navigate = useNavigate();
   const { items, updateQty, removeItem, clear, total } = useCart();
   const [confirmClear, setConfirmClear] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const vatRate = 0.25;
   const vat = Math.round((total * vatRate) / (1 + vatRate));
@@ -139,17 +141,34 @@ export default function CartPage() {
                     <div key={i.id} className="cart-item-card">
                       <div className="cart-item-image-wrapper">
                         {(i as any).imageLarge && (
-                          <img
-                            src={`/assets/menuItems/Large/${(i as any).imageLarge}`}
-                            alt={i.name}
-                            className="cart-item-image"
-                            loading="lazy"
-                            onError={(e) => {
-                              const img = e.currentTarget;
-                              img.onerror = null;
-                              img.src = "/assets/placeholderIMG.jpg";
-                            }}
-                          />
+                          <>
+                            {!imageLoaded && <div className="image-shimmer" />}
+
+                            <img
+                              src={`${IMAGE_BASE_URL}/Large/${(i as any).imageLarge}`}
+                              alt={i.name}
+                              className={`cart-item-image ${imageLoaded ? "loaded" : "hidden"}`}
+                              loading="lazy"
+                              onLoad={() => setImageLoaded(true)}
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                img.onerror = null;
+                                img.src = `${IMAGE_BASE_URL}/assets/placeholderIMG.jpeg`;
+                                setImageLoaded(true);
+                              }}
+                            />
+                          </>
+                          // <img
+                          //   src={`${IMAGE_BASE_URL}/Large/${(i as any).imageLarge}`}
+                          //   alt={i.name}
+                          //   className="cart-item-image"
+                          //   loading="lazy"
+                          //   onError={(e) => {
+                          //     const img = e.currentTarget;
+                          //     img.onerror = null;
+                          //     img.src = `${IMAGE_BASE_URL}/assets/placeholderIMG.jpeg`;
+                          //   }}
+                          // />
                         )}
                       </div>
 

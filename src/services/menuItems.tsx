@@ -16,6 +16,7 @@ export const MENU: Product[] = [
     name: "Baked Shrimp 6 pcs.",
     description: "With garlic dressing",
     price: 75,
+    imageExist: true,
     image: "baked-shrimp.jpeg",
     imageLarge: "baked-shrimp-large.jpeg",
   },
@@ -25,6 +26,7 @@ export const MENU: Product[] = [
     name: "Tzatziki",
     description: "Yogurt with cucumber, dill and garlic",
     price: 69,
+    imageExist: true,
     image: "tzatziki.jpeg",
     imageLarge: "tzatziki-large.jpeg",
   },
@@ -52,6 +54,7 @@ export const MENU: Product[] = [
     name: "Margherita",
     description: "Tomato and cheese",
     price: 75,
+    imageExist: true,
     image: "margherita.jpeg",
     size: [
       {
@@ -205,6 +208,7 @@ export const MENU: Product[] = [
     name: "Vesuvio",
     description: "Tomato, cheese and chopped ham",
     price: 82,
+    imageExist: true,
     image: "vesuvio.jpeg",
     size: [
       {
@@ -358,6 +362,7 @@ export const MENU: Product[] = [
     name: "Hawaii",
     description: "Tomato, cheese, chopped ham and pineapple",
     price: 85,
+    imageExist: true,
     image: "hawaii.jpeg",
     size: [
       {
@@ -511,6 +516,7 @@ export const MENU: Product[] = [
     name: "Capricciosa",
     description: "Tomato, cheese, chopped ham and mushrooms",
     price: 85,
+    imageExist: true,
     image: "capricciosa.jpeg",
     size: [
       {
@@ -664,6 +670,7 @@ export const MENU: Product[] = [
     name: "Hellas",
     description: "Tomato, cheese, meat sauce and onion",
     price: 85,
+    imageExist: true,
     image: "hellas.jpeg",
     size: [
       {
@@ -817,6 +824,7 @@ export const MENU: Product[] = [
     name: "Juventus",
     description: "Tomato, cheese and pepperoni",
     price: 82,
+    imageExist: true,
     image: "juventus.jpeg",
     size: [
       {
@@ -1123,6 +1131,7 @@ export const MENU: Product[] = [
     name: "Calzone (Baked in)",
     description: "Tomato, cheese and chopped ham",
     price: 85,
+    imageExist: true,
     image: "calzone.jpeg",
     size: [
       {
@@ -1417,6 +1426,7 @@ export const MENU: Product[] = [
     name: "Avanos",
     description: "Tomato, cheese, salad and dressing",
     price: 100,
+    imageExist: true,
     image: "avanos.jpeg",
     size: [
       {
@@ -1584,6 +1594,7 @@ export const MENU: Product[] = [
     name: "Parma",
     description: "Tomato, cheese, air-dried ham, gorgonzola, arugula and pesto",
     price: 100,
+    imageExist: true,
     image: "parma.jpeg",
     size: [
       {
@@ -3403,6 +3414,7 @@ export const MENU: Product[] = [
     name: "Romeo",
     description: "Tomato, cheese, potato, fresh mozzarella, pesto, arugula",
     price: 85,
+    imageExist: true,
     image: "romeo.jpeg",
     size: [
       {
@@ -3710,6 +3722,7 @@ export const MENU: Product[] = [
     name: "UFO (Double baked)",
     description: "Tomato, cheese, chopped ham and mushrooms",
     price: 99,
+    imageExist: true,
     image: "ufo.jpeg",
     size: [
       {
@@ -4004,6 +4017,7 @@ export const MENU: Product[] = [
     name: "Mamma Mia (Baked in) - Regular",
     description: "Tomato, cheese, spaghetti and meat sauce",
     price: 92,
+    imageExist: true,
     image: "mamma-mia.jpeg",
     size: [
       {
@@ -4765,6 +4779,7 @@ export const MENU: Product[] = [
     name: "Spaghetti Bolognese",
     description: "With meat sauce",
     price: 85,
+    imageExist: true,
     image: "bolognese.jpeg",
     imageLarge: "bolognese-large.jpeg",
   },
@@ -4843,6 +4858,7 @@ export const MENU: Product[] = [
     name: "Lasagne",
     description: "With meat sauce",
     price: 85,
+    imageExist: true,
     image: "lasagne.jpeg",
     imageLarge: "lasagne-large.jpeg",
   },
@@ -4852,6 +4868,7 @@ export const MENU: Product[] = [
     name: "Spaghetti Carbonara",
     description: "With bacon, egg and cream sauce",
     price: 95,
+    imageExist: true,
     image: "carbonara.jpeg",
     imageLarge: "carbonara-large.jpeg",
   },
@@ -5190,6 +5207,7 @@ export const MENU: Product[] = [
     name: "Chicken Nuggets 10 pcs.",
     description: "With remoulade and french fries.",
     price: 99,
+    imageExist: true,
     image: "chicken-nuggets.jpeg",
     type: [
       {
@@ -5455,6 +5473,7 @@ export const MENU: Product[] = [
     name: "Children Spaghetti Bolognese",
     description: "Kids portion of spaghetti with meat sauce",
     price: 75,
+    imageExist: true,
     image: "kids-spaghetti.jpeg",
     imageLarge: "kids-spaghetti-large.jpeg",
   },
@@ -5464,6 +5483,7 @@ export const MENU: Product[] = [
     name: "Children Fish fillet 1 pc.",
     description: "With french fries, remoulade or ketchup",
     price: 75,
+    imageExist: true,
     image: "kids-fish.jpeg",
     chooseOne: [
       {
@@ -5487,6 +5507,7 @@ export const MENU: Product[] = [
     name: "Kids Meat Sauce Pizza",
     description: "Tomato, cheese and meat sauce",
     price: 75,
+    imageExist: true,
     image: "kids-pizza-meat.jpeg",
     addOns: [
       {
@@ -5618,6 +5639,7 @@ export const MENU: Product[] = [
     name: "Børne Pepperoni Pizza",
     description: "Tomato, cheese and pepperoni",
     price: 75,
+    imageExist: true,
     image: "kids-pizza-pepperoni.jpeg",
     addOns: [
       {
@@ -5749,6 +5771,7 @@ export const MENU: Product[] = [
     name: "Kids Minced Ham Pizza",
     description: "Tomato, cheese and minced ham",
     price: 75,
+    imageExist: true,
     image: "kids-pizza-ham.jpeg",
     addOns: [
       {
@@ -5907,6 +5930,7 @@ export const MENU: Product[] = [
     name: "Greek Salad",
     description: "Served with flutes and butter",
     price: 75,
+    imageExist: true,
     image: "salad-greek.jpeg",
     addOns: [
       {
@@ -5931,6 +5955,7 @@ export const MENU: Product[] = [
     name: "Durum",
     description: "Homemade flatbread with salad and dressing.",
     price: 80,
+    imageExist: true,
     image: "durum.jpeg",
     type: [
       {
@@ -6003,6 +6028,7 @@ export const MENU: Product[] = [
     name: "Falafel Pita Bread",
     description: "Served with salad and dressing.",
     price: 65,
+    imageExist: true,
     image: "pita-falafel.jpeg",
     imageLarge: "pita-falafel-large.jpeg",
   },
@@ -6012,6 +6038,7 @@ export const MENU: Product[] = [
     name: "Chicken Pita bread",
     description: "Served with salad and dressing.",
     price: 65,
+    imageExist: true,
     image: "pita-chicken.jpeg",
     imageLarge: "pita-chicken-large.jpeg",
   },
@@ -6021,6 +6048,7 @@ export const MENU: Product[] = [
     name: "Kebab Pita bread",
     description: "Served with salad and dressing.",
     price: 65,
+    imageExist: true,
     image: "pita-kebab.jpeg",
     imageLarge: "pita-kebab-large.jpeg",
   },
@@ -6084,6 +6112,7 @@ export const MENU: Product[] = [
     name: "Pizza sandwich",
     description: "Homemade. Served with salad, cheese and dressing.",
     price: 85,
+    imageExist: true,
     image: "pizza-sandwich.jpeg",
     type: [
       {
@@ -6145,6 +6174,7 @@ export const MENU: Product[] = [
     name: "Chicken Nachos",
     description: "With cheddar cheese, guacamole and taco sauce.",
     price: 85,
+    imageExist: true,
     image: "nachos-chicken.jpeg",
     imageLarge: "nachos-chicken-large.jpeg",
   },
@@ -6163,6 +6193,7 @@ export const MENU: Product[] = [
     name: "Xanthos Burger",
     description: "Homemade beef burger with fresh salad and dressing",
     price: 69,
+    imageExist: true,
     image: "xanthos-burger.jpeg",
     imageLarge: "xanthos-burger-large.jpeg",
   },
@@ -6172,6 +6203,7 @@ export const MENU: Product[] = [
     name: "Cheese Burger",
     description: "Homemade beef burger with melted cheese",
     price: 73,
+    imageExist: true,
     image: "home-cheese-burger.jpeg",
     imageLarge: "home-cheese-burger-large.jpeg",
   },
@@ -6199,6 +6231,7 @@ export const MENU: Product[] = [
     name: "Bacon Cheese Burger",
     description: "Homemade with cheese and bacon",
     price: 75,
+    imageExist: true,
     image: "home-bacon-cheese.jpeg",
     imageLarge: "home-bacon-cheese-large.jpeg",
   },
@@ -6208,6 +6241,7 @@ export const MENU: Product[] = [
     name: "Hamburger",
     description: "Classic burger with salad and dressing",
     price: 62,
+    imageExist: true,
     image: "norm-hamburger.jpeg",
     imageLarge: "norm-hamburger-large.jpeg",
   },
@@ -6217,6 +6251,7 @@ export const MENU: Product[] = [
     name: "Cheese Burger",
     description: "Classic burger with cheese",
     price: 65,
+    imageExist: true,
     image: "norm-cheese.jpeg",
     imageLarge: "norm-cheese-large.jpeg",
   },
@@ -6244,6 +6279,7 @@ export const MENU: Product[] = [
     name: "Bacon Cheese Burger",
     description: "Classic burger with bacon and cheese",
     price: 69,
+    imageExist: true,
     image: "norm-bacon-cheese.jpeg",
     imageLarge: "norm-bacon-cheese-large.jpeg",
   },
@@ -6253,6 +6289,7 @@ export const MENU: Product[] = [
     name: "Burger Menu",
     description: "With french fries, salad mayonnaise and soda can",
     price: 99,
+    imageExist: true,
     image: "burger-menu.jpeg",
     chooseOne: [
       {
@@ -6280,6 +6317,7 @@ export const MENU: Product[] = [
     name: "Chicken Burger",
     description: "Crispy chicken burger with salad and dressing",
     price: 70,
+    imageExist: true,
     image: "chicken-burger.jpeg",
     imageLarge: "chicken-burger-large.jpeg",
   },
@@ -6289,6 +6327,7 @@ export const MENU: Product[] = [
     name: "French Fries (Small)",
     description: "Crispy golden french fries",
     price: 45,
+    imageExist: true,
     image: "fries-small.jpeg",
     addOns: [
       {
@@ -6308,6 +6347,7 @@ export const MENU: Product[] = [
     name: "French Fries (Large)",
     description: "Large portion of crispy golden french fries",
     price: 50,
+    imageExist: true,
     image: "fries-large.jpeg",
     addOns: [
       {
@@ -6327,6 +6367,7 @@ export const MENU: Product[] = [
     name: "Potato wedges (Large)",
     description: "Seasoned potato wedges",
     price: 55,
+    imageExist: true,
     image: "potato-wedges.jpeg",
     imageLarge: "potato-wedges-large.jpeg",
   },
@@ -6345,6 +6386,7 @@ export const MENU: Product[] = [
     name: "Fish fillet 2 pcs.",
     description: "With french fries, salad and remoulade",
     price: 109,
+    imageExist: true,
     image: "fish-fillet.jpeg",
     imageLarge: "fish-fillet-large.jpeg",
   },
@@ -6372,6 +6414,7 @@ export const MENU: Product[] = [
     name: "Dipping",
     description: "Choose your favorite dipping sauce",
     price: 15,
+    imageExist: true,
     image: "dipping.jpeg",
     chooseOne: [
       {
@@ -6403,6 +6446,7 @@ export const MENU: Product[] = [
     name: "Chili Cheese Tops 5 pcs.",
     description: "Spicy melted cheese in a crispy coating",
     price: 45,
+    imageExist: true,
     image: "chili-cheese.jpeg",
     imageLarge: "chili-cheese-large.jpeg",
   },
@@ -6412,6 +6456,7 @@ export const MENU: Product[] = [
     name: "Onion Rings 5 pcs.",
     description: "Crispy battered onion rings",
     price: 40,
+    imageExist: true,
     image: "onion-rings.jpeg",
     imageLarge: "onion-rings-large.jpeg",
   },
@@ -6421,6 +6466,7 @@ export const MENU: Product[] = [
     name: "Mozzarella Sticks 5 pcs.",
     description: "Melted mozzarella breaded and fried",
     price: 45,
+    imageExist: true,
     image: "mozzarella-sticks.jpeg",
     imageLarge: "mozzarella-sticks-large.jpeg",
   },
@@ -6450,6 +6496,7 @@ export const MENU: Product[] = [
     name: "Coca-Cola",
     description: "Out of the house only. Choose size.",
     price: 25,
+    imageExist: true,
     image: "cola.jpeg",
     type: [
       {
@@ -6469,6 +6516,7 @@ export const MENU: Product[] = [
     name: "Coca-Cola zero",
     description: "Out of the house only. Choose size.",
     price: 25,
+    imageExist: true,
     image: "cola-zero.jpeg",
     type: [
       {
@@ -6488,6 +6536,7 @@ export const MENU: Product[] = [
     name: "Sprite",
     description: "Out of the house only. Choose size.",
     price: 25,
+    imageExist: true,
     image: "sprite.jpeg",
     type: [
       {
@@ -6507,6 +6556,7 @@ export const MENU: Product[] = [
     name: "Fanta",
     description: "Out of the house only. Choose size.",
     price: 25,
+    imageExist: true,
     image: "fanta.jpeg",
     type: [
       { name: "0.5L", extraPrice: 0 },
@@ -6551,6 +6601,7 @@ export const MENU: Product[] = [
     name: "Water - 0,5L",
     description: "Refreshing still water",
     price: 18,
+    imageExist: true,
     image: "water.jpeg",
     imageLarge: "water-large.jpeg",
   },

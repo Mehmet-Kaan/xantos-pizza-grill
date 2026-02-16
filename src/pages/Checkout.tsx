@@ -12,6 +12,7 @@ import { createOrder, type Order } from "../services/ordersService";
 import "../styles/Checkout.css";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { IMAGE_BASE_URL } from "../services/productsService";
 
 const DELIVERY_FEE = 30;
 // 2. Minimum order logic
@@ -589,13 +590,13 @@ export default function Checkout() {
                 {items.map((item) => (
                   <div key={item.id} className="summary-item">
                     <img
-                      src={`./assets/menuItems/Large/${item.imageLarge}`}
+                      src={`${IMAGE_BASE_URL}/Large/${item.imageLarge}`}
                       alt={item.name}
                       className="checkout-item-img"
                       loading="lazy"
                       onError={(e) => {
                         let target = e.target as HTMLImageElement;
-                        target.src = "./assets/placeholderIMG.jpg";
+                        target.src = `${IMAGE_BASE_URL}/assets/placeholderIMG.jpeg`;
                         target.onerror = null;
                         // target.style.display = "none";
                       }}

@@ -9,6 +9,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  imageExist?: string;
   image: string;
   imageLarge: string;
   size?: AddOnOption[];

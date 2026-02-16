@@ -24,3 +24,22 @@
     background-position: -200% 0;
   }
 }
+
+.lazy-load-wrapper {
+  position: relative;
+  height: 130px;
+}
+
+.modal-content .lazy-load-wrapper {
+  height: 300px;
+}
+
+@media (max-width: 600px) {
+  .lazy-load-wrapper {
+    height: unset;
+  }
+
+  .modal-content .lazy-load-wrapper.loaded-successfully-wrapper {
+    height: 300px;
+  }
+}

@@ -9,6 +9,7 @@ import {
   getAllProducts,
   getProductsMetadata,
   getMostPopularMetadataAndIds,
+  IMAGE_BASE_URL,
 } from "../services/productsService";
 import {
   getStoredProducts,
@@ -29,7 +30,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
   return (
     <div key={item.id} className="menu-item-simple homePopularItemsDiv">
       <img
-        src={`./assets/menuItems/${item.image}`}
+        src={`${IMAGE_BASE_URL}/menuItems/${item.image}`}
         alt={item.name}
         className="menu-item-simple-img"
         // onError={(e) => {
@@ -38,6 +39,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
         //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
         // }}
         onError={(e) => {
+          // (e.target as HTMLImageElement).style.visibility = "hidden";
           (e.target as HTMLImageElement).style.display = "none";
         }}
       />
@@ -160,7 +162,7 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
     ? (selectedSize.extraPrice ?? 0) - item.price
     : 0;
 
-  console.log(priceDifferencesBetweenBaseAndSelectedSize);
+  // console.log(priceDifferencesBetweenBaseAndSelectedSize);
 
   // 2. The cost of everything else (Type + Extras)
   let selectedTypeCost = selectedType ? selectedType.extraPrice || 0 : 0;
@@ -207,14 +209,20 @@ function ModifyModal({ item, onClose, onConfirm }: ModifyModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content">
-          <LazyImage
-            item={item}
-            addClassToContainer="modal-image-wrapper"
-            addClassToImg="modalImage"
-            large={true}
-            badge={true}
-            onImageStatusChange={setImageExists}
-          />
+          {item.imageExist ? (
+            <LazyImage
+              item={item}
+              addClassToContainer="modal-image-wrapper"
+              addClassToImg="modalImage"
+              large={true}
+              badge={true}
+              onImageStatusChange={setImageExists}
+            />
+          ) : (
+            <div className="modal-price-badge relativePosition">
+              {item.size && "Fra"} {item.price.toFixed(2)} kr
+            </div>
+          )}
 
           <div
             className={`modal-header-section ${addOnExist ? "addOnExist" : imageExists ? "imageExist" : "noneExist"}`}
@@ -1319,10 +1327,12 @@ export default function Menu() {
                         // }
                       }}
                     >
-                      <LazyImage
-                        item={item}
-                        addClassToImg="menu-item-simple-img"
-                      />
+                      {item.imageExist && (
+                        <LazyImage
+                          item={item}
+                          addClassToImg="menu-item-simple-img"
+                        />
+                      )}
                       {/* <img
                         src={`./assets/menuItems/${item.image}`}
                         alt={item.name}
@@ -1339,22 +1349,25 @@ export default function Menu() {
                       <div className="menu-item-simple-content">
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
-                          <span className="menu-item-simple-price">
-                            {item.price.toFixed(2)} kr
-                          </span>
+                          <p className="menu-item-simple-desc">
+                            {item.description}
+                          </p>
+                          {item.tags && item.tags.length > 0 && (
+                            <div className="menu-item-simple-tags">
+                              {item.tags.slice(0, 2).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="menu-item-simple-tag"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <p className="menu-item-simple-desc">
-                          {item.description}
-                        </p>
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="menu-item-simple-tags">
-                            {item.tags.slice(0, 2).map((tag) => (
-                              <span key={tag} className="menu-item-simple-tag">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <span className="menu-item-simple-price">
+                          {item.price.toFixed(2)} kr
+                        </span>
                       </div>
                       <button
                         className="menu-item-simple-add"
@@ -1425,30 +1438,35 @@ export default function Menu() {
                         className="menu-item-simple-img"
                       /> */}
 
-                      <LazyImage
-                        item={item}
-                        addClassToImg="menu-item-simple-img"
-                      />
+                      {item.imageExist && (
+                        <LazyImage
+                          item={item}
+                          addClassToImg="menu-item-simple-img"
+                        />
+                      )}
 
                       <div className="menu-item-simple-content">
                         <div className="menu-item-simple-header">
                           <h4 className="menu-item-simple-name">{item.name}</h4>
-                          <span className="menu-item-simple-price">
-                            {item.price.toFixed(2)} kr
-                          </span>
+                          <p className="menu-item-simple-desc">
+                            {item.description}
+                          </p>
+                          {item.tags && item.tags.length > 0 && (
+                            <div className="menu-item-simple-tags">
+                              {item.tags.slice(0, 2).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="menu-item-simple-tag"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <p className="menu-item-simple-desc">
-                          {item.description}
-                        </p>
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="menu-item-simple-tags">
-                            {item.tags.slice(0, 2).map((tag) => (
-                              <span key={tag} className="menu-item-simple-tag">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <span className="menu-item-simple-price">
+                          {item.price.toFixed(2)} kr
+                        </span>
                       </div>
                       <button
                         className="menu-item-simple-add"

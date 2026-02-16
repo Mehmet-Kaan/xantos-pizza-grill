@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../styles/lazyLoad.css";
 import type { Product } from "../hooks/types";
+import { IMAGE_BASE_URL } from "../services/productsService";
 
 type Props = {
   item: Product;
@@ -23,14 +24,16 @@ export const LazyImage = ({
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className={`${addClassToContainer} ${imgError && "transparent-bg"}`}>
+    <div
+      className={`lazy-load-wrapper ${addClassToContainer} ${imgError ? "transparent-bg" : "loaded-successfully-wrapper"}`}
+    >
       {!loaded && !imgError && <div className="lazy-image-placeholder" />}
 
       <img
         src={
           large
-            ? `./assets/menuItems/Large/${item.imageLarge}`
-            : `./assets/menuItems/${item.image}`
+            ? `${IMAGE_BASE_URL}/Large/${item.imageLarge}`
+            : `${IMAGE_BASE_URL}/menuItems/${item.image}`
         }
         alt={item.name}
         loading="lazy"
@@ -40,7 +43,8 @@ export const LazyImage = ({
           onImageStatusChange?.(true);
         }}
         onError={(e) => {
-          (e.target as HTMLImageElement).style.display = "none";
+          // (e.target as HTMLImageElement).style.display = "none";
+          (e.target as HTMLImageElement).style.visibility = "hidden";
           setImgError(true);
           onImageStatusChange?.(false);
         }}
