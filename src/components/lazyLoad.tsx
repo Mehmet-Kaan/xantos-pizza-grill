@@ -25,7 +25,7 @@ export const LazyImage = ({
 
   return (
     <div
-      className={`lazy-load-wrapper ${addClassToContainer} ${imgError ? "transparent-bg" : "loaded-successfully-wrapper"}`}
+      className={`lazy-load-wrapper ${addClassToContainer} ${imgError ? "transparent-bg" : ""}`}
     >
       {!loaded && !imgError && <div className="lazy-image-placeholder" />}
 

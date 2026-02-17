@@ -452,7 +452,7 @@ export default function Home() {
               </span>
               <span className="hero-feature">
                 <span className="hero-icon">⭐</span>
-                4.6/5 (500+ anmeldelser)
+                {averageRating.toFixed(1)}/5 ({totalReviews}+ anmeldelser)
               </span>
             </div>
             <div className="hero-cta">

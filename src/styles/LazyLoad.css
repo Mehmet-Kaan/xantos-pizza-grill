@@ -14,6 +14,13 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite linear;
+  border-radius: 8px;
+}
+
+.modal-content .lazy-image-placeholder {
+  height: 100%;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 @keyframes shimmer {
@@ -27,7 +34,7 @@
 
 .lazy-load-wrapper {
   position: relative;
-  height: 130px;
+  /* height: 130px; */
 }
 
 .modal-content .lazy-load-wrapper {
@@ -39,7 +46,7 @@
     height: unset;
   }
 
-  .modal-content .lazy-load-wrapper.loaded-successfully-wrapper {
+  .modal-content .lazy-load-wrapper {
     height: 300px;
   }
 }
