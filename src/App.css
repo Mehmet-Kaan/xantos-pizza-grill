@@ -428,6 +428,10 @@ body:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+.modern-header.hide {
+  display: none;
+}
+
 .modern-header-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -1733,4 +1737,8 @@ textarea:focus {
 
 html {
   scroll-behavior: smooth;
+}
+
+.not-hide {
+  display: flex !important;
 }

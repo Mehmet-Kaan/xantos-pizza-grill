@@ -109,19 +109,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // We combine ID + Size Name + Type Name + Sorted Extras
       const sizeKey = menuItem.selectedSize?.name || "default";
       const typeKey = menuItem.selectedType?.name || "none";
+      const chooseOneKey = menuItem.selectedChooseOne?.name || "none";
       const extrasKey =
         menuItem.selectedaddOns
           ?.map((i) => i.name)
           .sort()
           .join("-") || "no-extras";
 
-      const uniqueId = `${menuItem.id}-${sizeKey}-${typeKey}-${extrasKey}`;
+      const uniqueId = `${menuItem.id}-${sizeKey}-${typeKey}-${chooseOneKey}-${extrasKey}`;
 
       const found = prev.find((i) => i.id === uniqueId);
 
       const totalPrice = calculateTotalPrice(menuItem);
-
-      console.log(itemQty);
 
       if (found) {
         return prev.map((i) =>

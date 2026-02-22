@@ -12,6 +12,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
+import type { AddOnOption } from "../hooks/types";
 
 export interface Order {
   id?: string;
@@ -20,8 +21,13 @@ export interface Order {
     name: string;
     price: number;
     qty: number;
-    selectedIngredients?: Array<{ name: string; extraPrice?: number }>;
+    selectedSize?: AddOnOption;
+    selectedType?: AddOnOption;
+    selectedChooseOne?: AddOnOption;
+    selectedaddOns?: AddOnOption[];
+    selectedaddOnsExtra?: AddOnOption[];
   }>;
+
   total: number;
   name: string;
   phone: string;
@@ -36,7 +42,7 @@ export interface Order {
 
 // Create a new order
 export async function createOrder(
-  orderData: Omit<Order, "id" | "createdAt">
+  orderData: Omit<Order, "id" | "createdAt">,
 ): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, "orders"), {
@@ -51,10 +57,13 @@ export async function createOrder(
 }
 
 // Get all orders (with optional filters for today's orders and excluding ready status)
-export async function getAllOrders(onlyToday = false, excludeReady = false): Promise<Order[]> {
+export async function getAllOrders(
+  onlyToday = false,
+  excludeReady = false,
+): Promise<Order[]> {
   try {
     let q = query(collection(db, "orders"));
-    
+
     // Filter: only today's orders
     if (onlyToday) {
       const today = new Date();
@@ -62,23 +71,23 @@ export async function getAllOrders(onlyToday = false, excludeReady = false): Pro
       const todayTimestamp = Timestamp.fromDate(today);
       q = query(q, where("createdAt", ">=", todayTimestamp));
     }
-    
+
     // Note: We filter by status client-side to avoid composite index requirement
     // Always order by createdAt descending (newest first)
     q = query(q, orderBy("createdAt", "desc"));
-    
+
     const querySnapshot = await getDocs(q);
     let orders = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate() || new Date(),
     })) as Order[];
-    
+
     // Filter: exclude orders with "ready" status (client-side to avoid index requirement)
     if (excludeReady) {
-      orders = orders.filter(order => order.status !== "ready");
+      orders = orders.filter((order) => order.status !== "ready");
     }
-    
+
     return orders;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -89,7 +98,7 @@ export async function getAllOrders(onlyToday = false, excludeReady = false): Pro
 // Update order status
 export async function updateOrderStatus(
   orderId: string,
-  status: Order["status"]
+  status: Order["status"],
 ): Promise<void> {
   try {
     const orderRef = doc(db, "orders", orderId);
@@ -127,11 +136,11 @@ export function subscribeToOrders(
   onUpdate: (orders: Order[]) => void,
   onError?: (error: Error) => void,
   onlyToday = false,
-  excludeReady = false
+  excludeReady = false,
 ): Unsubscribe {
   try {
     let q = query(collection(db, "orders"));
-    
+
     // Filter: only today's orders
     if (onlyToday) {
       const today = new Date();
@@ -139,11 +148,11 @@ export function subscribeToOrders(
       const todayTimestamp = Timestamp.fromDate(today);
       q = query(q, where("createdAt", ">=", todayTimestamp));
     }
-    
+
     // Note: We filter by status client-side to avoid composite index requirement
     // Always order by createdAt descending (newest first)
     q = query(q, orderBy("createdAt", "desc"));
-    
+
     const unsubscribe = onSnapshot(
       q,
       (querySnapshot) => {
@@ -152,12 +161,12 @@ export function subscribeToOrders(
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date(),
         })) as Order[];
-        
+
         // Filter: exclude orders with "ready" status (client-side to avoid index requirement)
         if (excludeReady) {
-          orders = orders.filter(order => order.status !== "ready");
+          orders = orders.filter((order) => order.status !== "ready");
         }
-        
+
         onUpdate(orders);
       },
       (error) => {
@@ -165,7 +174,7 @@ export function subscribeToOrders(
         if (onError) {
           onError(error as Error);
         }
-      }
+      },
     );
 
     return unsubscribe;

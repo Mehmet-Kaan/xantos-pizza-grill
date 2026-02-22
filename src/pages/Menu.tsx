@@ -29,20 +29,22 @@ export function MenuCard({ item }: { item: MenuItem }) {
 
   return (
     <div key={item.id} className="menu-item-simple homePopularItemsDiv">
-      <img
-        src={`${IMAGE_BASE_URL}/menuItems/${item.image}`}
-        alt={item.name}
-        className="menu-item-simple-img"
-        // onError={(e) => {
-        //   const target = e.target as HTMLImageElement;
-        //   target.src = "./assets/placeholderIMG.jpg"; // Path to a default image
-        //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
-        // }}
-        onError={(e) => {
-          // (e.target as HTMLImageElement).style.visibility = "hidden";
-          (e.target as HTMLImageElement).style.display = "none";
-        }}
-      />
+      {item.imageExist === true && (
+        <img
+          src={`${IMAGE_BASE_URL}/menuItems/${item.image}`}
+          alt={item.name}
+          className="menu-item-simple-img"
+          // onError={(e) => {
+          //   const target = e.target as HTMLImageElement;
+          //   target.src = "./assets/placeholderIMG.jpg"; // Path to a default image
+          //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
+          // }}
+          onError={(e) => {
+            // (e.target as HTMLImageElement).style.visibility = "hidden";
+            (e.target as HTMLImageElement).style.display = "none";
+          }}
+        />
+      )}
 
       <div>
         <p className="menu-cart-item-name">{item.name}</p>

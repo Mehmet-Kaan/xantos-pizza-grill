@@ -18,10 +18,16 @@
 
 .checkout-empty {
   background: #fff;
+  color: #111827;
   border-radius: 16px;
   padding: 3rem;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .checkout-empty {
+  background: transparent;
+  color: white;
 }
 
 .checkout-link {

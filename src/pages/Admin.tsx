@@ -14,6 +14,8 @@ import {
   setMostPopularProductIds,
   getMostPopularMetadataAndIds,
   type Product,
+  IMAGE_BASE_URL,
+  createProduct,
 } from "../services/productsService";
 import {
   getAllReviews,
@@ -24,6 +26,9 @@ import {
 } from "../services/reviewsService";
 import type { Unsubscribe } from "firebase/firestore";
 import "../styles/Admin.css";
+import { AddIcon, RefreshIcon } from "../utils/Icons";
+import LogoutButton from "../components/LogoutButton";
+import ToggleThemeButton from "../components/ToggleThemeButton";
 
 // localStorage keys
 const PRODUCTS_STORAGE_KEY = "admin_products";
@@ -239,6 +244,7 @@ export default function Admin() {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [productSearchQuery, setProductSearchQuery] = useState<string>("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [addNewProduct, setAddNewProduct] = useState(false);
   const [initializing, setInitializing] = useState(false);
   const [initSuccess, setInitSuccess] = useState(false);
   const [mostPopularProductIds, setMostPopularProductIdsState] = useState<
@@ -250,6 +256,18 @@ export default function Admin() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // document.body.style.overflow = activeItem ? "hidden" : "auto";
+    if (editingProduct || addNewProduct) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [editingProduct, addNewProduct]);
 
   // LocalStorage functions for all today's orders
   const getStoredTodaysOrders = (): Order[] | null => {
@@ -729,6 +747,33 @@ export default function Admin() {
     }
   }
 
+  async function handleAddProduct(product: Product | Partial<Product>) {
+    try {
+      const newId = await createProduct(product as Omit<Product, "id">);
+
+      const createdProduct: Product = {
+        ...(product as Product),
+        id: newId,
+      };
+
+      const updatedProducts = [...products, createdProduct];
+
+      setProducts(updatedProducts);
+      setStoredProducts(updatedProducts);
+
+      const newMetadata = await getProductsMetadata();
+      if (newMetadata) {
+        setStoredProductsLastUpdated(newMetadata);
+      }
+
+      setAddNewProduct(false);
+      alert("Produkt oprettet med succes!");
+    } catch (err) {
+      console.error("Error creating product:", err);
+      alert("Kunne ikke oprette produkt. Prøv venligst igen.");
+    }
+  }
+
   async function handleUpdateProduct(
     productId: string,
     updates: Partial<Product>,
@@ -853,8 +898,17 @@ export default function Admin() {
 
   return (
     <main className="admin-page">
+      <div className="admin-header">
+        <h1 className="admin-title">
+          Xanthos <span>/ Admin</span>
+        </h1>
+
+        <div className="admin-controls">
+          <LogoutButton />
+          <ToggleThemeButton setClass="modern-theme-toggle admin-toggle-theme-button not-hide" />
+        </div>
+      </div>
       <div className="admin-container">
-        <h1 className="admin-title">Admin Panel</h1>
         {/* Tabs */}
         <div className="admin-tabs">
           <button
@@ -1135,7 +1189,21 @@ export default function Admin() {
                   className="btn-refresh"
                   disabled={productsLoading}
                 >
-                  {productsLoading ? "Indlæser..." : "🔄 Opdater"}
+                  {productsLoading ? (
+                    <>
+                      <RefreshIcon className="spin" /> Indlæser...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshIcon /> Opdater
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setAddNewProduct(true)}
+                  className="btn-refresh"
+                >
+                  <AddIcon /> Add New Product
                 </button>
               </div>
             </div>
@@ -1165,87 +1233,6 @@ export default function Admin() {
               </div>
             ) : (
               <>
-                {editingProduct && (
-                  <ProductEditForm
-                    product={editingProduct}
-                    onSave={(updates) =>
-                      handleUpdateProduct(editingProduct.id!, updates)
-                    }
-                    onCancel={() => setEditingProduct(null)}
-                  />
-                )}
-
-                {/* Most Popular Products Selector */}
-                {/* <div className="most-popular-selector">
-                  <div className="most-popular-header">
-                    <label className="most-popular-label">
-                      ⭐ Mest Populære Produkter:
-                    </label>
-                    {mostPopularProductIds.length > 0 && (
-                      <button
-                        onClick={handleClearAllMostPopular}
-                        className="btn-clear-popular"
-                        disabled={savingPopularProducts}
-                        title="Fjern alle produkter fra Most Popular"
-                      >
-                        ✕ Fjern Alle ({mostPopularProductIds.length})
-                      </button>
-                    )}
-                  </div>
-                  {savingPopularProducts && (
-                    <div className="saving-indicator">Gemmer...</div>
-                  )}
-                  <p className="most-popular-info">
-                    Vælg produkter der skal vises i "Most Popular" sektionen på
-                    menuen. Klik på et produkt for at tilføje/fjerne det.
-                  </p>
-                  <div className="most-popular-products-grid">
-                    {products.map((product) => {
-                      const isPopular = mostPopularProductIds.includes(
-                        product.id || "",
-                      );
-                      return (
-                        <div
-                          key={product.id}
-                          className={`most-popular-product-card ${isPopular ? "is-popular" : ""}`}
-                          onClick={() =>
-                            !savingPopularProducts &&
-                            handleToggleMostPopular(product.id!)
-                          }
-                        >
-                          <div className="most-popular-product-checkbox">
-                            {isPopular ? "✓" : ""}
-                          </div>
-                          <img
-                            src={`./assets/${product.image}`}
-                            alt={product.name}
-                            className="most-popular-product-image"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display =
-                                "none";
-                            }}
-                          />
-                          <div className="most-popular-product-info">
-                            <div className="most-popular-product-name">
-                              {product.name}
-                            </div>
-                            <div className="most-popular-product-category">
-                              {product.category}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {mostPopularProductIds.length > 0 && (
-                    <div className="most-popular-summary">
-                      <strong>{mostPopularProductIds.length}</strong> produkt
-                      {mostPopularProductIds.length !== 1 ? "er" : ""} valgt til
-                      "Most Popular"
-                    </div>
-                  )}
-                </div> */}
-
                 <div
                   className={`most-popular-selector ${isPopularCollapsed ? "is-collapsed" : ""}`}
                   onClick={() => setIsPopularCollapsed(!isPopularCollapsed)}
@@ -1320,15 +1307,18 @@ export default function Admin() {
                               <div className="most-popular-product-checkbox">
                                 {isPopular ? "✓" : ""}
                               </div>
-                              <img
-                                src={`./assets/menuItems/${product.image}`}
-                                alt={product.name}
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display =
-                                    "none";
-                                }}
-                                className="most-popular-product-image"
-                              />
+                              {product.imageExist && (
+                                <img
+                                  src={`${IMAGE_BASE_URL}/menuItems/${product.image}`}
+                                  alt={product.name}
+                                  onError={(e) => {
+                                    (
+                                      e.target as HTMLImageElement
+                                    ).style.display = "none";
+                                  }}
+                                  className="most-popular-product-image"
+                                />
+                              )}
                               <div className="most-popular-product-info">
                                 <div className="most-popular-product-name">
                                   {product.name}
@@ -1413,20 +1403,22 @@ export default function Admin() {
                       {filteredProducts.map((product) => (
                         <div key={product.id} className="product-card">
                           <div className="product-header">
-                            <img
-                              src={`./assets/menuItems/${product.image}`}
-                              alt={product.name}
-                              // onError={(e) => {
-                              //   const target = e.target as HTMLImageElement;
-                              //   target.src =
-                              //     "./assets/menuItems/placeholderIMG.jpg"; // Path to a default image
-                              //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
-                              // }}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display =
-                                  "none";
-                              }}
-                            />
+                            {product.imageExist && (
+                              <img
+                                src={`${IMAGE_BASE_URL}/menuItems/${product.image}`}
+                                alt={product.name}
+                                // onError={(e) => {
+                                //   const target = e.target as HTMLImageElement;
+                                //   target.src =
+                                //     "./assets/menuItems/placeholderIMG.jpg"; // Path to a default image
+                                //   target.onerror = null; // Prevents infinite loops if placeholder is also missing
+                                // }}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display =
+                                    "none";
+                                }}
+                              />
+                            )}
 
                             <div>
                               <div className="product-name">{product.name}</div>
@@ -1448,9 +1440,9 @@ export default function Admin() {
                                 {product.size.map((ing, idx) => (
                                   <li key={idx}>
                                     {ing.name}
-                                    {ing.extraPrice &&
-                                      ing.extraPrice > 0 &&
-                                      ` ( - ${ing.extraPrice} DKK)`}
+                                    {ing.extraPrice && ing.extraPrice > 0
+                                      ? ` ( - ${ing.extraPrice} DKK)`
+                                      : ""}
                                   </li>
                                 ))}
                               </ul>
@@ -1463,9 +1455,9 @@ export default function Admin() {
                                 {product.type.map((ing, idx) => (
                                   <li key={idx}>
                                     {ing.name}
-                                    {ing.extraPrice &&
-                                      ing.extraPrice > 0 &&
-                                      ` ( - ${ing.extraPrice} DKK)`}
+                                    {ing.extraPrice && ing.extraPrice > 0
+                                      ? ` ( - ${ing.extraPrice} DKK)`
+                                      : ""}
                                   </li>
                                 ))}
                               </ul>
@@ -1479,9 +1471,9 @@ export default function Admin() {
                                   {product.chooseOne.map((ing, idx) => (
                                     <li key={idx}>
                                       {ing.name}
-                                      {ing.extraPrice &&
-                                        ing.extraPrice > 0 &&
-                                        ` ( - ${ing.extraPrice} DKK)`}
+                                      {ing.extraPrice && ing.extraPrice > 0
+                                        ? ` ( - ${ing.extraPrice} DKK)`
+                                        : ""}
                                     </li>
                                   ))}
                                 </ul>
@@ -1494,9 +1486,9 @@ export default function Admin() {
                                 {product.addOns.map((ing, idx) => (
                                   <li key={idx}>
                                     {ing.name}
-                                    {ing.extraPrice &&
-                                      ing.extraPrice > 0 &&
-                                      ` ( +${ing.extraPrice} DKK)`}
+                                    {ing.extraPrice && ing.extraPrice > 0
+                                      ? ` ( +${ing.extraPrice} DKK)`
+                                      : ""}
                                   </li>
                                 ))}
                               </ul>
@@ -1510,9 +1502,9 @@ export default function Admin() {
                                   {product.addOnsExtra.map((ing, idx) => (
                                     <li key={idx}>
                                       {ing.name}
-                                      {ing.extraPrice &&
-                                        ing.extraPrice > 0 &&
-                                        ` ( +${ing.extraPrice} DKK)`}
+                                      {ing.extraPrice && ing.extraPrice > 0
+                                        ? ` ( +${ing.extraPrice} DKK)`
+                                        : ""}
                                     </li>
                                   ))}
                                 </ul>
@@ -1696,97 +1688,264 @@ export default function Admin() {
           </section>
         )}
       </div>
+
+      {editingProduct && (
+        // <ProductEditForm
+        //   product={editingProduct}
+        //   onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
+        //   onCancel={() => setEditingProduct(null)}
+        // />
+
+        <ProductForm
+          mode="edit"
+          product={editingProduct}
+          products={products}
+          onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
+          onCancel={() => setEditingProduct(null)}
+        />
+
+        // <ProductEditForm
+        //   product={editingProduct}
+        //   onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
+        //   onCancel={() => setEditingProduct(null)}
+        // />
+      )}
+
+      {addNewProduct && (
+        <ProductForm
+          mode="add"
+          products={products}
+          onSave={handleAddProduct}
+          onCancel={() => setAddNewProduct(false)}
+        />
+      )}
     </main>
   );
 }
 
-// Product Edit Form Component
-function ProductEditForm({
+type ProductFormMode = "add" | "edit";
+
+interface ProductFormProps {
+  mode: ProductFormMode;
+  product?: Product;
+  products?: Product[];
+  onSave: (product: Product | Partial<Product>) => void;
+  onCancel: () => void;
+}
+
+function ProductForm({
+  mode,
   product,
+  products,
   onSave,
   onCancel,
-}: {
-  product: Product;
-  onSave: (updates: Partial<Product>) => void;
-  onCancel: () => void;
-}) {
-  const [name, setName] = useState(product.name);
-  const [description, setDescription] = useState(product.description);
-  const [price, setPrice] = useState(product.price.toString());
-  const [category, setCategory] = useState(product.category);
-  const [image, setImage] = useState(product.image);
-  const [tags, setTags] = useState<string[]>(product.tags || []);
-  const [ingredients, setIngredients] = useState<
-    Array<{ name: string; extraPrice?: number }>
-  >(product.addOns || []);
+}: ProductFormProps) {
+  const isEdit = mode === "edit";
 
+  // ====== Base State ======
+  const [name, setName] = useState(isEdit ? (product?.name ?? "") : "");
+  const [description, setDescription] = useState(
+    isEdit ? (product?.description ?? "") : "",
+  );
+  const [price, setPrice] = useState(
+    isEdit ? (product?.price.toString() ?? "") : "",
+  );
+  const [category, setCategory] = useState(
+    isEdit ? (product?.category ?? "Pizza") : "",
+  );
+  const [imageExist, setImageExist] = useState(
+    isEdit ? (product?.imageExist ?? false) : false,
+  );
+  const [image, setImage] = useState(isEdit ? (product?.image ?? "") : "");
+  const [imageLarge, setImageLarge] = useState(
+    isEdit ? (product?.imageLarge ?? "") : "",
+  );
+  const [tags, setTags] = useState(isEdit ? (product?.tags ?? []) : []);
+
+  const [sizes, setSizes] = useState(product?.size ?? []);
+  const [types, setTypes] = useState(product?.type ?? []);
+  const [chooseOnes, setChooseOnes] = useState(product?.chooseOne ?? []);
+  const [addOns, setAddOns] = useState(product?.addOns ?? []);
+  const [addOnsExtra, setAddOnsExtras] = useState(product?.addOnsExtra ?? []);
+
+  const [existingCategories, setExistingCategories] = useState<string[]>(
+    Array.from(new Set(products?.map((pro) => pro.category) ?? [])),
+  );
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+
+  const [existingImages, setExistingImages] = useState<string[]>(
+    Array.from(
+      new Set(
+        products
+          ?.map((pro) => pro.image)
+          .filter((img): img is string => img !== undefined) ?? [],
+      ),
+    ),
+  );
+  const [isAddingImage, setIsAddingImage] = useState(false);
+  const [newImage, setNewImage] = useState("");
+
+  // ====== Submit ======
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSave({
+
+    const baseData = {
       name,
       description,
       price: parseFloat(price),
       category,
+      imageExist,
       image,
-      tags: tags.length > 0 ? tags : [],
-      addOns: ingredients.length > 0 ? ingredients : [],
-    });
+      imageLarge,
+      tags,
+      size: sizes,
+      type: types,
+      chooseOne: chooseOnes,
+      addOns,
+      addOnsExtra,
+    };
+
+    if (isEdit && product) {
+      onSave(baseData); // Partial update
+    } else {
+      onSave({
+        ...baseData,
+      });
+    }
   }
 
-  function addIngredient() {
-    setIngredients([...ingredients, { name: "", extraPrice: undefined }]);
-  }
-
-  function removeIngredient(index: number) {
-    setIngredients(ingredients.filter((_, i) => i !== index));
-  }
-
-  function updateIngredient(
+  // ====== Reusable Helpers ======
+  function updateSelection(
     index: number,
     field: "name" | "extraPrice",
-    value: string | number,
+    value: string,
+    list: any[],
+    setter: any,
   ) {
-    const updated = [...ingredients];
+    const updated = [...list];
     updated[index] = {
       ...updated[index],
       [field]:
-        field === "extraPrice"
-          ? value === ""
-            ? undefined
-            : Number(value)
-          : value,
+        field === "extraPrice" ? (value === "" ? "" : Number(value)) : value,
     };
-    setIngredients(updated);
+    setter(updated);
   }
 
+  function addItem(list: any[], setter: any) {
+    setter([...list, { name: "", extraPrice: "" }]);
+  }
+
+  function removeItem(index: number, list: any[], setter: any) {
+    setter(list.filter((_, i) => i !== index));
+  }
+
+  const sections = [
+    { label: "Vælg en (Size)", list: sizes, setter: setSizes },
+    { label: "Vælg en (Type)", list: types, setter: setTypes },
+    { label: "Vælg en (Choose One)", list: chooseOnes, setter: setChooseOnes },
+    { label: "Tilvalg", list: addOns, setter: setAddOns },
+    { label: "Tilvalg Ekstra", list: addOnsExtra, setter: setAddOnsExtras },
+  ];
+
   return (
-    <>
+    <div className="modal-overlay">
       <div className="modal-backdrop" onClick={onCancel}></div>
+
       <div className="product-edit-form">
-        <h3>Rediger Produkt</h3>
+        <h3>{isEdit ? "Rediger Produkt" : "Tilføj Nyt Produkt"}</h3>
+
         <form onSubmit={handleSubmit}>
+          {/* Basic Info */}
           <div className="form-row">
             <div className="form-group">
               <label>Navn</label>
               <input
-                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
+
             <div className="form-group">
               <label>Kategori</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
-                <option value="Pizza">Pizza</option>
-                <option value="Grill">Grill</option>
-                <option value="Sides">Sides</option>
-                <option value="Drinks">Drinks</option>
-              </select>
+
+              {!isAddingCategory ? (
+                <select
+                  value={category}
+                  required
+                  onChange={(e) => {
+                    if (e.target.value === "__add_new__") {
+                      setIsAddingCategory(true);
+                      setCategory("");
+                    } else {
+                      setCategory(e.target.value);
+                    }
+                  }}
+                >
+                  <option value="">Vælg kategori</option>
+
+                  {existingCategories.map((cat, index) => (
+                    <option key={`${cat}-${index}`} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+
+                  <option value="__add_new__">+ Tilføj ny kategori</option>
+                </select>
+              ) : (
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type="text"
+                    placeholder="Ny kategori"
+                    required
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                  />
+
+                  <button
+                    type="button"
+                    className="btn-save"
+                    onClick={() => {
+                      const trimmed = newCategory.trim();
+                      if (!trimmed) return;
+
+                      const alreadyExists = existingCategories.some(
+                        (cat) => cat.toLowerCase() === trimmed.toLowerCase(),
+                      );
+
+                      if (alreadyExists) {
+                        // Just select existing category instead of adding duplicate
+                        setCategory(
+                          existingCategories.find(
+                            (cat) =>
+                              cat.toLowerCase() === trimmed.toLowerCase(),
+                          ) as string,
+                        );
+                      } else {
+                        setExistingCategories((prev) => [...prev, trimmed]);
+                        setCategory(trimmed);
+                      }
+
+                      setNewCategory("");
+                      setIsAddingCategory(false);
+                    }}
+                  >
+                    Gem
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => {
+                      setIsAddingCategory(false);
+                      setNewCategory("");
+                    }}
+                  >
+                    Annuller
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="form-group">
@@ -1794,100 +1953,125 @@ function ProductEditForm({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
               rows={3}
+              required
             />
           </div>
 
-          {/* Ingredients Section */}
-          <div className="form-group">
-            <div className="form-group-header">
-              <label>Tilvalg (Ingredienser)</label>
-              <button
-                type="button"
-                onClick={addIngredient}
-                className="btn-add-small"
-              >
-                + Tilføj tilvalg
-              </button>
-            </div>
-            {ingredients.length === 0 ? (
-              <p className="form-hint">
-                Ingen tilvalg tilføjet. Klik på "Tilføj tilvalg" for at tilføje.
-              </p>
-            ) : (
+          {tags ? (
+            <div className="form-group">
+              <div className="form-group-header">
+                <label>Tags</label>
+
+                <button
+                  type="button"
+                  className="btn-add-small"
+                  onClick={() => setTags([...tags, ""])}
+                >
+                  + Tilføj tag
+                </button>
+              </div>
+
+              {tags.length == 0 && (
+                <p className="form-hint">Ingen tilføjet endnu.</p>
+              )}
+
               <div className="ingredients-list">
-                {ingredients.map((ing, idx) => (
+                {tags.map((tag, idx) => (
                   <div key={idx} className="ingredient-item">
                     <input
                       type="text"
-                      placeholder="Navn på tilvalg"
-                      value={ing.name}
-                      onChange={(e) =>
-                        updateIngredient(idx, "name", e.target.value)
-                      }
-                      className="ingredient-name"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Ekstra pris (valgfrit)"
-                      value={ing.extraPrice || ""}
-                      onChange={(e) =>
-                        updateIngredient(idx, "extraPrice", e.target.value)
-                      }
-                      className="ingredient-price"
+                      value={tag}
+                      onChange={(e) => {
+                        const newTags = [...tags];
+                        newTags[idx] = e.target.value;
+                        setTags(newTags);
+                      }}
                     />
                     <button
                       type="button"
-                      onClick={() => removeIngredient(idx)}
                       className="btn-remove"
+                      onClick={() => {
+                        setTags(tags.filter((_, i) => i !== idx));
+                      }}
                     >
                       🗑️
                     </button>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Tags Section */}
-          <div className="form-group">
-            <label>Tags</label>
-            <div className="tags-checkbox-group">
-              {[
-                { value: "vegetarian", label: "🌱 Vegetar" },
-                { value: "vegan", label: "🥬 Vegansk" },
-                { value: "spicy", label: "🌶️ Stærk" },
-                { value: "glutenfree", label: "🌾 Glutenfri" },
-                { value: "halal", label: "☪️ Halal" },
-                { value: "popular", label: "⭐ Populær" },
-              ].map((tag) => (
-                <label key={tag.value} className="tag-checkbox-label">
-                  <input
-                    type="checkbox"
-                    value={tag.value}
-                    checked={tags.includes(tag.value)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setTags([...tags, tag.value]);
-                      } else {
-                        setTags(tags.filter((t) => t !== tag.value));
-                      }
-                    }}
-                    className="tag-checkbox"
-                  />
-                  <span className="tag-checkbox-text">{tag.label}</span>
-                </label>
-              ))}
             </div>
-            {tags.length > 0 && (
-              <div className="selected-tags">
-                <strong>Valgte tags:</strong> {tags.join(", ")}
+          ) : (
+            <>tags does not exist</>
+          )}
+
+          {/* Dynamic Sections */}
+          {sections.map((section, sIndex) => (
+            <div key={sIndex} className="form-group">
+              <div className="form-group-header">
+                <label>{section.label}</label>
+                <button
+                  type="button"
+                  className="btn-add-small"
+                  onClick={() => addItem(section.list, section.setter)}
+                >
+                  + Tilføj
+                </button>
               </div>
-            )}
-          </div>
+
+              {section.list.length === 0 ? (
+                <p className="form-hint">Ingen tilføjet endnu.</p>
+              ) : (
+                <div className="ingredients-list">
+                  {section.list.map((item, idx) => (
+                    <div key={idx} className="ingredient-item">
+                      <input
+                        value={item.name}
+                        onChange={(e) =>
+                          updateSelection(
+                            idx,
+                            "name",
+                            e.target.value,
+                            section.list,
+                            section.setter,
+                          )
+                        }
+                        placeholder="Navn"
+                      />
+
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.extraPrice ?? ""}
+                        onChange={(e) =>
+                          updateSelection(
+                            idx,
+                            "extraPrice",
+                            e.target.value,
+                            section.list,
+                            section.setter,
+                          )
+                        }
+                        placeholder="Ekstra pris"
+                      />
+
+                      <button
+                        type="button"
+                        className="btn-remove"
+                        onClick={() =>
+                          removeItem(idx, section.list, section.setter)
+                        }
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          {/* Price + Image */}
           <div className="form-row">
             <div className="form-group">
               <label>Pris (DKK)</label>
@@ -1899,26 +2083,100 @@ function ProductEditForm({
                 required
               />
             </div>
+
             <div className="form-group">
               <label>Billede filnavn</label>
-              <input
-                type="text"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                required
-              />
+              {/* <input value={image} onChange={(e) => setImage(e.target.value)} /> */}
+
+              {!isAddingImage ? (
+                <select
+                  value={image}
+                  onChange={(e) => {
+                    if (e.target.value === "__add_new_image_") {
+                      setIsAddingImage(true);
+                      setImage("");
+                    } else {
+                      setImage(e.target.value);
+                    }
+                  }}
+                >
+                  <option value="">Vælg bilede namn</option>
+
+                  {existingImages.map((cat, index) => (
+                    <option key={`${cat}-${index}`} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+
+                  <option value="__add_new_image_">
+                    + Tilføj ny bild filnavn
+                  </option>
+                </select>
+              ) : (
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type="text"
+                    placeholder="Ny bild navn"
+                    value={newImage}
+                    onChange={(e) => setNewImage(e.target.value)}
+                  />
+
+                  <button
+                    type="button"
+                    className="btn-save"
+                    onClick={() => {
+                      const trimmed = newImage.trim();
+                      if (!trimmed) return;
+
+                      const alreadyExists = existingImages.some(
+                        (img) => img.toLowerCase() === trimmed.toLowerCase(),
+                      );
+
+                      if (alreadyExists) {
+                        // Just select existing category instead of adding duplicate
+                        setImage(
+                          existingImages.find(
+                            (img) =>
+                              img.toLowerCase() === trimmed.toLowerCase(),
+                          ) as string,
+                        );
+                      } else {
+                        setExistingImages((prev) => [...prev, trimmed]);
+                        setImage(trimmed);
+                      }
+
+                      setNewImage("");
+                      setIsAddingImage(false);
+                    }}
+                  >
+                    Gem
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => {
+                      setIsAddingImage(false);
+                      setNewImage("");
+                    }}
+                  >
+                    Annuller
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="form-actions">
             <button type="submit" className="btn-save">
-              💾 Gem
+              {isEdit ? "💾 Gem" : "➕ Opret Produkt"}
             </button>
+
             <button type="button" onClick={onCancel} className="btn-cancel">
               Annuller
             </button>
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 }

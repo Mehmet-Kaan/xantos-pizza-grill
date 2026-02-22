@@ -571,10 +571,16 @@ export default function Checkout() {
         </h2>
         {items.length === 0 ? (
           <div className="checkout-empty">
-            <p>Din kurv er tom —</p>
-            <Link to="/bestil" className="checkout-link">
-              Se menuen
-            </Link>
+            <div className="cart-empty-state">
+              <div className="cart-empty-icon">🛒</div>
+              <h2 className="cart-empty-title">Din kurv er tom</h2>
+              <p className="cart-empty-text">
+                Tilføj lækre retter fra menuen for at komme i gang
+              </p>
+              <Link to="/bestil" className="checkout-link">
+                Se menuen
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="checkout-layout">

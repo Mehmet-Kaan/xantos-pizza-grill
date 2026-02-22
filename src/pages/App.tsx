@@ -20,6 +20,8 @@ import { CartProvider } from "../contexts/CartContext";
 import ScrollToTop from "../utils/ScrollToTop";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "../utils/PageTransition";
+import AdminLogin from "./AdminLogin";
+import AdminRoute from "../auth/AdminRoute";
 
 // import CookieBanner from "../components/CookieBanner";
 
@@ -46,6 +48,24 @@ function AppContent() {
               element={
                 <PageTransition>
                   <Home />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <PageTransition>
+                  <AdminLogin />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PageTransition>
+                  <AdminRoute>
+                    <Admin />
+                  </AdminRoute>
                 </PageTransition>
               }
             />
@@ -113,14 +133,7 @@ function AppContent() {
                 </PageTransition>
               }
             />
-            <Route
-              path="/admin"
-              element={
-                <PageTransition>
-                  <Admin />
-                </PageTransition>
-              }
-            />
+
             <Route
               path="*"
               element={

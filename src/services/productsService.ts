@@ -23,7 +23,7 @@ export interface Product {
   price: number;
   imageExist?: boolean;
   image?: string;
-  imageLarge: string;
+  imageLarge?: string;
   tags?: string[];
   size?: Array<{
     name: string;
@@ -70,6 +70,8 @@ export async function createProduct(
   productData: Omit<Product, "id">,
 ): Promise<string> {
   try {
+    console.log(productData);
+
     const docRef = await addDoc(collection(db, "menuItems"), productData);
     await updateProductsMetadata();
     return docRef.id;

@@ -1,7 +1,7 @@
 /* Modern Admin Panel Styles */
 
-.admin-page {
-  min-height: calc(100vh - 200px);
+/* .admin-page {
+  min-height: 100vh;
   padding: 2rem 1rem;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   transition: background 0.3s ease;
@@ -9,6 +9,108 @@
 
 [data-theme="dark"] .admin-page {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+} */
+
+.admin-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  overflow: hidden;
+
+  background: linear-gradient(-45deg, #f8fafc, #e2e8f0, #fef3c7, #fee2e2);
+  background-size: 400% 400%;
+  animation: adminGradientShift 18s ease infinite;
+
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .admin-page {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #7f1d1d, #431407);
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #111827, #0f172a);
+  background-size: 400% 400%;
+}
+
+@keyframes adminGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  gap: 10px;
+  max-width: 1600px;
+  margin: auto;
+  margin-bottom: 2.5rem;
+}
+
+.admin-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+[data-theme="light"] .admin-toggle-theme-button {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #f97316;
+  color: #fff;
+  background: #f97316;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.25);
+  height: 2.5rem;
+}
+
+.logout-btn:hover {
+  color: #f97316;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+  transform: translateY(-1px);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+}
+
+[data-theme="dark"] .logout-btn {
+  background: #f97316;
+  border: 1px solid #f97316;
+  color: white;
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.15);
+}
+
+[data-theme="dark"] .logout-btn:hover {
+  color: #f97316;
+  background: white;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .logout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 .admin-container {
@@ -19,13 +121,17 @@
 .admin-title {
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 800;
-  margin-bottom: 2.5rem;
   background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
   letter-spacing: -0.02em;
+  margin-bottom: 0;
+}
+
+.admin-title span {
+  font-size: 30px;
 }
 
 [data-theme="dark"] .admin-title {
@@ -106,7 +212,7 @@
 }
 
 /* Modern Section */
-.admin-section {
+/* .admin-section {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   border-radius: 24px;
@@ -123,6 +229,32 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+} */
+
+.admin-section {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  border-radius: 24px;
+  padding: 2.5rem;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .admin-section {
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
@@ -181,6 +313,11 @@
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   color: #475569;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-refresh::before {
@@ -197,9 +334,9 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.btn-refresh:hover:not(:disabled)::before {
+/* .btn-refresh:hover:not(:disabled)::before {
   opacity: 1;
-}
+} */
 
 [data-theme="dark"] .btn-refresh {
   background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
@@ -1119,12 +1256,9 @@
 
 /* Modern Modal */
 .modal-backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  z-index: 999;
-  animation: fadeIn 0.2s ease;
+  background: rgba(0, 0, 0, 0.5);
 }
 
 @keyframes fadeIn {
@@ -1137,11 +1271,19 @@
 }
 
 /* Modern Product Edit Form */
-.product-edit-form {
+.modal-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.product-edit-form {
+  position: relative; /* important */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 24px;
@@ -1149,24 +1291,26 @@
   width: 90%;
   max-width: 1000px;
   max-height: 85vh;
-  z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   overflow-y: auto;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* animation: modalSlideIn 0.3s ease; */
+
+  animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%);
+    transform: translateY(12px) scale(0.5);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -2029,4 +2173,17 @@
 [data-theme="dark"] .admin-section::-webkit-scrollbar-thumb,
 [data-theme="dark"] .product-edit-form::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -9,7 +9,7 @@ import {
   InfoIcon,
   ContactIcon,
 } from "../utils/Icons";
-import { SunIcon, MoonIcon } from "../hooks/icons";
+import ToggleThemeButton from "./ToggleThemeButton";
 
 function Nav() {
   const [open, setOpen] = useState(false);
@@ -17,10 +17,7 @@ function Nav() {
   const count = items.reduce((s: number, i: any) => s + i.qty, 0);
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
-
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
+  const [isAdminPage, setIsAdminPage] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,14 +32,12 @@ function Nav() {
   };
 
   useEffect(() => {
-    const html = document.documentElement;
-    if (darkMode) {
-      html.setAttribute("data-theme", "dark");
+    if (location.pathname === "/admin" || location.pathname === "/login") {
+      setIsAdminPage(true);
     } else {
-      html.setAttribute("data-theme", "light");
+      setIsAdminPage(false);
     }
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (open) {
@@ -83,7 +78,7 @@ function Nav() {
   }, [open]);
 
   return (
-    <header className="modern-header">
+    <header className={isAdminPage ? "modern-header hide" : "modern-header"}>
       <div className="modern-header-container">
         <Link to="/" className="modern-header-logo">
           <span className="modern-logo-main">Xanthos</span>
@@ -126,13 +121,7 @@ function Nav() {
             <ArrowRightIcon />
           </Link>
 
-          <button
-            className="modern-theme-toggle"
-            onClick={() => setDarkMode((prev) => !prev)}
-            aria-label="Skift tema"
-          >
-            {darkMode ? <SunIcon /> : <MoonIcon />}
-          </button>
+          <ToggleThemeButton />
 
           <button
             ref={toggleRef}
@@ -183,13 +172,8 @@ function Nav() {
               <PhoneIcon className="mobile-nav-icon" />
               <span>55 37 69 76</span>
             </a>
-            <button
-              className="mobile-theme-toggle"
-              onClick={() => setDarkMode((prev) => !prev)}
-              aria-label="Skift tema"
-            >
-              {darkMode ? <SunIcon /> : <MoonIcon />}
-            </button>
+
+            <ToggleThemeButton setClass={"mobile-theme-toggle"} />
           </div>
           <Link
             to="/bestil"

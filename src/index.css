@@ -190,6 +190,15 @@ textarea {
   font-size: 0.95rem;
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 1220px) {
   main {
     padding: 1.25rem 1rem;
