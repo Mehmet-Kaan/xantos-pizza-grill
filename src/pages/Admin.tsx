@@ -26,7 +26,12 @@ import {
 } from "../services/reviewsService";
 import type { Unsubscribe } from "firebase/firestore";
 import "../styles/Admin.css";
-import { AddIcon, RefreshIcon } from "../utils/Icons";
+import {
+  AddIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  RefreshIcon,
+} from "../utils/Icons";
 import LogoutButton from "../components/LogoutButton";
 import ToggleThemeButton from "../components/ToggleThemeButton";
 
@@ -257,9 +262,41 @@ export default function Admin() {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
 
+  const [isOrderFullscreen, setIsOrderFullscreen] = useState(false);
+
+  // 1. Add state at the top of your component
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "error" | "success" | "loading" | "confirm";
+    resolve?: (value: boolean) => void;
+  } | null>(null);
+
+  // 2. Create a helper to show and auto-hide the notification
+  const showNotification = (
+    message: string,
+    type: "error" | "success" | "loading" | "confirm" = "error",
+  ) => {
+    setNotification({ message, type });
+
+    // Auto-hide only for success & error
+    if (type !== "loading" && type !== "confirm") {
+      setTimeout(() => setNotification(null), 4000);
+    }
+  };
+
+  const showConfirm = (message: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setNotification({
+        message,
+        type: "confirm",
+        resolve,
+      });
+    });
+  };
+
   useEffect(() => {
     // document.body.style.overflow = activeItem ? "hidden" : "auto";
-    if (editingProduct || addNewProduct) {
+    if (editingProduct || addNewProduct || notification) {
       document.body.classList.add("modal-open");
     } else {
       document.body.classList.remove("modal-open");
@@ -267,7 +304,29 @@ export default function Admin() {
     return () => {
       document.body.classList.remove("modal-open");
     };
-  }, [editingProduct, addNewProduct]);
+  }, [editingProduct, addNewProduct, notification]);
+
+  useEffect(() => {
+    if (!notification) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // Optional: prevent closing loading state
+        if (notification.type !== "loading") {
+          if (notification.type === "confirm") {
+            notification.resolve?.(false);
+          }
+          setNotification(null);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [notification]);
 
   // LocalStorage functions for all today's orders
   const getStoredTodaysOrders = (): Order[] | null => {
@@ -372,7 +431,10 @@ export default function Admin() {
       setStoredTodaysOrders(fetchedOrders);
     } catch (err) {
       console.error("Error loading all today's orders:", err);
-      alert("Kunne ikke indlæse alle dagens ordrer. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke indlæse alle dagens ordrer. Prøv venligst igen.",
+        "error",
+      );
     } finally {
       setAllTodaysOrdersLoading(false);
     }
@@ -497,31 +559,44 @@ export default function Admin() {
       setStoredMostPopularLastUpdatedAdmin(new Date());
     } catch (err) {
       console.error("Error updating most popular products:", err);
-      alert("Kunne ikke opdatere mest populære produkter. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke opdatere mest populære produkter. Prøv venligst igen.",
+        "error",
+      );
     } finally {
       setSavingPopularProducts(false);
     }
   }
 
   async function handleClearAllMostPopular() {
-    if (
-      !confirm(
-        "Er du sikker på, at du vil fjerne alle produkter fra 'Most Popular'?",
-      )
-    ) {
-      return;
-    }
+    // if (
+    //   !confirm(
+    //     "Er du sikker på, at du vil fjerne alle produkter fra 'Most Popular'?",
+    //   )
+
+    // ) {
+    //   return;
+    // }
+
+    const confirmed = await showConfirm(
+      "Er du sikker på, at du vil fjerne alle produkter fra 'Most Popular'?",
+    );
+    if (!confirmed) return;
+
     try {
       setSavingPopularProducts(true);
       await setMostPopularProductIds([]);
       setMostPopularProductIdsState([]);
-      alert("Alle produkter fjernet fra 'Most Popular'!");
+      showNotification("Alle produkter fjernet fra 'Most Popular'!", "success");
       // Clear localStorage cache for most popular
       setStoredMostPopularIdsAdmin([]);
       setStoredMostPopularLastUpdatedAdmin(new Date());
     } catch (err) {
       console.error("Error clearing most popular products:", err);
-      alert("Kunne ikke fjerne produkter. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke fjerne produkter. Prøv venligst igen.",
+        "error",
+      );
     } finally {
       setSavingPopularProducts(false);
     }
@@ -688,13 +763,18 @@ export default function Admin() {
   }, []);
 
   async function handleInitializeProducts() {
-    if (
-      !confirm(
-        "Er du sikker på, at du vil initialisere alle produkter? Dette kan oprette dubletter hvis produkter allerede findes.",
-      )
-    ) {
-      return;
-    }
+    // if (
+    //   !confirm(
+    //     "Er du sikker på, at du vil initialisere alle produkter? Dette kan oprette dubletter hvis produkter allerede findes.",
+    //   )
+    // ) {
+    //   return;
+    // }
+
+    const confirmed = await showConfirm(
+      "Er du sikker på, at du vil initialisere alle produkter? Dette kan oprette dubletter hvis produkter allerede findes.",
+    );
+    if (!confirmed) return;
 
     setInitializing(true);
     setInitSuccess(false);
@@ -743,7 +823,11 @@ export default function Admin() {
       }
     } catch (err) {
       console.error("Error updating order status:", err);
-      alert("Kunne ikke opdatere ordrestatus. Prøv venligst igen.");
+
+      showNotification(
+        "Kunne ikke opdatere ordrestatus. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
@@ -767,10 +851,13 @@ export default function Admin() {
       }
 
       setAddNewProduct(false);
-      alert("Produkt oprettet med succes!");
+      showNotification("Produkt oprettet med succes!", "success");
     } catch (err) {
       console.error("Error creating product:", err);
-      alert("Kunne ikke oprette produkt. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke oprette produkt. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
@@ -793,17 +880,25 @@ export default function Admin() {
       }
 
       setEditingProduct(null);
-      alert("Produkt opdateret med succes!");
+      showNotification("Produkt opdateret med succes!", "success");
     } catch (err) {
       console.error("Error updating product:", err);
-      alert("Kunne ikke opdatere produkt. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke opdatere produkt. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
   async function handleDeleteProduct(productId: string) {
-    if (!confirm("Er du sikker på, at du vil slette dette produkt?")) {
-      return;
-    }
+    // if (!confirm("Er du sikker på, at du vil slette dette produkt?")) {
+    //   return;
+    // }
+
+    const confirmed = await showConfirm(
+      "Er du sikker på, at du vil slette dette produkt?",
+    );
+    if (!confirmed) return;
 
     try {
       await deleteProduct(productId);
@@ -817,10 +912,13 @@ export default function Admin() {
         setStoredProductsLastUpdated(newMetadata);
       }
 
-      alert("Produkt slettet!");
+      showNotification("Produkt slettet!", "success");
     } catch (err) {
       console.error("Error deleting product:", err);
-      alert("Kunne ikke slette produkt. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke slette produkt. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
@@ -839,17 +937,25 @@ export default function Admin() {
         setStoredReviewsLastUpdated(newMetadata);
       }
 
-      alert("Anmeldelse godkendt!");
+      showNotification("Anmeldelse godkendt!", "success");
     } catch (err) {
       console.error("Error approving review:", err);
-      alert("Kunne ikke godkende anmeldelse. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke godkende anmeldelse. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
   async function handleRejectReview(reviewId: string) {
-    if (!confirm("Er du sikker på, at du vil afvise denne anmeldelse?")) {
-      return;
-    }
+    // if (!confirm("Er du sikker på, at du vil afvise denne anmeldelse?")) {
+    //   return;
+    // }
+
+    const confirmed = await showConfirm(
+      "Er du sikker på, at du vil afvise denne anmeldelse?",
+    );
+    if (!confirmed) return;
 
     try {
       await updateReview(reviewId, { approved: false });
@@ -865,17 +971,25 @@ export default function Admin() {
         setStoredReviewsLastUpdated(newMetadata);
       }
 
-      alert("Anmeldelse afvist!");
+      showNotification("Anmeldelse afvist!", "success");
     } catch (err) {
       console.error("Error rejecting review:", err);
-      alert("Kunne ikke afvise anmeldelse. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke afvise anmeldelse. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
   async function handleDeleteReview(reviewId: string) {
-    if (!confirm("Er du sikker på, at du vil slette denne anmeldelse?")) {
-      return;
-    }
+    // if (!confirm("Er du sikker på, at du vil slette denne anmeldelse?")) {
+    //   return;
+    // }
+
+    const confirmed = await showConfirm(
+      "Er du sikker på, at du vil slette denne anmeldelse?",
+    );
+    if (!confirmed) return;
 
     try {
       await deleteReview(reviewId);
@@ -889,28 +1003,31 @@ export default function Admin() {
         setStoredReviewsLastUpdated(newMetadata);
       }
 
-      alert("Anmeldelse slettet!");
+      showNotification("Anmeldelse slettet!", "success");
     } catch (err) {
       console.error("Error deleting review:", err);
-      alert("Kunne ikke slette anmeldelse. Prøv venligst igen.");
+      showNotification(
+        "Kunne ikke slette anmeldelse. Prøv venligst igen.",
+        "error",
+      );
     }
   }
 
   return (
     <main className="admin-page">
-      <div className="admin-header">
+      <div className={isOrderFullscreen ? "admin-header hide" : "admin-header"}>
         <h1 className="admin-title">
           Xanthos <span>/ Admin</span>
         </h1>
 
         <div className="admin-controls">
-          <LogoutButton />
           <ToggleThemeButton setClass="modern-theme-toggle admin-toggle-theme-button not-hide" />
+          <LogoutButton />
         </div>
       </div>
       <div className="admin-container">
         {/* Tabs */}
-        <div className="admin-tabs">
+        <div className={isOrderFullscreen ? "admin-tabs hide" : "admin-tabs"}>
           <button
             className={`admin-tab ${activeTab === "orders" ? "active" : ""}`}
             onClick={() => setActiveTab("orders")}
@@ -936,17 +1053,34 @@ export default function Admin() {
           <section className="admin-section">
             <div className="section-header">
               <h2 className="section-title">Ordre Administration</h2>
-              <button
-                onClick={() => loadOrders(true)}
-                className="btn-refresh"
-                disabled={ordersLoading}
-              >
-                {ordersLoading ? "Indlæser..." : "🔄 Opdater"}
-              </button>
+              <div className="order-section-actions">
+                <button
+                  onClick={() => loadOrders(true)}
+                  className="btn-refresh"
+                  disabled={ordersLoading}
+                >
+                  {ordersLoading ? "Indlæser..." : "🔄 Opdater"}
+                </button>
+                <button
+                  onClick={() => setIsOrderFullscreen((prev) => !prev)}
+                  className="btn-refresh"
+                  title={
+                    isOrderFullscreen ? "Minimer sektion" : "Maksimer sektion"
+                  }
+                >
+                  {isOrderFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
+                </button>
+              </div>
             </div>
 
             {/* All Today's Orders Subsection */}
-            <div className="todays-orders-subsection">
+            <div
+              className={
+                isOrderFullscreen
+                  ? "todays-orders-subsection hide"
+                  : "todays-orders-subsection"
+              }
+            >
               <div className="todays-orders-header">
                 <h3 className="todays-orders-title">
                   Alle Dagens Ordrer ({allTodaysOrders.length})
@@ -1690,12 +1824,6 @@ export default function Admin() {
       </div>
 
       {editingProduct && (
-        // <ProductEditForm
-        //   product={editingProduct}
-        //   onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
-        //   onCancel={() => setEditingProduct(null)}
-        // />
-
         <ProductForm
           mode="edit"
           product={editingProduct}
@@ -1703,12 +1831,6 @@ export default function Admin() {
           onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
           onCancel={() => setEditingProduct(null)}
         />
-
-        // <ProductEditForm
-        //   product={editingProduct}
-        //   onSave={(updates) => handleUpdateProduct(editingProduct.id!, updates)}
-        //   onCancel={() => setEditingProduct(null)}
-        // />
       )}
 
       {addNewProduct && (
@@ -1718,6 +1840,67 @@ export default function Admin() {
           onSave={handleAddProduct}
           onCancel={() => setAddNewProduct(false)}
         />
+      )}
+
+      {notification && (
+        <div
+          className={`notification-overlay ${notification.type}`}
+          onClick={() => setNotification(null)}
+        >
+          <div
+            className="notification-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="notification-icon">
+              {notification.type === "loading" ? (
+                <div className="notification-spinner"></div>
+              ) : notification.type === "success" ? (
+                "✅"
+              ) : notification.type === "confirm" ? (
+                "❓"
+              ) : (
+                "⚠️"
+              )}
+            </div>
+
+            <p>{notification.message}</p>
+
+            {/* CONFIRM MODE */}
+            {notification.type === "confirm" ? (
+              <div className="notification-actions">
+                <button
+                  className="notification-confirm"
+                  onClick={() => {
+                    notification.resolve?.(true);
+                    setNotification(null);
+                  }}
+                >
+                  Bekræft
+                </button>
+
+                <button
+                  className="notification-cancel"
+                  onClick={() => {
+                    notification.resolve?.(false);
+                    setNotification(null);
+                  }}
+                >
+                  Annuller
+                </button>
+              </div>
+            ) : (
+              // Normal close button
+              notification.type !== "loading" && (
+                <button
+                  onClick={() => setNotification(null)}
+                  className="notification-close"
+                >
+                  Forstået
+                </button>
+              )
+            )}
+          </div>
+        </div>
       )}
     </main>
   );
@@ -1753,7 +1936,7 @@ function ProductForm({
   const [category, setCategory] = useState(
     isEdit ? (product?.category ?? "Pizza") : "",
   );
-  const [imageExist, setImageExist] = useState(
+  const [imageExist] = useState(
     isEdit ? (product?.imageExist ?? false) : false,
   );
   const [image, setImage] = useState(isEdit ? (product?.image ?? "") : "");
@@ -2097,6 +2280,15 @@ function ProductForm({
                       setImage("");
                     } else {
                       setImage(e.target.value);
+
+                      let value = e.target.value;
+                      // Extract extension (e.g. .jpeg, .jpg, .png)
+                      const extensionMatch = value.match(/\.[^/.]+$/);
+                      const extension = extensionMatch ? extensionMatch[0] : "";
+
+                      // Remove extension
+                      const base = value.replace(/\.[^/.]+$/, "");
+                      setImageLarge(`${base}-large${extension}`);
                     }
                   }}
                 >
@@ -2133,7 +2325,7 @@ function ProductForm({
                       );
 
                       if (alreadyExists) {
-                        // Just select existing category instead of adding duplicate
+                        // Just select existing image instead of adding duplicate
                         setImage(
                           existingImages.find(
                             (img) =>
@@ -2143,6 +2335,17 @@ function ProductForm({
                       } else {
                         setExistingImages((prev) => [...prev, trimmed]);
                         setImage(trimmed);
+
+                        let value = trimmed;
+                        // Extract extension (e.g. .jpeg, .jpg, .png)
+                        const extensionMatch = value.match(/\.[^/.]+$/);
+                        const extension = extensionMatch
+                          ? extensionMatch[0]
+                          : "";
+
+                        // Remove extension
+                        const base = value.replace(/\.[^/.]+$/, "");
+                        setImageLarge(`${base}-large${extension}`);
                       }
 
                       setNewImage("");

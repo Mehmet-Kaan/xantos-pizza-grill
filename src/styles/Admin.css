@@ -47,11 +47,12 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-
   gap: 10px;
   max-width: 1600px;
   margin: auto;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.5);
 }
 
 .admin-controls {
@@ -320,6 +321,10 @@
   gap: 6px;
 }
 
+.empty-state > .btn-refresh {
+  margin: auto;
+}
+
 .btn-refresh::before {
   content: "";
   position: absolute;
@@ -460,24 +465,42 @@
   transition: opacity 0.3s ease;
 }
 
-.order-card:hover {
+/* .order-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(220, 38, 38, 0.15);
   border-color: rgba(220, 38, 38, 0.3);
-}
+} */
 
-.order-card:hover::before {
+/* .order-card:hover::before {
   opacity: 1;
-}
+} */
 
 [data-theme="dark"] .order-card {
   background: rgba(30, 41, 59, 0.6);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-[data-theme="dark"] .order-card:hover {
+/* [data-theme="dark"] .order-card:hover {
   box-shadow: 0 12px 32px rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.3);
+} */
+
+/* Only apply hover effects when the device has a hover capability */
+@media (hover: hover) and (pointer: fine) {
+  .order-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.3);
+  }
+
+  .order-card:hover::before {
+    opacity: 1;
+  }
+
+  [data-theme="dark"] .order-card:hover {
+    box-shadow: 0 12px 32px rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
 }
 
 .order-header {
@@ -486,6 +509,16 @@
   align-items: flex-start;
   margin-bottom: 1.25rem;
   gap: 1.5rem;
+}
+
+.order-section-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.admin-tabs.hide,
+.admin-header.hide {
+  display: none;
 }
 
 .order-name {
@@ -2186,4 +2219,90 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Overlay */
+.notification-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  animation: overlayFade 0.25s ease forwards;
+  z-index: 9999;
+}
+
+/* Modal card */
+.notification-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+  animation: modalScaleIn 0.25s ease forwards;
+}
+
+/* Overlay fade */
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal scale */
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.notification-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+.notification-actions button {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.notification-confirm {
+  background: rgb(29, 159, 29);
+}
+.notification-confirm:hover {
+  background: rgb(21, 120, 21);
+  box-shadow: 0 8px 20px rgba(52, 165, 29, 0.35);
+}
+
+.notification-cancel {
+  background: #dc2626;
+}
+
+.notification-cancel:hover {
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+  background: #b91c1c;
 }

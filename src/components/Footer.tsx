@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../styles/footer.css";
 import { useEffect, useState } from "react";
-import { assignAdminRole } from "../auth/assignAdmin";
+// import { assignAdminRole } from "../auth/assignAdmin";
 
 export default function Footer() {
   const [isAdminPage, setIsAdminPage] = useState(false);

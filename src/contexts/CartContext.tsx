@@ -18,9 +18,9 @@ export interface CartItem {
   name: string;
   price: number; // base price
   qty: number;
-  selectedSize?: AddOnOption;
-  selectedType?: AddOnOption;
-  selectedChooseOne?: AddOnOption;
+  selectedSize?: AddOnOption | null;
+  selectedType?: AddOnOption | null;
+  selectedChooseOne?: AddOnOption | null;
   selectedaddOns?: AddOnOption[];
   selectedaddOnsExtra?: AddOnOption[];
   [key: string]: unknown;
@@ -35,9 +35,9 @@ export interface MenuItem {
   description: string;
   stripePriceId?: string;
   stipeProductId?: string;
-  selectedSize?: AddOnOption;
-  selectedType?: AddOnOption;
-  selectedChooseOne?: AddOnOption;
+  selectedSize?: AddOnOption | null;
+  selectedType?: AddOnOption | null;
+  selectedChooseOne?: AddOnOption | null;
   selectedaddOns?: AddOnOption[];
   selectedaddOnsExtra?: AddOnOption[];
   [key: string]: unknown;

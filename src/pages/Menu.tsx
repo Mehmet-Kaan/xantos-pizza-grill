@@ -700,11 +700,11 @@ export default function Menu() {
   ) => {
     addItem({
       ...item,
-      selectedSize: selectedSize ?? undefined,
-      selectedType: selectedType ?? undefined,
-      selectedChooseOne: selectedChooseOne ?? undefined,
-      selectedaddOns,
-      selectedExtras,
+      selectedSize: selectedSize ?? null,
+      selectedType: selectedType ?? null,
+      selectedChooseOne: selectedChooseOne ?? null,
+      selectedaddOns: selectedaddOns ?? [],
+      selectedExtras: selectedExtras ?? [],
       qty: qty,
     });
 

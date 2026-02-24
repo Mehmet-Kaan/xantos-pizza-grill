@@ -21,9 +21,9 @@ export interface Order {
     name: string;
     price: number;
     qty: number;
-    selectedSize?: AddOnOption;
-    selectedType?: AddOnOption;
-    selectedChooseOne?: AddOnOption;
+    selectedSize?: AddOnOption | null;
+    selectedType?: AddOnOption | null;
+    selectedChooseOne?: AddOnOption | null;
     selectedaddOns?: AddOnOption[];
     selectedaddOnsExtra?: AddOnOption[];
   }>;
@@ -31,7 +31,7 @@ export interface Order {
   total: number;
   name: string;
   phone: string;
-  address: string | null;
+  address?: string | "";
   method: "pickup" | "delivery";
   note?: string;
   paymentMethod?: "card" | "mobilepay" | "cash";
@@ -45,6 +45,8 @@ export async function createOrder(
   orderData: Omit<Order, "id" | "createdAt">,
 ): Promise<string> {
   try {
+    console.log("ORDER DATA:", orderData);
+
     const docRef = await addDoc(collection(db, "orders"), {
       ...orderData,
       createdAt: Timestamp.now(),

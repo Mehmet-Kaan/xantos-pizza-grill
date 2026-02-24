@@ -70,8 +70,6 @@ export async function createProduct(
   productData: Omit<Product, "id">,
 ): Promise<string> {
   try {
-    console.log(productData);
-
     const docRef = await addDoc(collection(db, "menuItems"), productData);
     await updateProductsMetadata();
     return docRef.id;

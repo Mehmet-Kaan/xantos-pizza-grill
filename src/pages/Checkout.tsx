@@ -404,11 +404,47 @@ export default function Checkout() {
     try {
       // 1. Prepare Order Payload
       const orderPayload = {
-        items,
+        // items: items.map((item) => ({
+        //   ...item,
+        //   selectedSize: item.selectedSize ?? null,
+        //   selectedType: item.selectedType ?? null,
+        //   selectedChooseOne: item.selectedChooseOne ?? null,
+        //   selectedaddOns: item.selectedaddOns ?? [],
+        //   selectedaddOnsExtra: item.selectedaddOnsExtra ?? [],
+        // })),
+
+        items: items.map((item) => {
+          let cleanedItem: any = {
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            qty: item.qty,
+          };
+
+          if (item.selectedSize) cleanedItem.selectedSize = item.selectedSize;
+          if (item.selectedType) cleanedItem.selectedType = item.selectedType;
+          if (item.selectedChooseOne)
+            cleanedItem.selectedChooseOne = item.selectedChooseOne;
+          if (item.selectedaddOns?.length)
+            cleanedItem.selectedaddOns = item.selectedaddOns;
+          if (item.selectedaddOnsExtra?.length)
+            cleanedItem.selectedaddOnsExtra = item.selectedaddOnsExtra;
+
+          if (item.stripePriceId) {
+            cleanedItem.stripePriceId = item.stripePriceId;
+          }
+          if (item.stipeProductId) {
+            cleanedItem.stipeProductId = item.stipeProductId;
+          }
+
+          return cleanedItem;
+        }),
+
         total: finalTotal,
         name,
         phone,
-        address: method === "delivery" ? address : null,
+        address: method === "delivery" ? address : "",
         method: method as "pickup" | "delivery",
         email: trimmedEmail,
         note,
@@ -417,76 +453,6 @@ export default function Checkout() {
         status: "pending" as Order["status"],
         createdAt: Date.now(),
       };
-
-      //   // 2. Create Order in Firestore (Always do this first!)
-      //   const orderId = await createOrder(orderPayload);
-
-      //   // 3. Conditional Payment Logic
-      //   if (paymentMethod === "card") {
-      //     try {
-      //       const response = await fetch(
-      //         import.meta.env.VITE_STRIPE_FUNCTION_URL,
-      //         {
-      //           method: "POST",
-      //           headers: { "Content-Type": "application/json" },
-      //           body: JSON.stringify({
-      //             cartItems: items.map((item) => ({
-      //               price: item.stripePriceId,
-      //               quantity: item.qty,
-      //             })),
-      //             orderId: orderId,
-      //             // Pro tip: Send the email to Stripe to pre-fill the checkout page!
-      //             customerEmail: email.trim(),
-      //           }),
-      //         },
-      //       );
-
-      //       if (!response.ok) {
-      //         const errorData = await response.json();
-      //         throw new Error(errorData.error || "Kunne ikke oprette betaling");
-      //       }
-
-      //       const session = await response.json();
-
-      //       console.log("Stripe Session Response:", session);
-
-      //       if (session.url) {
-      //         window.location.href = session.url;
-      //         return;
-      //       } else {
-      //         throw new Error("Stripe session URL manglede i svaret");
-      //       }
-      //     } catch (err) {
-      //       console.error("Stripe Error:", err);
-      //       showNotification("Der opstod en fejl med betalingen. Prøv igen.");
-      //       setIsProcessing(false);
-      //       return;
-      //     }
-      //   }
-
-      //   // 4. Fallback for Cash / MobilePay (Manual handling)
-      //   sessionStorage.setItem(
-      //     `order:${orderId}`,
-      //     JSON.stringify({ id: orderId, ...orderPayload }),
-      //   );
-
-      //   clear();
-      //   localStorage.removeItem("checkout_draft");
-      //   setIsProcessing(false);
-
-      //   // If it's cash/pickup, show success for a moment then navigate
-      //   setNotification({
-      //     message: "Ordre modtaget! Vi ringer hvis der er noget.",
-      //     type: "success",
-      //   });
-      //   setTimeout(() => {
-      //     navigate("/confirmation/" + orderId);
-      //   }, 2000);
-      // } catch (error) {
-      //   console.error("Error:", error);
-      //   setIsProcessing(false);
-      //   showNotification("Der opstod en fejl. Prøv venligst igen.");
-      // }
 
       // --- RETRY LOGIC ENGINE ---
       let currentOrderId = sessionStorage.getItem("pending_order_id");
@@ -511,7 +477,9 @@ export default function Checkout() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 cartItems: items.map((item) => ({
-                  price: item.stripePriceId,
+                  name: item.name,
+                  description: item.description,
+                  unitAmount: item.price,
                   quantity: item.qty,
                 })),
                 orderId: currentOrderId, // Use the ID from our retry logic
