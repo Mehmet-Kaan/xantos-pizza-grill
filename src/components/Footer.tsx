@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../styles/footer.css";
 import { useEffect, useState } from "react";
+// import { deleteAllOrders } from "../services/ordersService";
 // import { assignAdminRole } from "../auth/assignAdmin";
 
 export default function Footer() {
@@ -46,6 +47,18 @@ export default function Footer() {
         </button> */}
 
         {/* <button onClick={assignAdminRole}>Make Me Admin</button> */}
+        {/* <button
+          onClick={async () => {
+            const confirmed = window.confirm(
+              "Are you sure you want to delete ALL orders?",
+            );
+            if (confirmed) {
+              await deleteAllOrders();
+            }
+          }}
+        >
+          Delete All Orders
+        </button> */}
       </div>
     </footer>
   );

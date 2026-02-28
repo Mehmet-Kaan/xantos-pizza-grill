@@ -1304,7 +1304,7 @@
 }
 
 /* Modern Product Edit Form */
-.modal-overlay {
+.admin-page > .modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;

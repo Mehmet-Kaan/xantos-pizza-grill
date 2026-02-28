@@ -121,13 +121,14 @@ a {
 [data-theme="dark"] a {
   color: #f87171;
 } */
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    text-decoration: underline;
+  }
 
-a:hover {
-  text-decoration: underline;
-}
-
-[data-theme="dark"] a:hover {
-  color: #fca5a5;
+  [data-theme="dark"] a:hover {
+    color: #fca5a5;
+  }
 }
 
 h1,

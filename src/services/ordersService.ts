@@ -10,6 +10,7 @@ import {
   Timestamp,
   onSnapshot,
   type Unsubscribe,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import type { AddOnOption } from "../hooks/types";
@@ -187,5 +188,29 @@ export function subscribeToOrders(
     }
     // Return a no-op unsubscribe function
     return () => {};
+  }
+}
+
+export async function deleteAllOrders() {
+  try {
+    const ordersRef = collection(db, "orders");
+    const snapshot = await getDocs(ordersRef);
+
+    if (snapshot.empty) {
+      console.log("No orders found.");
+      return;
+    }
+
+    const batch = writeBatch(db);
+
+    snapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    console.log(`Deleted ${snapshot.size} orders successfully.`);
+  } catch (error) {
+    console.error("Error deleting orders:", error);
   }
 }

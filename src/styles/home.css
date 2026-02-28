@@ -200,9 +200,11 @@
     box-shadow 0.3s ease;
 }
 
-.special-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+@media (hover: hover) and (pointer: fine) {
+  .special-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
 }
 
 .special-badge {
@@ -276,22 +278,22 @@
   box-shadow: var(--shadow-lg);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xl);
-  filter: brightness(1.1);
-}
-
 .btn-secondary {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(10px);
 }
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    filter: brightness(1.1);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
 }
 
 .btn-large {
@@ -358,11 +360,12 @@
     box-shadow 0.3s ease;
 }
 
-.trust-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+@media (hover: hover) and (pointer: fine) {
+  .trust-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
 }
-
 .trust-icon {
   font-size: 2.5rem;
   margin-bottom: var(--spacing-sm);
@@ -537,11 +540,11 @@
   color: inherit;
   transition: color 0.2s ease;
 }
-
-.contact-link:hover {
-  color: var(--color-primary);
+@media (hover: hover) and (pointer: fine) {
+  .contact-link:hover {
+    color: var(--color-primary);
+  }
 }
-
 .contact-label {
   font-size: 0.875rem;
   color: var(--color-text-light);
@@ -696,11 +699,12 @@
     box-shadow 0.3s ease;
 }
 
-.review-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+@media (hover: hover) and (pointer: fine) {
+  .review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
 }
-
 .review-stars {
   color: #fbbf24;
   font-size: 1.25rem;
@@ -835,9 +839,11 @@
   color: white;
 }
 
-.cta-section .btn-primary:hover {
-  background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .cta-section .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+  }
 }
 .homePopularItemsDiv {
   background: #fafafa;
