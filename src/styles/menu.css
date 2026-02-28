@@ -2922,6 +2922,10 @@
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body.cart-drawer-open {
+  overflow: hidden;
+}
+
 /* Hide navbar when cart drawer is open */
 body.cart-drawer-open header {
   transform: translateY(-100%);
@@ -2929,7 +2933,6 @@ body.cart-drawer-open header {
   pointer-events: none;
   z-index: 0;
 }
-
 body.modal-open {
   overflow: hidden;
 }
@@ -3945,4 +3948,9 @@ input,
 textarea,
 select {
   font-size: 16px;
+}
+
+.iconsDimension {
+  width: 28px;
+  height: 28px;
 }

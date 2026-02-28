@@ -80,7 +80,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
             }}
             className="menu-item-simple-add"
           >
-            <PlusIcon />
+            <PlusIcon className="iconsDimension" />
           </button>
         </Link>
       )}
@@ -860,280 +860,142 @@ export default function Menu() {
     selectedCategory,
   ]);
 
-  // // Show categoriesContainer-revealOnScroll when scrolling past menu-filters > categoriesContainer
-  // useEffect(() => {
-  //   if (loading || products.length === 0) return;
-
-  //   const checkRevealOnScroll = () => {
-  //     // Find the categoriesContainer inside menu-filters
-  //     const menuFilters = document.querySelector(".menu-filters");
-  //     const triggerEl = menuFilters?.querySelector(
-  //       ".categoriesContainer",
-  //     ) as HTMLElement;
-  //     const revealEl = document.querySelector(
-  //       ".categoriesContainer-revealOnScroll",
-  //     ) as HTMLElement;
-
-  //     if (!triggerEl || !revealEl) return;
-
-  //     const triggerRect = triggerEl.getBoundingClientRect();
-
-  //     // Show when the trigger element has scrolled out of view (above viewport)
-  //     // This means user has scrolled past the menu-filters categoriesContainer
-  //     if (triggerRect.top <= 0) {
-  //       // Scrolled past - show the reveal element
-  //       revealEl.classList.add("is-visible");
-  //     } else {
-  //       // Scrolled back to top - hide the reveal element
-  //       revealEl.classList.remove("is-visible");
-  //     }
-  //   };
-
-  //   // Add scroll listener
-  //   window.addEventListener("scroll", checkRevealOnScroll, { passive: true });
-  //   window.addEventListener("resize", checkRevealOnScroll, { passive: true });
-
-  //   return () => {
-  //     window.removeEventListener("scroll", checkRevealOnScroll);
-  //     window.removeEventListener("resize", checkRevealOnScroll);
-  //   };
-  // }, [selectedCategory, loading, products.length]);
-
-  // // Auto-scroll the active category button into view in categoriesContainer-revealOnScroll
-  // useEffect(() => {
-  //   if (loading || products.length === 0 || !selectedCategory) return;
-
-  //   // Only scroll if the reveal container is visible
-  //   const revealContainer = document.querySelector(
-  //     ".categoriesContainer-revealOnScroll",
-  //   ) as HTMLElement;
-  //   if (!revealContainer || !revealContainer.classList.contains("is-visible")) {
-  //     return;
-  //   }
-
-  //   // Find the active button by text content
-  //   const buttons = revealContainer.querySelectorAll("button");
-  //   let targetButton: HTMLElement | null = null;
-  //   buttons.forEach((btn) => {
-  //     if (btn.textContent?.trim() === selectedCategory) {
-  //       targetButton = btn;
-  //     }
-  //   });
-
-  //   if (targetButton && revealContainer) {
-  //     const containerRect = revealContainer.getBoundingClientRect();
-  //     const buttonRect = (targetButton as HTMLElement).getBoundingClientRect();
-
-  //     // Calculate scroll position to center the button
-  //     const scrollLeft =
-  //       revealContainer.scrollLeft +
-  //       (buttonRect.left - containerRect.left) -
-  //       containerRect.width / 2 +
-  //       buttonRect.width / 2;
-
-  //     // Smooth scroll to the button
-  //     revealContainer.scrollTo({
-  //       left: scrollLeft,
-  //       behavior: "smooth",
-  //     });
-  //   }
-  // }, [selectedCategory, loading, products.length]);
-
-  // // Auto-scroll the active category button into view in side categoriesContainer
-  // useEffect(() => {
-  //   if (loading || products.length === 0 || !selectedCategory) return;
-
-  //   // Only scroll if the reveal container is visible
-  //   const sideCategoriesContainer = document.querySelector(
-  //     ".categoriesContainer",
-  //   ) as HTMLElement;
-  //   if (!sideCategoriesContainer) {
-  //     return;
-  //   }
-
-  //   // Find the active button by text content
-  //   const buttons = sideCategoriesContainer.querySelectorAll("button");
-  //   let targetButton: HTMLElement | null = null;
-  //   buttons.forEach((btn) => {
-  //     if (btn.textContent?.trim() === selectedCategory) {
-  //       targetButton = btn;
-  //     }
-  //   });
-
-  //   if (targetButton && sideCategoriesContainer) {
-  //     const containerRect = sideCategoriesContainer.getBoundingClientRect();
-  //     const buttonRect = (targetButton as HTMLElement).getBoundingClientRect();
-
-  //     const scrollTop =
-  //       sideCategoriesContainer.scrollTop +
-  //       (buttonRect.top - containerRect.top) -
-  //       containerRect.height / 2 +
-  //       buttonRect.height / 2;
-
-  //     sideCategoriesContainer.scrollTo({
-  //       top: scrollTop,
-  //       behavior: "smooth",
-  //     });
-  //   }
-  // }, [selectedCategory, loading, products.length]);
-
-  // // Auto-update active category based on scroll position
-  // useEffect(() => {
-  //   if (loading || products.length === 0) return;
-
-  //   const updateActiveCategory = () => {
-  //     // Don't update if user just clicked a category or if we haven't initialized yet
-  //     if (isUserClickingRef.current || !hasInitializedCategoryRef.current)
-  //       return;
-
-  //     const scrollY = window.scrollY || window.pageYOffset;
-  //     const viewportHeight = window.innerHeight;
-  //     const threshold = viewportHeight * 0.3; // Consider section active when 30% into viewport
-
-  //     let activeCategory: string | null = null;
-  //     let minDistance = Infinity;
-
-  //     // Check "Most Popular" section
-  //     if (popularRef.current) {
-  //       const rect = popularRef.current.getBoundingClientRect();
-  //       const sectionTop = rect.top + scrollY;
-  //       const distance = Math.abs(scrollY + threshold - sectionTop);
-
-  //       if (
-  //         rect.top <= threshold &&
-  //         rect.bottom > 0 &&
-  //         distance < minDistance
-  //       ) {
-  //         minDistance = distance;
-  //         activeCategory = "Most Popular";
-  //       }
-  //     }
-
-  //     // Check all other category sections
-  //     Object.entries(sectionRefs.current).forEach(([cat, element]) => {
-  //       if (!element) return;
-
-  //       const rect = element.getBoundingClientRect();
-  //       const sectionTop = rect.top + scrollY;
-  //       const distance = Math.abs(scrollY + threshold - sectionTop);
-
-  //       if (
-  //         rect.top <= threshold &&
-  //         rect.bottom > 0 &&
-  //         distance < minDistance
-  //       ) {
-  //         minDistance = distance;
-  //         activeCategory = cat;
-  //       }
-  //     });
-
-  //     // Update selected category if we found an active one
-  //     if (activeCategory && activeCategory !== selectedCategory) {
-  //       setSelectedCategory(activeCategory);
-  //     }
-  //   };
-
-  //   // Throttle scroll events for better performance
-  //   let ticking = false;
-  //   const handleScroll = () => {
-  //     if (!ticking) {
-  //       window.requestAnimationFrame(() => {
-  //         updateActiveCategory();
-  //         ticking = false;
-  //       });
-  //       ticking = true;
-  //     }
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll, { passive: true });
-  //   window.addEventListener("resize", updateActiveCategory, { passive: true });
-
-  //   // Initial check
-  //   updateActiveCategory();
-
-  //   return () => {
-  //     window.removeEventListener("scroll", handleScroll);
-  //     window.removeEventListener("resize", updateActiveCategory);
-  //   };
-  // }, [loading, products.length, selectedCategory]);
-
-  const findButtonByText = (
-    container: HTMLElement,
-    text: string,
-  ): HTMLElement | null => {
-    const buttons = container.querySelectorAll("button");
-    for (const btn of buttons) {
-      if (btn.textContent?.trim() === text) return btn as HTMLElement;
-    }
-    return null;
-  };
-
-  const scrollHorizontallyToCenter = (
-    container: HTMLElement,
-    target: HTMLElement,
-  ) => {
-    const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-
-    const scrollLeft =
-      container.scrollLeft +
-      (targetRect.left - containerRect.left) -
-      containerRect.width / 2 +
-      targetRect.width / 2;
-
-    container.scrollTo({ left: scrollLeft, behavior: "smooth" });
-  };
-
-  const scrollVerticallyToCenter = (
-    container: HTMLElement,
-    target: HTMLElement,
-  ) => {
-    const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-
-    const scrollTop =
-      container.scrollTop +
-      (targetRect.top - containerRect.top) -
-      containerRect.height / 2 +
-      targetRect.height / 2;
-
-    container.scrollTo({ top: scrollTop, behavior: "smooth" });
-  };
-
+  // Show categoriesContainer-revealOnScroll when scrolling past menu-filters > categoriesContainer
   useEffect(() => {
     if (loading || products.length === 0) return;
 
-    let ticking = false;
-
-    const handleScrollLogic = () => {
-      /* ---------------- Reveal container ---------------- */
+    const checkRevealOnScroll = () => {
+      // Find the categoriesContainer inside menu-filters
       const menuFilters = document.querySelector(".menu-filters");
       const triggerEl = menuFilters?.querySelector(
         ".categoriesContainer",
-      ) as HTMLElement | null;
+      ) as HTMLElement;
       const revealEl = document.querySelector(
         ".categoriesContainer-revealOnScroll",
-      ) as HTMLElement | null;
+      ) as HTMLElement;
 
-      if (triggerEl && revealEl) {
-        const triggerRect = triggerEl.getBoundingClientRect();
-        revealEl.classList.toggle("is-visible", triggerRect.top <= 0);
+      if (!triggerEl || !revealEl) return;
+
+      const triggerRect = triggerEl.getBoundingClientRect();
+
+      // Show when the trigger element has scrolled out of view (above viewport)
+      // This means user has scrolled past the menu-filters categoriesContainer
+      if (triggerRect.top <= 0) {
+        // Scrolled past - show the reveal element
+        revealEl.classList.add("is-visible");
+      } else {
+        // Scrolled back to top - hide the reveal element
+        revealEl.classList.remove("is-visible");
       }
+    };
 
-      /* ---------------- Active category update ---------------- */
-      if (isUserClickingRef.current || !hasInitializedCategoryRef.current) {
+    // Add scroll listener
+    window.addEventListener("scroll", checkRevealOnScroll, { passive: true });
+    window.addEventListener("resize", checkRevealOnScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", checkRevealOnScroll);
+      window.removeEventListener("resize", checkRevealOnScroll);
+    };
+  }, [selectedCategory, loading, products.length]);
+
+  // Auto-scroll the active category button into view in categoriesContainer-revealOnScroll
+  useEffect(() => {
+    if (loading || products.length === 0 || !selectedCategory) return;
+
+    // Only scroll if the reveal container is visible
+    const revealContainer = document.querySelector(
+      ".categoriesContainer-revealOnScroll",
+    ) as HTMLElement;
+    if (!revealContainer || !revealContainer.classList.contains("is-visible")) {
+      return;
+    }
+
+    // Find the active button by text content
+    const buttons = revealContainer.querySelectorAll("button");
+    let targetButton: HTMLElement | null = null;
+    buttons.forEach((btn) => {
+      if (btn.textContent?.trim() === selectedCategory) {
+        targetButton = btn;
+      }
+    });
+
+    if (targetButton && revealContainer) {
+      const containerRect = revealContainer.getBoundingClientRect();
+      const buttonRect = (targetButton as HTMLElement).getBoundingClientRect();
+
+      // Calculate scroll position to center the button
+      const scrollLeft =
+        revealContainer.scrollLeft +
+        (buttonRect.left - containerRect.left) -
+        containerRect.width / 2 +
+        buttonRect.width / 2;
+
+      // Smooth scroll to the button
+      revealContainer.scrollTo({
+        left: scrollLeft,
+        behavior: "smooth",
+      });
+    }
+  }, [selectedCategory, loading, products.length]);
+
+  // Auto-scroll the active category button into view in side categoriesContainer
+  useEffect(() => {
+    if (loading || products.length === 0 || !selectedCategory) return;
+
+    // Only scroll if the reveal container is visible
+    const sideCategoriesContainer = document.querySelector(
+      ".categoriesContainer",
+    ) as HTMLElement;
+    if (!sideCategoriesContainer) {
+      return;
+    }
+
+    // Find the active button by text content
+    const buttons = sideCategoriesContainer.querySelectorAll("button");
+    let targetButton: HTMLElement | null = null;
+    buttons.forEach((btn) => {
+      if (btn.textContent?.trim() === selectedCategory) {
+        targetButton = btn;
+      }
+    });
+
+    if (targetButton && sideCategoriesContainer) {
+      const containerRect = sideCategoriesContainer.getBoundingClientRect();
+      const buttonRect = (targetButton as HTMLElement).getBoundingClientRect();
+
+      const scrollTop =
+        sideCategoriesContainer.scrollTop +
+        (buttonRect.top - containerRect.top) -
+        containerRect.height / 2 +
+        buttonRect.height / 2;
+
+      sideCategoriesContainer.scrollTo({
+        top: scrollTop,
+        behavior: "smooth",
+      });
+    }
+  }, [selectedCategory, loading, products.length]);
+
+  // Auto-update active category based on scroll position
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+
+    const updateActiveCategory = () => {
+      // Don't update if user just clicked a category or if we haven't initialized yet
+      if (isUserClickingRef.current || !hasInitializedCategoryRef.current)
         return;
-      }
 
       const scrollY = window.scrollY || window.pageYOffset;
-      const threshold = window.innerHeight * 0.3;
+      const viewportHeight = window.innerHeight;
+      const threshold = viewportHeight * 0.3; // Consider section active when 30% into viewport
 
       let activeCategory: string | null = null;
       let minDistance = Infinity;
 
-      const checkSection = (name: string, el: HTMLElement | null) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
+      // Check "Most Popular" section
+      if (popularRef.current) {
+        const rect = popularRef.current.getBoundingClientRect();
         const sectionTop = rect.top + scrollY;
         const distance = Math.abs(scrollY + threshold - sectionTop);
 
@@ -1143,69 +1005,207 @@ export default function Menu() {
           distance < minDistance
         ) {
           minDistance = distance;
-          activeCategory = name;
+          activeCategory = "Most Popular";
         }
-      };
+      }
 
-      checkSection("Most Popular", popularRef.current);
+      // Check all other category sections
+      Object.entries(sectionRefs.current).forEach(([cat, element]) => {
+        if (!element) return;
 
-      Object.entries(sectionRefs.current).forEach(([cat, el]) =>
-        checkSection(cat, el),
-      );
+        const rect = element.getBoundingClientRect();
+        const sectionTop = rect.top + scrollY;
+        const distance = Math.abs(scrollY + threshold - sectionTop);
 
+        if (
+          rect.top <= threshold &&
+          rect.bottom > 0 &&
+          distance < minDistance
+        ) {
+          minDistance = distance;
+          activeCategory = cat;
+        }
+      });
+
+      // Update selected category if we found an active one
       if (activeCategory && activeCategory !== selectedCategory) {
         setSelectedCategory(activeCategory);
       }
     };
 
-    const onScroll = () => {
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const handleScroll = () => {
       if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScrollLogic();
+        window.requestAnimationFrame(() => {
+          updateActiveCategory();
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", handleScrollLogic, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", updateActiveCategory, { passive: true });
 
-    handleScrollLogic(); // initial sync
+    // Initial check
+    updateActiveCategory();
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", handleScrollLogic);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateActiveCategory);
     };
   }, [loading, products.length, selectedCategory]);
 
-  useEffect(() => {
-    if (loading || products.length === 0 || !selectedCategory) return;
+  // const findButtonByText = (
+  //   container: HTMLElement,
+  //   text: string,
+  // ): HTMLElement | null => {
+  //   const buttons = container.querySelectorAll("button");
+  //   for (const btn of buttons) {
+  //     if (btn.textContent?.trim() === text) return btn as HTMLElement;
+  //   }
+  //   return null;
+  // };
 
-    /* -------- Reveal (horizontal) -------- */
-    const revealContainer = document.querySelector(
-      ".categoriesContainer-revealOnScroll",
-    ) as HTMLElement | null;
+  // const scrollHorizontallyToCenter = (
+  //   container: HTMLElement,
+  //   target: HTMLElement,
+  // ) => {
+  //   const containerRect = container.getBoundingClientRect();
+  //   const targetRect = target.getBoundingClientRect();
 
-    if (revealContainer?.classList.contains("is-visible")) {
-      const btn = findButtonByText(revealContainer, selectedCategory);
-      if (btn) {
-        scrollHorizontallyToCenter(revealContainer, btn);
-      }
-    }
+  //   const scrollLeft =
+  //     container.scrollLeft +
+  //     (targetRect.left - containerRect.left) -
+  //     containerRect.width / 2 +
+  //     targetRect.width / 2;
 
-    /* -------- Side (vertical) -------- */
-    const sideContainer = document.querySelector(
-      ".categoriesContainer",
-    ) as HTMLElement | null;
+  //   container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+  // };
 
-    if (sideContainer) {
-      const btn = findButtonByText(sideContainer, selectedCategory);
-      if (btn) {
-        scrollVerticallyToCenter(sideContainer, btn);
-      }
-    }
-  }, [selectedCategory, loading, products.length]);
+  // const scrollVerticallyToCenter = (
+  //   container: HTMLElement,
+  //   target: HTMLElement,
+  // ) => {
+  //   const containerRect = container.getBoundingClientRect();
+  //   const targetRect = target.getBoundingClientRect();
+
+  //   const scrollTop =
+  //     container.scrollTop +
+  //     (targetRect.top - containerRect.top) -
+  //     containerRect.height / 2 +
+  //     targetRect.height / 2;
+
+  //   container.scrollTo({ top: scrollTop, behavior: "smooth" });
+  // };
+
+  // useEffect(() => {
+  //   if (loading || products.length === 0) return;
+
+  //   let ticking = false;
+
+  //   const handleScrollLogic = () => {
+  //     /* ---------------- Reveal container ---------------- */
+  //     const menuFilters = document.querySelector(".menu-filters");
+  //     const triggerEl = menuFilters?.querySelector(
+  //       ".categoriesContainer",
+  //     ) as HTMLElement | null;
+  //     const revealEl = document.querySelector(
+  //       ".categoriesContainer-revealOnScroll",
+  //     ) as HTMLElement | null;
+
+  //     if (triggerEl && revealEl) {
+  //       const triggerRect = triggerEl.getBoundingClientRect();
+  //       revealEl.classList.toggle("is-visible", triggerRect.top <= 0);
+  //     }
+
+  //     /* ---------------- Active category update ---------------- */
+  //     if (isUserClickingRef.current || !hasInitializedCategoryRef.current) {
+  //       return;
+  //     }
+
+  //     const scrollY = window.scrollY || window.pageYOffset;
+  //     const threshold = window.innerHeight * 0.3;
+
+  //     let activeCategory: string | null = null;
+  //     let minDistance = Infinity;
+
+  //     const checkSection = (name: string, el: HTMLElement | null) => {
+  //       if (!el) return;
+  //       const rect = el.getBoundingClientRect();
+  //       const sectionTop = rect.top + scrollY;
+  //       const distance = Math.abs(scrollY + threshold - sectionTop);
+
+  //       if (
+  //         rect.top <= threshold &&
+  //         rect.bottom > 0 &&
+  //         distance < minDistance
+  //       ) {
+  //         minDistance = distance;
+  //         activeCategory = name;
+  //       }
+  //     };
+
+  //     checkSection("Most Popular", popularRef.current);
+
+  //     Object.entries(sectionRefs.current).forEach(([cat, el]) =>
+  //       checkSection(cat, el),
+  //     );
+
+  //     if (activeCategory && activeCategory !== selectedCategory) {
+  //       setSelectedCategory(activeCategory);
+  //     }
+  //   };
+
+  //   const onScroll = () => {
+  //     if (!ticking) {
+  //       requestAnimationFrame(() => {
+  //         handleScrollLogic();
+  //         ticking = false;
+  //       });
+  //       ticking = true;
+  //     }
+  //   };
+
+  //   window.addEventListener("scroll", onScroll, { passive: true });
+  //   window.addEventListener("resize", handleScrollLogic, { passive: true });
+
+  //   handleScrollLogic(); // initial sync
+
+  //   return () => {
+  //     window.removeEventListener("scroll", onScroll);
+  //     window.removeEventListener("resize", handleScrollLogic);
+  //   };
+  // }, [loading, products.length, selectedCategory]);
+
+  // useEffect(() => {
+  //   if (loading || products.length === 0 || !selectedCategory) return;
+
+  //   /* -------- Reveal (horizontal) -------- */
+  //   const revealContainer = document.querySelector(
+  //     ".categoriesContainer-revealOnScroll",
+  //   ) as HTMLElement | null;
+
+  //   if (revealContainer?.classList.contains("is-visible")) {
+  //     const btn = findButtonByText(revealContainer, selectedCategory);
+  //     if (btn) {
+  //       scrollHorizontallyToCenter(revealContainer, btn);
+  //     }
+  //   }
+
+  //   /* -------- Side (vertical) -------- */
+  //   const sideContainer = document.querySelector(
+  //     ".categoriesContainer",
+  //   ) as HTMLElement | null;
+
+  //   if (sideContainer) {
+  //     const btn = findButtonByText(sideContainer, selectedCategory);
+  //     if (btn) {
+  //       scrollVerticallyToCenter(sideContainer, btn);
+  //     }
+  //   }
+  // }, [selectedCategory, loading, products.length]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -1540,7 +1540,7 @@ export default function Menu() {
                           // }
                         }}
                       >
-                        <PlusIcon />
+                        <PlusIcon className="iconsDimension" />
                       </button>
                     </div>
                   ))}
@@ -1637,7 +1637,7 @@ export default function Menu() {
                           // }
                         }}
                       >
-                        <PlusIcon />
+                        <PlusIcon className="iconsDimension" />
                       </button>
                     </div>
                   ))}
@@ -1832,14 +1832,14 @@ export default function Menu() {
                           }}
                           aria-label="Fjern en"
                         >
-                          <MinusIcon />
+                          <MinusIcon className="iconsDimension" />
                         </button>
                         <span>{item.qty}</span>
                         <button
                           onClick={() => updateQty(item.id, item.qty + 1)}
                           aria-label="Tilføj en"
                         >
-                          <PlusIcon />
+                          <PlusIcon className="iconsDimension" />
                         </button>
                         <button
                           className="menu-cart-remove"
@@ -2015,14 +2015,14 @@ export default function Menu() {
                         }}
                         aria-label="Fjern en"
                       >
-                        <MinusIcon />
+                        <MinusIcon className="iconsDimension" />
                       </button>
                       <span>{item.qty}</span>
                       <button
                         onClick={() => updateQty(item.id, item.qty + 1)}
                         aria-label="Tilføj en"
                       >
-                        <PlusIcon />
+                        <PlusIcon className="iconsDimension" />
                       </button>
                       <button
                         className="menu-cart-remove"
