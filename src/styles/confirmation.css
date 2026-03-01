@@ -136,20 +136,20 @@
   color: white;
   border: none;
 }
-
-.confirmation-btn-primary:hover {
-  background: #1f2937;
+@media (hover: hover) and (pointer: fine) {
+  .confirmation-btn-primary:hover {
+    background: #1f2937;
+  }
 }
-
 .confirmation-btn-secondary {
   background: transparent;
   border: 1px solid #d1d5db;
 }
-
-.confirmation-btn-secondary:hover {
-  background: #f3f4f6;
+@media (hover: hover) and (pointer: fine) {
+  .confirmation-btn-secondary:hover {
+    background: #f3f4f6;
+  }
 }
-
 /* States */
 .confirmation-loading,
 .confirmation-error {
@@ -317,21 +317,21 @@
   background: #22c55e;
   color: #052e24;
 }
-
-[data-theme="dark"] .confirmation-btn-primary:hover {
-  background: #16a34a;
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="dark"] .confirmation-btn-primary:hover {
+    background: #16a34a;
+  }
 }
-
 [data-theme="dark"] .confirmation-btn-secondary {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #e5e7eb;
 }
-
-[data-theme="dark"] .confirmation-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="dark"] .confirmation-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
-
 /* Loading / error */
 [data-theme="dark"] .confirmation-loading,
 [data-theme="dark"] .confirmation-error {

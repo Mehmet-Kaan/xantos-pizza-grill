@@ -21,7 +21,7 @@
     background 0.2s ease;
 }
 
-@media (pointer: fine) {
+@media (hover: hover) and (pointer: fine) {
   button.feedback-trigger-btn:hover {
     background: #a31f1f;
     transform: rotate(270deg) translateY(-10%);
@@ -186,11 +186,12 @@
   overflow: hidden;
 }
 
-.submit-btn:hover {
-  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-  box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5);
+@media (hover: hover) and (pointer: fine) {
+  .submit-btn:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5);
+  }
 }
-
 .submit-feedback-btn:disabled {
   background: #ccc;
   cursor: not-allowed;

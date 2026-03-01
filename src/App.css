@@ -1054,6 +1054,12 @@ body.mobile-menu-open {
   }
 }
 
+@media (max-width: 900px) and (hover: hover) and (pointer: fine) {
+  .modern-mobile-nav a:hover,
+  .modern-mobile-nav button:not(.mobile-theme-toggle):hover {
+    padding-left: 1.75rem;
+  }
+}
 @media (max-width: 900px) {
   .modern-header-container {
     padding: 0.25rem 1rem;
@@ -1113,11 +1119,6 @@ body.mobile-menu-open {
     font-size: 1rem;
     padding: 1.125rem 1.25rem;
     min-height: 56px;
-  }
-
-  .modern-mobile-nav a:hover,
-  .modern-mobile-nav button:not(.mobile-theme-toggle):hover {
-    padding-left: 1.75rem;
   }
 
   .modern-mobile-nav a::after,

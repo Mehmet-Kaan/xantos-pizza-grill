@@ -75,12 +75,13 @@ header {
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-[data-theme="dark"] .btn-primary:hover {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="dark"] .btn-primary:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    transform: translateY(-1px);
+  }
 }
-
 .btn-outline {
   background: transparent;
   border: 2px solid #999;
@@ -94,12 +95,12 @@ header {
   border-color: rgba(255, 255, 255, 0.3);
   color: #f1f5f9;
 }
-
-[data-theme="dark"] .btn-outline:hover {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="dark"] .btn-outline:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+  }
 }
-
 .card {
   background: white;
   padding: 20px;
@@ -459,10 +460,11 @@ header {
   transition: color 0.2s ease;
 }
 
-.privacy-link:hover {
-  color: #b91c1c;
+@media (hover: hover) and (pointer: fine) {
+  .privacy-link:hover {
+    color: #b91c1c;
+  }
 }
-
 .privacy-contact {
   background: #f9fafb;
   border-left: 4px solid #dc2626;

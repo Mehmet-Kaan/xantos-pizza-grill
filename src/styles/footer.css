@@ -59,17 +59,17 @@
 [data-theme="dark"] .glass-links button {
   color: #94a3b8;
 }
+@media (hover: hover) and (pointer: fine) {
+  .glass-links a:hover,
+  .glass-links button:hover {
+    color: white;
+  }
 
-.glass-links a:hover,
-.glass-links button:hover {
-  color: white;
+  [data-theme="dark"] .glass-links a:hover,
+  [data-theme="dark"] .glass-links button:hover {
+    color: #f1f5f9;
+  }
 }
-
-[data-theme="dark"] .glass-links a:hover,
-[data-theme="dark"] .glass-links button:hover {
-  color: #f1f5f9;
-}
-
 @media (max-width: 1220px) and (min-width: 1206px) {
   .footer-glass {
     padding: 60px 1.75rem;

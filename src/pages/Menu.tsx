@@ -35,6 +35,38 @@ export function MenuCard({ item }: { item: MenuItem }) {
 
   return (
     <div key={item.id} className="menu-item-simple homePopularItemsDiv">
+      <div>
+        <p className="menu-cart-item-name">{item.name}</p>
+        <p className="menu-cart-item-description">{item.description}</p>
+        <p className="menu-cart-item-price" style={{ fontWeight: "bold" }}>
+          DKK {item.price.toFixed(2)}
+        </p>
+        {items.some((i) => i.id === item.id) ? (
+          <div className="menu-cart-controls">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeItem(item.id);
+              }}
+              className="menu-item-simple-add"
+            >
+              <TrashIcon className="cart-clear-icon" />
+            </button>
+          </div>
+        ) : (
+          <Link to={"/cart"} className="menu-cart-controls">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                addItem({ ...item, qty: 1 });
+              }}
+              className="menu-item-simple-add"
+            >
+              <PlusIcon className="iconsDimension" />
+            </button>
+          </Link>
+        )}
+      </div>
       {item.imageExist === true && (
         <img
           src={`${IMAGE_BASE_URL}/menuItems/${item.image}`}
@@ -50,39 +82,6 @@ export function MenuCard({ item }: { item: MenuItem }) {
             (e.target as HTMLImageElement).style.display = "none";
           }}
         />
-      )}
-
-      <div>
-        <p className="menu-cart-item-name">{item.name}</p>
-        <p className="menu-cart-item-description">{item.description}</p>
-        <p className="menu-cart-item-price" style={{ fontWeight: "bold" }}>
-          DKK {item.price.toFixed(2)}
-        </p>
-      </div>
-      {items.some((i) => i.id === item.id) ? (
-        <div className="menu-cart-controls">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              removeItem(item.id);
-            }}
-            className="menu-item-simple-add"
-          >
-            <TrashIcon className="cart-clear-icon" />
-          </button>
-        </div>
-      ) : (
-        <Link to={"/cart"} className="menu-cart-controls">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              addItem({ ...item, qty: 1 });
-            }}
-            className="menu-item-simple-add"
-          >
-            <PlusIcon className="iconsDimension" />
-          </button>
-        </Link>
       )}
     </div>
   );
@@ -860,7 +859,7 @@ export default function Menu() {
     selectedCategory,
   ]);
 
-  // Show categoriesContainer-revealOnScroll when scrolling past menu-filters > categoriesContainer
+  // Show categoriesContainer when scrolling past menu-filters > categoriesContainer
   useEffect(() => {
     if (loading || products.length === 0) return;
 
