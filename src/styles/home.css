@@ -901,6 +901,8 @@
     flex-direction: column-reverse !important;
     gap: 20px !important;
     min-height: unset;
+    padding: 1rem !important;
+    width: fit-content !important;
   }
   .homePopularItemsDiv > div {
     max-width: 240px;

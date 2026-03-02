@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { MenuCard } from "./Menu";
 import { PizzaIcon, ArrowRightIcon } from "../utils/Icons";
 import { useState, useEffect } from "react";
-// import type { FormEvent } from "react";
 import {
   getAllReviews,
   getReviewsMetadata,
@@ -27,6 +26,7 @@ import {
 import ScrollReveal from "../utils/ScrollReveal";
 import type { Product } from "../hooks/types";
 import FeedbackModal from "../components/FeedbackModal";
+import { LazyImage } from "../components/lazyLoad";
 
 // localStorage keys
 const REVIEWS_STORAGE_KEY = "xanthos_reviews";
@@ -91,25 +91,67 @@ function setStoredReviewsLastUpdated(date: Date): void {
 
 const SPECIALS = [
   {
-    id: 1,
-    title: "BBQ Ribs Combo",
-    description: "Saftiga ribs med vår hemlagade BBQ-sås + liten Cola",
-    price: "159,-",
-    image: "./assets/pepperoni.jpeg",
+    id: "burg-home-xanthos",
+    category: "Beef burger",
+    name: "Xanthos Burger",
+    description: "Homemade beef burger with fresh salad and dressing",
+    price: 69,
+    image: "xanthos-burger.jpeg",
+    imageLarge: "xanthos-burger-large.jpeg",
   },
   {
-    id: 2,
-    title: "Pepperoni Pizza Deal",
-    description: "Stor pepperoni pizza + valgfri dip",
-    price: "119,-",
-    image: "./assets/pepperoni.jpeg",
+    id: "durum-classic",
+    category: "Durum",
+    name: "Durum",
+    description: "Homemade flatbread with salad and dressing.",
+    price: 80,
+    image: "durum.jpeg",
+    imageLarge: "durum-large.jpeg",
   },
   {
-    id: 3,
-    title: "Mixed Grill Plate",
-    description: "Kebabspyd, pølser & pommes frites",
-    price: "169,-",
-    image: "./assets/pepperoni.jpeg",
+    id: "pita-falafel",
+    category: "Homemade Pita Bread",
+    name: "Falafel Pita Bread",
+    description: "Served with salad and dressing.",
+    price: 65,
+    image: "pita-falafel.jpeg",
+    imageLarge: "pita-falafel-large.jpeg",
+  },
+  {
+    id: "pasta-bolognese",
+    category: "Pasta dishes",
+    name: "Spaghetti Bolognese",
+    description: "With meat sauce",
+    price: 85,
+    image: "bolognese.jpeg",
+    imageLarge: "bolognese-large.jpeg",
+  },
+  {
+    id: "p-avanos",
+    category: "Pizza",
+    name: "Avanos",
+    description: "Tomato, cheese, salad and dressing",
+    price: 100,
+    image: "avanos.jpeg",
+    imageLarge: "avanos-large.jpeg",
+  },
+  {
+    id: "nachos-chicken",
+    category: "Nachos",
+    name: "Chicken Nachos",
+    description: "With cheddar cheese, guacamole and taco sauce.",
+    price: 85,
+    image: "nachos-chicken.jpeg",
+    imageLarge: "nachos-chicken-large.jpeg",
+  },
+  {
+    id: "pizza-sandwich-classic",
+    category: "Pizza Sandwich",
+    name: "Pizza sandwich",
+    description: "Homemade. Served with salad, cheese and dressing.",
+    price: 85,
+    image: "pizza-sandwich.jpeg",
+    imageLarge: "pizza-sandwich-large.jpeg",
   },
 ];
 
@@ -470,11 +512,11 @@ export default function Home() {
               <div className="special-card">
                 <span className="special-badge">Dagens tilbud</span>
                 <div className="special-image">
-                  <img src={special.image} alt={special.title} />
+                  <LazyImage item={special} large={true} />
                 </div>
-                <h3 className="special-title">{special.title}</h3>
+                <h3 className="special-title">{special.name}</h3>
                 <p className="special-desc">{special.description}</p>
-                <p className="special-price">{special.price}</p>
+                <p className="special-price">{special.price} kr</p>
               </div>
             </div>
           </ScrollReveal>
@@ -519,14 +561,13 @@ export default function Home() {
         </section>
 
         {/* ABOUT US SECTION */}
-        <section id="about" className="section about-section">
-          <ScrollReveal>
+        <ScrollReveal>
+          <section id="about" className="section about-section">
             <div className="section-header">
               <h2 className="section-title darkTitle">Om os</h2>
               <p className="section-subtitle">Din lokale pizzabar og grill</p>
             </div>
-          </ScrollReveal>
-          <ScrollReveal>
+
             <div className="about-content">
               <div className="about-text">
                 <p>
@@ -551,8 +592,8 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </ScrollReveal>
-        </section>
+          </section>
+        </ScrollReveal>
 
         {/* POPULAR ITEMS */}
         <section className="section popular-section">
