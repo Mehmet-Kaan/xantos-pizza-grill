@@ -42,6 +42,9 @@
   gap: 2rem;
   align-items: flex-start;
 }
+.noSummaryLayout {
+  grid-template-columns: 1fr;
+}
 
 .checkout-form {
   background: #fff;
@@ -341,7 +344,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 100px;
-  max-height: calc(100vh - 120px);
+  /* max-height: calc(100vh - 120px); */
   display: flex;
   flex-direction: column;
 }
@@ -356,12 +359,8 @@
 [data-theme="dark"] .checkout-summary .summary-header .summary-count {
   color: #f8fafc;
 }
-[data-theme="dark"] .checkout-summary {
-}
-
-[data-theme="dark"] .summary-item {
-  background: white;
-}
+/* [data-theme="dark"] .checkout-summary {
+} */
 
 .summary-header {
   display: flex;
@@ -415,10 +414,15 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 0.875rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f0f0f0;
+  /* border-radius: 8px; */
+
   position: relative;
   gap: 10px;
-  border-radius: 8px;
+}
+
+[data-theme="dark"] .summary-item {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .checkout-item-img {
@@ -446,6 +450,10 @@
   font-weight: 600;
   color: #111827;
   font-size: 0.95rem;
+}
+[data-theme="dark"] .summary-item-name,
+[data-theme="dark"] .summary-item-price {
+  color: white;
 }
 
 .summary-item-qty {
@@ -482,13 +490,13 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.addOnLists {
-}
-
 .summary-item-price {
   font-weight: 700;
   color: #111827;
   font-size: 0.95rem;
+  position: absolute;
+  top: 0.875rem;
+  right: 0;
 }
 
 .summary-total {
@@ -596,6 +604,9 @@
   max-width: 400px;
   width: 90%;
   text-align: center;
+
+  white-space: pre-line;
+
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -715,9 +726,26 @@
 }
 
 @media (max-width: 640px) {
+  .summary-item {
+    padding: 0.7rem;
+    flex-direction: column;
+  }
+  .summary-item-name {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 5px;
+  }
+  [data-theme="dark"] .summary-item-name {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  .summary-item-qty {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
   .checkout-item-img {
-    width: 70px;
-    height: 70px;
+    width: 100%;
+    /* width: 70px;
+    height: 70px; */
   }
 
   .checkout-title {
@@ -734,14 +762,12 @@
     padding: 1.25rem;
     border-radius: 16px;
   }
-  .summary-item {
-    padding: 0.7rem;
-  }
   .summary-item-price {
-    position: absolute;
-    right: 0.7rem;
     font-size: 1rem;
-    bottom: 0.2rem;
+    position: absolute;
+    top: unset;
+    right: 0.7rem;
+    bottom: 0.5rem;
   }
   .checkout-actions {
     flex-direction: column;
@@ -753,7 +779,13 @@
   }
   .summary-item-info {
     margin: 0;
-    margin-bottom: 20px;
+    margin-bottom: 35px;
+    margin-top: 5px;
+    width: 100%;
+    position: relative;
+  }
+  .cart-item-ingredients {
+    margin-top: 0.75rem;
   }
   .summary-item-ingredients-list {
     margin: 0;

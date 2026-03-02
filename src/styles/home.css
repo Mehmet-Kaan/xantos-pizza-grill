@@ -851,10 +851,11 @@
   border-radius: 12px;
   flex-direction: row !important;
   justify-content: space-between;
+  min-height: 182px;
 }
 
 [data-theme="dark"] .homePopularItemsDiv {
-  background: #b3aeb317;
+  background: rgb(30, 41, 59);
 }
 
 .homePopularItemsDiv > .menu-item-simple-img {
@@ -899,6 +900,10 @@
   .homePopularItemsDiv {
     flex-direction: column-reverse !important;
     gap: 20px !important;
+    min-height: unset;
+  }
+  .homePopularItemsDiv > div {
+    max-width: 240px;
   }
   .homePopularItemsDiv > .menu-item-simple-img {
     width: fit-content;

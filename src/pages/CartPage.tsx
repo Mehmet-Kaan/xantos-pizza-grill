@@ -1,5 +1,5 @@
 import "../styles/cart.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { CartIcon, TrashIcon } from "../utils/Icons";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { IMAGE_BASE_URL } from "../services/productsService";
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { items, updateQty, removeItem, clear, total } = useCart();
   const [confirmClear, setConfirmClear] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -158,17 +159,6 @@ export default function CartPage() {
                               }}
                             />
                           </>
-                          // <img
-                          //   src={`${IMAGE_BASE_URL}/Large/${(i as any).imageLarge}`}
-                          //   alt={i.name}
-                          //   className="cart-item-image"
-                          //   loading="lazy"
-                          //   onError={(e) => {
-                          //     const img = e.currentTarget;
-                          //     img.onerror = null;
-                          //     img.src = `${IMAGE_BASE_URL}/assets/placeholderIMG.jpeg`;
-                          //   }}
-                          // />
                         )}
                       </div>
 
@@ -368,7 +358,11 @@ export default function CartPage() {
                     Fortsæt shopping
                   </Link>
                   <button
-                    onClick={() => navigate("/checkout")}
+                    onClick={() =>
+                      navigate("/checkout", {
+                        state: { from: location.pathname },
+                      })
+                    }
                     className="cart-checkout-btn"
                   >
                     Gå til betaling

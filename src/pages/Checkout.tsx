@@ -1,5 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import {
   ArrowRightIcon,
@@ -37,6 +42,10 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 export default function Checkout() {
+  const location = useLocation();
+  const cameFromCart = location.state?.from === "/cart";
+  console.log(cameFromCart);
+
   const { items, total, clear } = useCart();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -93,6 +102,19 @@ export default function Checkout() {
   //     navigate("/menu");
   //   }
   // }, [items.length, isHydrated, isProcessing, searchParams]);
+
+  useEffect(() => {
+    // document.body.style.overflow = cartDrawerOpen ? "hidden" : "auto";
+    if (notification) {
+      document.body.classList.add("cart-drawer-open");
+    } else {
+      document.body.classList.remove("cart-drawer-open");
+    }
+    return () => {
+      // document.body.style.overflow = "auto";
+      document.body.classList.remove("cart-drawer-open");
+    };
+  }, [notification]);
 
   // Handle BFCache (Back-Forward Cache) scenarios
   useEffect(() => {
@@ -393,6 +415,59 @@ export default function Checkout() {
       }
     }
 
+    // OPENING HOURS CHECK (11:00 – 20:30)
+    const OPEN_HOUR = 10;
+    const OPEN_MINUTE = 0;
+
+    const CLOSE_HOUR = 22;
+    const CLOSE_MINUTE = 0;
+
+    const ONLINE_CLOSE_OFFSET_MINUTES = 15;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const openMinutes = OPEN_HOUR * 60 + OPEN_MINUTE;
+    const closeMinutes = CLOSE_HOUR * 60 + CLOSE_MINUTE;
+    const onlineCloseMinutes = closeMinutes - ONLINE_CLOSE_OFFSET_MINUTES;
+
+    const minutesUntilOpen =
+      currentMinutes < openMinutes
+        ? openMinutes - currentMinutes
+        : 24 * 60 - currentMinutes + openMinutes;
+
+    const hours = Math.floor(minutesUntilOpen / 60);
+    const minutes = minutesUntilOpen % 60;
+
+    const reopenText =
+      hours > 0
+        ? `Vi åbner igen om ${hours} timer og ${minutes} minutter.`
+        : `Vi åbner igen om ${minutes} minutter.`;
+
+    if (currentMinutes < openMinutes || currentMinutes > onlineCloseMinutes) {
+      showNotification(
+        `Vi åbner snart igen! \n
+Vi har desværre lukket lige nu, men du kan snart komme tilbage og bestille.
+
+Velkommen til at bestille i dagens åbningstid: ${String(OPEN_HOUR).padStart(2, "0")}:${String(OPEN_MINUTE).padStart(2, "0")} – ${String(CLOSE_HOUR).padStart(2, "0")}:${String(CLOSE_MINUTE).padStart(2, "0")}` +
+          "\n\n" +
+          reopenText,
+      );
+
+      //       showNotification(
+      //         `Vi åbner snart igen! \n
+      // Vi har desværre lukket lige nu, men du kan snart komme tilbage og bestille.
+
+      // Onlinebestillinger åbner samtidig med, at restauranten åbner og lukker ca. 15 minutter før vores fastsatte lukketid. \n
+      // Dette er for at sikre, at vi altid kan nå at færdiggøre de bestillinger, vi påtager os.
+
+      // Velkommen til at bestille i dagens åbningstid: ${String(OPEN_HOUR).padStart(2, "0")}:${String(OPEN_MINUTE).padStart(2, "0")} – ${String(CLOSE_HOUR).padStart(2, "0")}:${String(CLOSE_MINUTE).padStart(2, "0")}` +
+      //           "\n\n" +
+      //           reopenText,
+      //       );
+      return;
+    }
+
     // 1. Show Loading Notification
     setNotification({
       message: "Vi gør din betaling klar... Vent venligst.",
@@ -551,113 +626,173 @@ export default function Checkout() {
             </div>
           </div>
         ) : (
-          <div className="checkout-layout">
+          <div
+            className={
+              !cameFromCart
+                ? "checkout-layout"
+                : "checkout-layout noSummaryLayout"
+            }
+          >
             {/* Order Summary Sidebar */}
-            <aside className="checkout-summary">
-              <div className="summary-header">
-                <h3>Din bestilling</h3>
-                <span className="summary-count">
-                  {items.length} {items.length === 1 ? "vare" : "varer"}
-                </span>
-              </div>
-              <div className="summary-items">
-                {items.map((item) => (
-                  <div key={item.id} className="summary-item">
-                    <img
-                      src={`${IMAGE_BASE_URL}/Large/${item.imageLarge}`}
-                      alt={item.name}
-                      className="checkout-item-img"
-                      loading="lazy"
-                      onError={(e) => {
-                        let target = e.target as HTMLImageElement;
-                        target.src = `${IMAGE_BASE_URL}/assets/placeholderIMG.jpeg`;
-                        target.onerror = null;
-                        // target.style.display = "none";
-                      }}
-                    />
+            {!cameFromCart && (
+              <aside className="checkout-summary">
+                <div className="summary-header">
+                  <h3>Din bestilling</h3>
+                  <span className="summary-count">
+                    {items.length} {items.length === 1 ? "vare" : "varer"}
+                  </span>
+                </div>
+                <div className="summary-items">
+                  {items.map((item) => (
+                    <div key={item.id} className="summary-item">
+                      <img
+                        src={`${IMAGE_BASE_URL}/Large/${item.imageLarge}`}
+                        alt={item.name}
+                        className="checkout-item-img"
+                        loading="lazy"
+                        onError={(e) => {
+                          let target = e.target as HTMLImageElement;
+                          target.src = `${IMAGE_BASE_URL}/assets/placeholderIMG.jpeg`;
+                          target.onerror = null;
+                          // target.style.display = "none";
+                        }}
+                      />
 
-                    <div className="summary-item-info">
-                      <span className="summary-item-name">{item.name}</span>
-                      <span className="summary-item-qty">x{item.qty}</span>
-                      {item.selectedSize && (
-                        <ul className="summary-item-ingredients-list">
-                          <li>
-                            <strong>Størlek: </strong>
-                            {item.selectedSize.name}
-                          </li>
-                        </ul>
-                      )}
-                      {item.selectedType && (
-                        <ul className="summary-item-ingredients-list">
-                          <li>
-                            <strong>Væld: </strong> {item.selectedType.name}
-                          </li>
-                        </ul>
-                      )}
-                      {item.selectedChooseOne && (
-                        <ul className="summary-item-ingredients-list">
-                          <li>
-                            <strong>Væld: </strong>{" "}
-                            {item.selectedChooseOne.name}
-                          </li>
-                        </ul>
-                      )}
-                      {item.selectedaddOns &&
-                        item.selectedaddOns?.length > 0 && (
-                          <ul className="summary-item-ingredients-list addOnLists">
-                            {item.selectedaddOns?.map((ing, idx) => (
-                              <li key={idx}>
-                                {ing.name}
-                                {idx !==
-                                  (item.selectedaddOns?.length ?? 0) - 1 && (
-                                  <span className="kommaTecken">,</span>
+                      <div className="summary-item-info">
+                        <span className="summary-item-name">{item.name}</span>
+                        <span className="summary-item-qty">x{item.qty}</span>
+
+                        {item.selectedSize && (
+                          <div className="cart-item-ingredients">
+                            <p className="cart-ingredients-label">Størlek:</p>
+                            <div className="cart-ingredients-list">
+                              <span className="cart-ingredient-tag">
+                                {item.selectedSize.name}
+                                {item.selectedSize.extraPrice &&
+                                  item.selectedSize.extraPrice > 0 && (
+                                    <span className="cart-ingredient-price">
+                                      +{item.selectedSize.extraPrice.toFixed(2)}{" "}
+                                      kr
+                                    </span>
+                                  )}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {(item.selectedType || item.selectedChooseOne) && (
+                          <div className="cart-item-ingredients">
+                            <p className="cart-ingredients-label">Tilvalg:</p>
+                            <div className="cart-ingredients-list">
+                              {item.selectedType && (
+                                <span className="cart-ingredient-tag">
+                                  {item.selectedType.name}
+                                  {item.selectedType.extraPrice &&
+                                    item.selectedType.extraPrice > 0 && (
+                                      <span className="cart-ingredient-price">
+                                        +
+                                        {item.selectedType.extraPrice.toFixed(
+                                          2,
+                                        )}{" "}
+                                        kr
+                                      </span>
+                                    )}
+                                </span>
+                              )}
+                              {item.selectedChooseOne && (
+                                <span className="cart-ingredient-tag">
+                                  {item.selectedChooseOne.name}
+                                  {item.selectedChooseOne.extraPrice &&
+                                    item.selectedChooseOne.extraPrice > 0 && (
+                                      <span className="cart-ingredient-price">
+                                        +
+                                        {item.selectedChooseOne.extraPrice.toFixed(
+                                          2,
+                                        )}{" "}
+                                        kr
+                                      </span>
+                                    )}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {item.selectedaddOns &&
+                          item.selectedaddOns.length > 0 && (
+                            <div className="cart-item-ingredients">
+                              <p className="cart-ingredients-label">Tilvalg:</p>
+                              <div className="cart-ingredients-list">
+                                {item.selectedaddOns.map(
+                                  (ing: any, idx: number) => (
+                                    <span
+                                      key={idx}
+                                      className="cart-ingredient-tag"
+                                    >
+                                      {ing.name}
+                                      {ing.extraPrice > 0 && (
+                                        <span className="cart-ingredient-price">
+                                          +{ing.extraPrice.toFixed(2)} kr
+                                        </span>
+                                      )}
+                                    </span>
+                                  ),
                                 )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                              </div>
+                            </div>
+                          )}
 
-                      {item.selectedaddOnsExtra &&
-                        item.selectedaddOnsExtra?.length > 0 && (
-                          <ul className="summary-item-ingredients-list addOnLists">
-                            {item.selectedaddOnsExtra?.map((ing, idx) => (
-                              <li key={idx}>
-                                {ing.name}
-                                {idx !==
-                                  (item.selectedaddOnsExtra?.length ?? 0) -
-                                    1 && <span className="kommaTecken">,</span>}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                        {item.selectedaddOnsExtra &&
+                          item.selectedaddOnsExtra.length > 0 && (
+                            <div className="cart-item-ingredients">
+                              <p className="cart-ingredients-label">Tilvalg:</p>
+                              <div className="cart-ingredients-list">
+                                {item.selectedaddOnsExtra.map(
+                                  (ing: any, idx: number) => (
+                                    <span
+                                      key={idx}
+                                      className="cart-ingredient-tag"
+                                    >
+                                      {ing.name}
+                                      {ing.extraPrice > 0 && (
+                                        <span className="cart-ingredient-price">
+                                          +{ing.extraPrice.toFixed(2)} kr
+                                        </span>
+                                      )}
+                                    </span>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+                          )}
+                      </div>
+                      <span className="summary-item-price">
+                        {(item.price * item.qty).toFixed(2)} DKK
+                      </span>
                     </div>
-                    <span className="summary-item-price">
-                      {(item.price * item.qty).toFixed(2)} DKK
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="summary-total">
-                <div className="summary-total-row">
-                  <span>Subtotal</span>
-                  <span>{subtotal.toFixed(2)} DKK</span>
+                  ))}
                 </div>
-                <div className="summary-total-row">
-                  <span>Moms (25%)</span>
-                  <span>{vat.toFixed(2)} DKK</span>
-                </div>
-                {method === "delivery" && (
+                <div className="summary-total">
                   <div className="summary-total-row">
-                    <span>Leveringsgebyr</span>
-                    <span>{DELIVERY_FEE.toFixed(2)} DKK</span>
+                    <span>Subtotal</span>
+                    <span>{subtotal.toFixed(2)} DKK</span>
                   </div>
-                )}
-                <div className="summary-total-row summary-total-final">
-                  <span>Total</span>
-                  <strong>{finalTotal.toFixed(2)} DKK</strong>
+                  <div className="summary-total-row">
+                    <span>Moms (25%)</span>
+                    <span>{vat.toFixed(2)} DKK</span>
+                  </div>
+                  {method === "delivery" && (
+                    <div className="summary-total-row">
+                      <span>Leveringsgebyr</span>
+                      <span>{DELIVERY_FEE.toFixed(2)} DKK</span>
+                    </div>
+                  )}
+                  <div className="summary-total-row summary-total-final">
+                    <span>Total</span>
+                    <strong>{finalTotal.toFixed(2)} DKK</strong>
+                  </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            )}
 
             {/* Checkout Form */}
             <form onSubmit={handlePlaceOrder} className="checkout-form">
