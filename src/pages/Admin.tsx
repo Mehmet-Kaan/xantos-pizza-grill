@@ -24,7 +24,12 @@ import {
   deleteReview,
   type Review,
 } from "../services/reviewsService";
-import type { Unsubscribe } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getFirestore,
+  type Unsubscribe,
+} from "firebase/firestore";
 import "../styles/Admin.css";
 import {
   AddIcon,
@@ -270,6 +275,16 @@ export default function Admin() {
       });
 
       console.log("FCM Token:", token);
+
+      if (token) {
+        const db = getFirestore();
+        // 3️⃣ Save token to adminDevices collection
+        await setDoc(doc(db, "adminDevices", token), {
+          createdAt: Date.now(),
+          platform: navigator.userAgent,
+        });
+        console.log("Token saved to adminDevices collection");
+      }
     } catch (err) {
       console.error("FCM Error:", err);
     }
