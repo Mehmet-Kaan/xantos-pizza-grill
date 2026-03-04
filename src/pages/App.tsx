@@ -22,17 +22,11 @@ import { AnimatePresence } from "framer-motion";
 import PageTransition from "../utils/PageTransition";
 import AdminLogin from "./AdminLogin";
 import AdminRoute from "../auth/AdminRoute";
-import { initMessaging } from "../config/firebase";
-import { useEffect } from "react";
 
 // import CookieBanner from "../components/CookieBanner";
 
 function AppContent() {
   const location = useLocation();
-
-  useEffect(() => {
-    initMessaging();
-  }, []);
 
   // Prevents the browser from trying to restore old scroll positions.
   // useEffect(() => {

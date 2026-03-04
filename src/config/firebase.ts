@@ -1,7 +1,12 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getMessaging, isSupported } from "firebase/messaging";
+import {
+  getMessaging,
+  isSupported,
+  getToken,
+  onMessage,
+} from "firebase/messaging";
 
 // Your Firebase configuration
 const firebaseConfig = {

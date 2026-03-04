@@ -12,12 +12,26 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
+// // Handle background messages
+// messaging.onBackgroundMessage((payload) => {
+//   const notificationTitle = payload.notification.title;
+//   const notificationOptions = {
+//     body: payload.notification.body,
+//     icon: "/icon.png",
+//   };
+//   self.registration.showNotification(notificationTitle, notificationOptions);
+// });
+
+// Background notifications
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification.title;
+  console.log("[SW] Background message received", payload);
+
+  const notificationTitle = payload.notification?.title || "Ny besked!";
   const notificationOptions = {
-    body: payload.notification.body,
+    body: payload.notification?.body || "",
     icon: "/icon.png",
+    data: payload.data || {},
   };
+
   self.registration.showNotification(notificationTitle, notificationOptions);
 });

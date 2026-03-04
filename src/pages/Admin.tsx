@@ -35,7 +35,7 @@ import {
 import LogoutButton from "../components/LogoutButton";
 import ToggleThemeButton from "../components/ToggleThemeButton";
 
-import { messaging } from "../config/firebase";
+import { initMessaging, messaging } from "../config/firebase";
 import { getToken, onMessage } from "firebase/messaging";
 
 // localStorage keys
@@ -238,6 +238,8 @@ function playNotificationAlert() {
 export default function Admin() {
   // 🔹 Foreground message listener
   useEffect(() => {
+    initMessaging();
+
     if (!messaging) return;
 
     const unsubscribe = onMessage(messaging, (payload) => {
@@ -254,20 +256,20 @@ export default function Admin() {
 
     try {
       const permission = await Notification.requestPermission();
+      if (permission !== "granted") return;
 
-      if (permission !== "granted") {
-        console.log("Notification permission denied");
-        return;
-      }
+      // 1. Explicitly register the service worker first
+      const registration = await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js",
+      );
 
+      // 2. Pass the registration to getToken
       const token = await getToken(messaging, {
-        vapidKey:
-          "BIpUeHJdlB4vgovcrhIMJzUpPm3K467PY94rXN8MfJB8-TbC_UlBr9ctAL6ygwJD2fuNndSIQlDOri2-jIQMnQQ",
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: registration, // This is crucial for iOS
       });
 
       console.log("FCM Token:", token);
-
-      // Save token to Firestore here
     } catch (err) {
       console.error("FCM Error:", err);
     }
