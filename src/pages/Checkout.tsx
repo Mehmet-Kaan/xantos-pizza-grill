@@ -44,7 +44,6 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 export default function Checkout() {
   const location = useLocation();
   const cameFromCart = location.state?.from === "/cart";
-  console.log(cameFromCart);
 
   const { items, total, clear } = useCart();
   const [name, setName] = useState("");
@@ -416,57 +415,57 @@ export default function Checkout() {
     }
 
     // OPENING HOURS CHECK (11:00 – 20:30)
-    const OPEN_HOUR = 10;
-    const OPEN_MINUTE = 0;
+    // const OPEN_HOUR = 10;
+    // const OPEN_MINUTE = 0;
 
-    const CLOSE_HOUR = 22;
-    const CLOSE_MINUTE = 0;
+    // const CLOSE_HOUR = 22;
+    // const CLOSE_MINUTE = 0;
 
-    const ONLINE_CLOSE_OFFSET_MINUTES = 15;
+    // const ONLINE_CLOSE_OFFSET_MINUTES = 15;
 
-    const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    // const now = new Date();
+    // const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    const openMinutes = OPEN_HOUR * 60 + OPEN_MINUTE;
-    const closeMinutes = CLOSE_HOUR * 60 + CLOSE_MINUTE;
-    const onlineCloseMinutes = closeMinutes - ONLINE_CLOSE_OFFSET_MINUTES;
+    // const openMinutes = OPEN_HOUR * 60 + OPEN_MINUTE;
+    // const closeMinutes = CLOSE_HOUR * 60 + CLOSE_MINUTE;
+    // const onlineCloseMinutes = closeMinutes - ONLINE_CLOSE_OFFSET_MINUTES;
 
-    const minutesUntilOpen =
-      currentMinutes < openMinutes
-        ? openMinutes - currentMinutes
-        : 24 * 60 - currentMinutes + openMinutes;
+    // const minutesUntilOpen =
+    //   currentMinutes < openMinutes
+    //     ? openMinutes - currentMinutes
+    //     : 24 * 60 - currentMinutes + openMinutes;
 
-    const hours = Math.floor(minutesUntilOpen / 60);
-    const minutes = minutesUntilOpen % 60;
+    // const hours = Math.floor(minutesUntilOpen / 60);
+    // const minutes = minutesUntilOpen % 60;
 
-    const reopenText =
-      hours > 0
-        ? `Vi åbner igen om ${hours} timer og ${minutes} minutter.`
-        : `Vi åbner igen om ${minutes} minutter.`;
+    // const reopenText =
+    //   hours > 0
+    //     ? `Vi åbner igen om ${hours} timer og ${minutes} minutter.`
+    //     : `Vi åbner igen om ${minutes} minutter.`;
 
-    if (currentMinutes < openMinutes || currentMinutes > onlineCloseMinutes) {
-      showNotification(
-        `Vi åbner snart igen! \n
-Vi har desværre lukket lige nu, men du kan snart komme tilbage og bestille.
+    // if (currentMinutes < openMinutes || currentMinutes > onlineCloseMinutes) {
+    //   showNotification(
+    //     `Vi åbner snart igen! \n
+    // Vi har desværre lukket lige nu, men du kan snart komme tilbage og bestille.
 
-Velkommen til at bestille i dagens åbningstid: ${String(OPEN_HOUR).padStart(2, "0")}:${String(OPEN_MINUTE).padStart(2, "0")} – ${String(CLOSE_HOUR).padStart(2, "0")}:${String(CLOSE_MINUTE).padStart(2, "0")}` +
-          "\n\n" +
-          reopenText,
-      );
+    // Velkommen til at bestille i dagens åbningstid: ${String(OPEN_HOUR).padStart(2, "0")}:${String(OPEN_MINUTE).padStart(2, "0")} – ${String(CLOSE_HOUR).padStart(2, "0")}:${String(CLOSE_MINUTE).padStart(2, "0")}` +
+    //       "\n\n" +
+    //       reopenText,
+    //   );
 
-      //       showNotification(
-      //         `Vi åbner snart igen! \n
-      // Vi har desværre lukket lige nu, men du kan snart komme tilbage og bestille.
+    //   //       showNotification(
+    //   //         `Vi åbner snart igen! \n
+    //   // Vi har desværre lukket lige nu, men du kan snart komme tilbage og bestille.
 
-      // Onlinebestillinger åbner samtidig med, at restauranten åbner og lukker ca. 15 minutter før vores fastsatte lukketid. \n
-      // Dette er for at sikre, at vi altid kan nå at færdiggøre de bestillinger, vi påtager os.
+    //   // Onlinebestillinger åbner samtidig med, at restauranten åbner og lukker ca. 15 minutter før vores fastsatte lukketid. \n
+    //   // Dette er for at sikre, at vi altid kan nå at færdiggøre de bestillinger, vi påtager os.
 
-      // Velkommen til at bestille i dagens åbningstid: ${String(OPEN_HOUR).padStart(2, "0")}:${String(OPEN_MINUTE).padStart(2, "0")} – ${String(CLOSE_HOUR).padStart(2, "0")}:${String(CLOSE_MINUTE).padStart(2, "0")}` +
-      //           "\n\n" +
-      //           reopenText,
-      //       );
-      return;
-    }
+    //   // Velkommen til at bestille i dagens åbningstid: ${String(OPEN_HOUR).padStart(2, "0")}:${String(OPEN_MINUTE).padStart(2, "0")} – ${String(CLOSE_HOUR).padStart(2, "0")}:${String(CLOSE_MINUTE).padStart(2, "0")}` +
+    //   //           "\n\n" +
+    //   //           reopenText,
+    //   //       );
+    //   return;
+    // }
 
     // 1. Show Loading Notification
     setNotification({

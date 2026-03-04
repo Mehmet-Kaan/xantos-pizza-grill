@@ -35,6 +35,9 @@ import {
 import LogoutButton from "../components/LogoutButton";
 import ToggleThemeButton from "../components/ToggleThemeButton";
 
+import { messaging } from "../config/firebase";
+import { getToken, onMessage } from "firebase/messaging";
+
 // localStorage keys
 const PRODUCTS_STORAGE_KEY = "admin_products";
 const PRODUCTS_LAST_UPDATED_KEY = "admin_products_lastUpdated";
@@ -193,20 +196,21 @@ function setStoredReviewsLastUpdated(date: Date): void {
 
 type Tab = "orders" | "products" | "reviews";
 
-// Function to play notification sound
-function playNotificationSound() {
+// Function to play notification sound + vibration
+function playNotificationAlert() {
   try {
-    // Create a simple notification sound using Web Audio API
-    const audioContext = new (
-      window.AudioContext || (window as any).webkitAudioContext
-    )();
+    // 🔔 SOUND
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext;
+
+    const audioContext = new AudioContextClass();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    // Pleasant notification tone (two-tone chime)
+    // Two-tone chime
     oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
     oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
     oscillator.type = "sine";
@@ -214,22 +218,63 @@ function playNotificationSound() {
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(
       0.01,
-      audioContext.currentTime + 0.3,
+      audioContext.currentTime + 0.4,
     );
 
     oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
+    oscillator.stop(audioContext.currentTime + 0.4);
+
+    // 📳 VIBRATION (Android only)
+    if ("vibrate" in navigator) {
+      navigator.vibrate([200, 100, 200]); // vibrate, pause, vibrate
+    }
   } catch (error) {
-    console.error("Error playing notification sound:", error);
+    console.error("Error playing notification alert:", error);
   }
 }
 
 // migrateProductsToMenuItems
 
 export default function Admin() {
+  // 🔹 Foreground message listener
+  useEffect(() => {
+    if (!messaging) return;
+
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Message received:", payload);
+      alert(payload.notification?.body);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 🔹 Called ONLY from button click
+  async function requestNotificationPermission() {
+    if (!messaging) return;
+
+    try {
+      const permission = await Notification.requestPermission();
+
+      if (permission !== "granted") {
+        console.log("Notification permission denied");
+        return;
+      }
+
+      const token = await getToken(messaging, {
+        vapidKey:
+          "BIpUeHJdlB4vgovcrhIMJzUpPm3K467PY94rXN8MfJB8-TbC_UlBr9ctAL6ygwJD2fuNndSIQlDOri2-jIQMnQQ",
+      });
+
+      console.log("FCM Token:", token);
+
+      // Save token to Firestore here
+    } catch (err) {
+      console.error("FCM Error:", err);
+    }
+  }
+
   const [activeTab, setActiveTab] = useState<Tab>("orders");
   const [isPopularCollapsed, setIsPopularCollapsed] = useState(true); // Start collapsed to save space
-
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -686,8 +731,8 @@ export default function Admin() {
             if (newOrders.length > 0) {
               // Only play sound if page is visible
               if (!document.hidden) {
-                // Play notification sound for new orders
-                playNotificationSound();
+                // Play notification sound and vibration for new orders
+                playNotificationAlert();
               }
 
               // Append new orders to existing list (prepend since sorted by date desc)
@@ -1021,6 +1066,9 @@ export default function Admin() {
         </h1>
 
         <div className="admin-controls">
+          <button onClick={requestNotificationPermission}>
+            Enable Order Notifications
+          </button>
           <ToggleThemeButton setClass="modern-theme-toggle admin-toggle-theme-button not-hide" />
           <LogoutButton />
         </div>

@@ -46,8 +46,6 @@ export async function createOrder(
   orderData: Omit<Order, "id" | "createdAt">,
 ): Promise<string> {
   try {
-    console.log("ORDER DATA:", orderData);
-
     const docRef = await addDoc(collection(db, "orders"), {
       ...orderData,
       createdAt: Timestamp.now(),
