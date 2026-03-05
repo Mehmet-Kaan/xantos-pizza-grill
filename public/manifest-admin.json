@@ -1,7 +1,9 @@
 {
+  "id": "/xanthos-admin-pwa",
   "short_name": "Admin - Xanthos",
   "name": "Xanthos Admin Panel",
-  "start_url": "/admin",
+  "start_url": "https://xantos-pizza-grill.web.app/admin",
+  "scope": "/admin",
   "display": "standalone",
   "icons": [
     {

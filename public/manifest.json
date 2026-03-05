@@ -1,4 +1,5 @@
 {
+  "id": "/Xanthos-pwa",
   "short_name": "Xanthos Pizza",
   "name": "Xanthos Pizza & Grill",
   "icons": [
@@ -19,7 +20,8 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"

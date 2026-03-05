@@ -3,23 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.png" />
-    <link rel="manifest" href="/manifest.json" />
-
     <script>
-      function applyAdminManifest() {
-        // Check if we are currently on the admin path
-        if (window.location.pathname.includes("/admin")) {
-          // Look for the manifest link and swap it immediately
-          const link = document.querySelector('link[rel="manifest"]');
-          if (link) {
-            link.setAttribute("href", "/manifest-admin.json");
-          }
-        }
-      }
-      // Run it immediately
-      applyAdminManifest();
-      // Also run it when the DOM is fully ready just in case
-      window.addEventListener("DOMContentLoaded", applyAdminManifest);
+      (function () {
+        // Check if we are on the admin path
+        const isAdmin = window.location.pathname.includes("/admin");
+        const manifestFile = isAdmin
+          ? "/manifest-admin.json"
+          : "/manifest.json";
+
+        // Create the link tag dynamically
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = manifestFile;
+
+        // Append it to the head
+        document.head.appendChild(link);
+        console.log("Loaded manifest:", manifestFile);
+      })();
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
