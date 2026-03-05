@@ -242,11 +242,32 @@ function playNotificationAlert() {
 
 export default function Admin() {
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
-    // Check if permission is already granted on load
-    if (Notification.permission === "granted") {
-      setIsSubscribed(true);
+    // 1. Safe check for Notification API (prevents Safari crash)
+    const notificationsSupported = "Notification" in window;
+
+    if (notificationsSupported) {
+      if (Notification.permission === "granted") {
+        setIsSubscribed(true);
+      }
+
+      // 2. Logic to decide if we show the setup button
+      const isIOS =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        !(window as any).MSStream;
+      const isStandalone = window.matchMedia(
+        "(display-mode: standalone)",
+      ).matches;
+
+      if (isIOS) {
+        // On iPhone, ONLY show if already installed as PWA
+        setShowButton(isStandalone);
+      } else {
+        // On Android/Desktop, always show if not yet subscribed
+        setShowButton(true);
+      }
     }
   }, []);
 
@@ -264,69 +285,42 @@ export default function Admin() {
   }, []);
 
   // 🔹 Called ONLY from button click
-  // async function requestNotificationPermission() {
-  //   if (!messaging) return;
+  async function requestNotificationPermission() {
+    if (!messaging) return;
 
-  //   try {
-  //     const permission = await Notification.requestPermission();
-  //     if (permission !== "granted") return;
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return;
 
-  //     // 1. Explicitly register the service worker first
-  //     const registration = await navigator.serviceWorker.register(
-  //       "/firebase-messaging-sw.js",
-  //     );
+      // 1. Explicitly register the service worker first
+      const registration = await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js",
+      );
 
-  //     // 2. Pass the registration to getToken
-  //     const token = await getToken(messaging, {
-  //       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-  //       serviceWorkerRegistration: registration, // This is crucial for iOS
-  //     });
-
-  //     console.log("FCM Token:", token);
-
-  //     if (token) {
-  //       const db = getFirestore();
-  //       // 3️⃣ Save token to adminDevices collection
-  //       await setDoc(doc(db, "adminDevices", token), {
-  //         token: token,
-  //         createdAt: Date.now(),
-  //         platform: navigator.userAgent,
-  //       });
-  //       console.log("Token saved to adminDevices collection");
-  //     }
-  //   } catch (err) {
-  //     console.error("FCM Error:", err);
-  //   }
-  // }
-
-  const handleRequestPermission = async () => {
-    const permission = await Notification.requestPermission();
-    const registration = await navigator.serviceWorker.register(
-      "/firebase-messaging-sw.js",
-    );
-
-    if (permission === "granted") {
+      // 2. Pass the registration to getToken
       const token = await getToken(messaging, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-        serviceWorkerRegistration: registration,
+        serviceWorkerRegistration: registration, // This is crucial for iOS
       });
+
+      console.log("FCM Token:", token);
 
       if (token) {
         const db = getFirestore();
-        // Save to Firestore
+        // 3️⃣ Save token to adminDevices collection
         await setDoc(doc(db, "adminDevices", token), {
           token: token,
-          timestamp: new Date(),
-          device: navigator.userAgent, // Optional: helps you identify the device
+          createdAt: Date.now(),
+          platform: navigator.userAgent,
         });
 
-        setIsSubscribed(true); // 👈 This makes the button disappear immediately!
+        setIsSubscribed(true);
         alert("Notifikationer er nu aktiveret!");
       }
-    } else {
-      alert("Du skal tillade notifikationer for at modtage ordrer.");
+    } catch (err) {
+      console.error("FCM Error:", err);
     }
-  };
+  }
 
   const [activeTab, setActiveTab] = useState<Tab>("orders");
   const [isPopularCollapsed, setIsPopularCollapsed] = useState(true); // Start collapsed to save space
@@ -1121,9 +1115,9 @@ export default function Admin() {
         </h1>
 
         <div className="admin-controls">
-          {!isSubscribed && (
+          {showButton && !isSubscribed && (
             <button
-              onClick={handleRequestPermission}
+              onClick={requestNotificationPermission}
               className="modern-theme-toggle admin-enable-notifications-button not-hide"
             >
               Aktiver Notifikationer
