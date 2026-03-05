@@ -6,14 +6,20 @@
     <link rel="manifest" href="/manifest.json" />
 
     <script>
-      // Check if we are currently on the admin path
-      if (window.location.pathname.startsWith("/admin")) {
-        // Look for the manifest link and swap it immediately
-        const link = document.querySelector('link[rel="manifest"]');
-        if (link) {
-          link.setAttribute("href", "/manifest-admin.json");
+      function applyAdminManifest() {
+        // Check if we are currently on the admin path
+        if (window.location.pathname.includes("/admin")) {
+          // Look for the manifest link and swap it immediately
+          const link = document.querySelector('link[rel="manifest"]');
+          if (link) {
+            link.setAttribute("href", "/manifest-admin.json");
+          }
         }
       }
+      // Run it immediately
+      applyAdminManifest();
+      // Also run it when the DOM is fully ready just in case
+      window.addEventListener("DOMContentLoaded", applyAdminManifest);
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
