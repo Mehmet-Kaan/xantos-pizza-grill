@@ -241,12 +241,12 @@ function playNotificationAlert() {
 // migrateProductsToMenuItems
 
 export default function Admin() {
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
   useEffect(() => {
-    const isPWA = window.matchMedia("(display-mode: standalone)").matches;
-    if (isPWA) {
-      console.log("Running as an installed PWA!");
-    } else {
-      console.log("Running in a standard browser tab.");
+    // Check if permission is already granted on load
+    if (Notification.permission === "granted") {
+      setIsSubscribed(true);
     }
   }, []);
 
@@ -257,7 +257,6 @@ export default function Admin() {
     if (!messaging) return;
 
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Message received:", payload);
       alert(payload.notification?.body);
     });
 
@@ -265,39 +264,69 @@ export default function Admin() {
   }, []);
 
   // 🔹 Called ONLY from button click
-  async function requestNotificationPermission() {
-    if (!messaging) return;
+  // async function requestNotificationPermission() {
+  //   if (!messaging) return;
 
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") return;
+  //   try {
+  //     const permission = await Notification.requestPermission();
+  //     if (permission !== "granted") return;
 
-      // 1. Explicitly register the service worker first
-      const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js",
-      );
+  //     // 1. Explicitly register the service worker first
+  //     const registration = await navigator.serviceWorker.register(
+  //       "/firebase-messaging-sw.js",
+  //     );
 
-      // 2. Pass the registration to getToken
+  //     // 2. Pass the registration to getToken
+  //     const token = await getToken(messaging, {
+  //       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+  //       serviceWorkerRegistration: registration, // This is crucial for iOS
+  //     });
+
+  //     console.log("FCM Token:", token);
+
+  //     if (token) {
+  //       const db = getFirestore();
+  //       // 3️⃣ Save token to adminDevices collection
+  //       await setDoc(doc(db, "adminDevices", token), {
+  //         token: token,
+  //         createdAt: Date.now(),
+  //         platform: navigator.userAgent,
+  //       });
+  //       console.log("Token saved to adminDevices collection");
+  //     }
+  //   } catch (err) {
+  //     console.error("FCM Error:", err);
+  //   }
+  // }
+
+  const handleRequestPermission = async () => {
+    const permission = await Notification.requestPermission();
+    const registration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js",
+    );
+
+    if (permission === "granted") {
       const token = await getToken(messaging, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-        serviceWorkerRegistration: registration, // This is crucial for iOS
+        serviceWorkerRegistration: registration,
       });
-
-      console.log("FCM Token:", token);
 
       if (token) {
         const db = getFirestore();
-        // 3️⃣ Save token to adminDevices collection
+        // Save to Firestore
         await setDoc(doc(db, "adminDevices", token), {
-          createdAt: Date.now(),
-          platform: navigator.userAgent,
+          token: token,
+          timestamp: new Date(),
+          device: navigator.userAgent, // Optional: helps you identify the device
         });
-        console.log("Token saved to adminDevices collection");
+
+        setIsSubscribed(true); // 👈 This makes the button disappear immediately!
+        alert("Notifikationer er nu aktiveret!");
       }
-    } catch (err) {
-      console.error("FCM Error:", err);
+    } else {
+      alert("Du skal tillade notifikationer for at modtage ordrer.");
     }
-  }
+  };
 
   const [activeTab, setActiveTab] = useState<Tab>("orders");
   const [isPopularCollapsed, setIsPopularCollapsed] = useState(true); // Start collapsed to save space
@@ -1092,9 +1121,14 @@ export default function Admin() {
         </h1>
 
         <div className="admin-controls">
-          <button onClick={requestNotificationPermission}>
-            Enable Order Notifications
-          </button>
+          {!isSubscribed && (
+            <button
+              onClick={handleRequestPermission}
+              className="modern-theme-toggle admin-enable-notifications-button not-hide"
+            >
+              Aktiver Notifikationer
+            </button>
+          )}
           <ToggleThemeButton setClass="modern-theme-toggle admin-toggle-theme-button not-hide" />
           <LogoutButton />
         </div>

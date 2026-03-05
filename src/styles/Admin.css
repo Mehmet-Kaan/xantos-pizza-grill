@@ -60,10 +60,24 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 [data-theme="light"] .admin-toggle-theme-button {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.admin-enable-notifications-button {
+  width: fit-content !important;
+  padding: 0 10px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+[data-theme="light"] .admin-enable-notifications-button {
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+}
+
+.admin-enable-notifications-button:hover {
+  transform: unset !important;
 }
 
 .logout-btn {
