@@ -241,6 +241,25 @@ function playNotificationAlert() {
 // migrateProductsToMenuItems
 
 export default function Admin() {
+  useEffect(() => {
+    const isPWA = window.matchMedia("(display-mode: standalone)").matches;
+    if (isPWA) {
+      console.log("Running as an installed PWA!");
+    } else {
+      console.log("Running in a standard browser tab.");
+    }
+  }, []);
+
+  useEffect(() => {
+    // Find the existing manifest link
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+
+    if (manifestLink) {
+      // Point to a special admin manifest
+      manifestLink.setAttribute("href", "/manifest-admin.json");
+    }
+  }, []);
+
   // 🔹 Foreground message listener
   useEffect(() => {
     initMessaging();
