@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.png" />
     <link rel="manifest" href="/manifest.json" />
+
+    <script>
+      // Check if we are currently on the admin path
+      if (window.location.pathname.startsWith("/admin")) {
+        // Look for the manifest link and swap it immediately
+        const link = document.querySelector('link[rel="manifest"]');
+        if (link) {
+          link.setAttribute("href", "/manifest-admin.json");
+        }
+      }
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"

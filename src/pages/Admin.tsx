@@ -251,13 +251,17 @@ export default function Admin() {
   }, []);
 
   useEffect(() => {
-    // Find the existing manifest link
-    const manifestLink = document.querySelector('link[rel="manifest"]');
+    let manifestLink = document.querySelector('link[rel="manifest"]');
 
-    if (manifestLink) {
-      // Point to a special admin manifest
-      manifestLink.setAttribute("href", "/manifest-admin.json");
+    if (!manifestLink) {
+      // If it's missing for some reason, create it
+      manifestLink = document.createElement("link");
+      manifestLink.setAttribute("rel", "manifest");
+      document.head.appendChild(manifestLink);
     }
+
+    // Set to the admin-specific manifest
+    manifestLink.setAttribute("href", "/manifest-admin.json");
   }, []);
 
   // 🔹 Foreground message listener
