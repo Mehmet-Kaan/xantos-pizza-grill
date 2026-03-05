@@ -29,14 +29,14 @@ messaging.onBackgroundMessage((payload) => {
   // If the payload already has a notification object, 
   // some browsers show it automatically. 
   // We wrap this in showNotification for consistency.
-  const notificationTitle = payload.notification?.title || "Ny besked!";
-  const notificationOptions = {
-    body: payload.notification?.body || "",
-    icon: "/admin-logo.png", // Double-check this file is in your /public folder
-    badge: "/admin-logo.png",
-    data: payload.data || {},
-  };
+  // const notificationTitle = payload.notification?.title || "Ny besked!";
+  // const notificationOptions = {
+  //   body: payload.notification?.body || "",
+  //   icon: "/admin-logo.png", // Double-check this file is in your /public folder
+  //   badge: "/admin-logo.png",
+  //   data: payload.data || {},
+  // };
 
-  // 🔹 The 'return' and 'waitUntil' are important for mobile stability
-  return self.registration.showNotification(notificationTitle, notificationOptions);
+  // // 🔹 The 'return' and 'waitUntil' are important for mobile stability
+  // return self.registration.showNotification(notificationTitle, notificationOptions);
 });
