@@ -244,6 +244,7 @@ export default function Admin() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
+  // Hiding the activate notification button if notification already allowed by user
   useEffect(() => {
     // 1. Safe check for Notification API (prevents Safari crash)
     const notificationsSupported = "Notification" in window;

@@ -248,30 +248,29 @@
 } */
 
 .admin-section {
-  background: rgba(255, 255, 255, 0.75);
+  padding: 2.5rem;
+  /* background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-
   border-radius: 24px;
-  padding: 2.5rem;
-
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.08),
     0 0 0 1px rgba(255, 255, 255, 0.4) inset;
 
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3); 
 
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  */
 }
 
-[data-theme="dark"] .admin-section {
+/* [data-theme="dark"] .admin-section {
   background: rgba(30, 41, 59, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.08);
 
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-}
+} 
 
 .admin-section:hover {
   box-shadow:
@@ -283,7 +282,7 @@
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-}
+} */
 
 .section-header {
   display: flex;
@@ -435,19 +434,19 @@
 .empty-state {
   padding: 4rem 2rem;
   text-align: center;
-  color: #64748b;
+  /* color: #64748b;
   background: rgba(248, 250, 252, 0.5);
   border-radius: 16px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.5); */
 }
 
-[data-theme="dark"] .loading-state,
+/* [data-theme="dark"] .loading-state,
 [data-theme="dark"] .empty-state {
   background: rgba(30, 41, 59, 0.5);
   color: #94a3b8;
   border-color: rgba(255, 255, 255, 0.1);
-}
+} */
 
 /* Modern Order Cards */
 .orders-list {
