@@ -262,6 +262,9 @@
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   */
 }
+.admin-section.notWider {
+  padding: 0 1rem;
+}
 
 /* [data-theme="dark"] .admin-section {
   background: rgba(30, 41, 59, 0.65);
@@ -2058,6 +2061,10 @@
   .btn-refresh,
   .btn-init {
     width: 100%;
+  }
+
+  .order-section-actions .btn-refresh {
+    width: unset;
   }
 
   .order-header {

@@ -1153,7 +1153,11 @@ export default function Admin() {
 
         {/* Orders Section */}
         {activeTab === "orders" && (
-          <section className="admin-section">
+          <section
+            className={
+              isOrderFullscreen ? "admin-section notWider" : "admin-section"
+            }
+          >
             <div className="section-header">
               <h2 className="section-title">Ordre Administration</h2>
               <div className="order-section-actions">
