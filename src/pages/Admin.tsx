@@ -759,71 +759,122 @@ export default function Admin() {
       // Set up real-time listener for orders (only today's orders, excluding "ready" status)
       unsubscribeRef.current = subscribeToOrders(
         (fetchedOrders) => {
+          // 1. Filter out orders that shouldn't be visible yet (Ghost Orders)
+          const validVisibleOrders = fetchedOrders.filter((o) => {
+            if (o.paymentMethod === "cash") return true;
+            return o.paymentMethod === "card" && o.paymentStatus === "paid";
+          });
+
           if (isInitialLoadRef.current) {
-            // First load: just set orders and mark as seen
-            setOrders(fetchedOrders);
-            fetchedOrders.forEach((o) => {
-              if (o.id) {
-                seenOrderIdsRef.current.add(o.id);
-              }
-            });
+            // First load: just set valid orders
+            setOrders(validVisibleOrders);
+            validVisibleOrders.forEach(
+              (o) => o.id && seenOrderIdsRef.current.add(o.id),
+            );
             isInitialLoadRef.current = false;
             setOrdersLoading(false);
           } else {
-            // Subsequent updates: check for new orders
+            // Subsequent updates: check for new VALID orders
             const previousOrderIds = seenOrderIdsRef.current;
 
-            // Find new orders that we haven't seen before
-            const newOrders = fetchedOrders.filter(
+            // IMPORTANT: Only alert if the order is NEW to our "Visible" list
+            const newValidOrders = validVisibleOrders.filter(
               (o) => o.id && !previousOrderIds.has(o.id),
             );
 
-            if (newOrders.length > 0) {
-              // Only play sound if page is visible
+            if (newValidOrders.length > 0) {
               if (!document.hidden) {
-                // Play notification sound and vibration for new orders
-                playNotificationAlert();
+                playNotificationAlert(); // Now it only dings for PAID card orders or CASH
               }
 
-              // Append new orders to existing list (prepend since sorted by date desc)
               setOrders((prevOrders) => {
-                // Get existing order IDs to avoid duplicates
-                const existingIds = new Set(prevOrders.map((o) => o.id));
-                const uniqueNewOrders = newOrders.filter(
-                  (o) => o.id && !existingIds.has(o.id),
-                );
-
-                // Prepend new orders to existing ones (newest first)
-                const updatedOrders = [...uniqueNewOrders, ...prevOrders];
-
-                // Sort by createdAt descending to maintain order (newest first)
-                return updatedOrders.sort((a, b) => {
-                  const getTime = (order: Order) => {
-                    if (order.createdAt instanceof Date) {
-                      return order.createdAt.getTime();
-                    }
-                    if (
-                      order.createdAt &&
-                      typeof order.createdAt === "object" &&
-                      "toDate" in order.createdAt
-                    ) {
-                      return (order.createdAt as any).toDate().getTime();
-                    }
-                    return new Date(order.createdAt as any).getTime();
+                // Use validVisibleOrders directly to ensure the list is always fresh/correct
+                // But we sort it to keep newest at top
+                return [...validVisibleOrders].sort((a, b) => {
+                  const getTime = (order: any) => {
+                    if (order.createdAt?.toDate)
+                      return order.createdAt.toDate().getTime();
+                    return new Date(order.createdAt).getTime();
                   };
                   return getTime(b) - getTime(a);
                 });
               });
 
-              // Update seen orders - mark new orders as seen
-              newOrders.forEach((o) => {
-                if (o.id) {
-                  seenOrderIdsRef.current.add(o.id);
-                }
-              });
+              newValidOrders.forEach(
+                (o) => o.id && seenOrderIdsRef.current.add(o.id),
+              );
+            } else {
+              // Even if no NEW orders, we should update the list in case an existing
+              // "Pending" order just became "Paid" (it wouldn't be in newValidOrders, but it needs to appear)
+              setOrders(validVisibleOrders);
             }
-            // If no new orders, don't update state - leave existing orders on screen
           }
+
+          // if (isInitialLoadRef.current) {
+          //   // First load: just set orders and mark as seen
+          //   setOrders(fetchedOrders);
+          //   fetchedOrders.forEach((o) => {
+          //     if (o.id) {
+          //       seenOrderIdsRef.current.add(o.id);
+          //     }
+          //   });
+          //   isInitialLoadRef.current = false;
+          //   setOrdersLoading(false);
+          // } else {
+          //   // Subsequent updates: check for new orders
+          //   const previousOrderIds = seenOrderIdsRef.current;
+
+          //   // Find new orders that we haven't seen before
+          //   const newOrders = fetchedOrders.filter(
+          //     (o) => o.id && !previousOrderIds.has(o.id),
+          //   );
+
+          //   if (newOrders.length > 0) {
+          //     // Only play sound if page is visible
+          //     if (!document.hidden) {
+          //       // Play notification sound and vibration for new orders
+          //       playNotificationAlert();
+          //     }
+
+          //     // Append new orders to existing list (prepend since sorted by date desc)
+          //     setOrders((prevOrders) => {
+          //       // Get existing order IDs to avoid duplicates
+          //       const existingIds = new Set(prevOrders.map((o) => o.id));
+          //       const uniqueNewOrders = newOrders.filter(
+          //         (o) => o.id && !existingIds.has(o.id),
+          //       );
+
+          //       // Prepend new orders to existing ones (newest first)
+          //       const updatedOrders = [...uniqueNewOrders, ...prevOrders];
+
+          //       // Sort by createdAt descending to maintain order (newest first)
+          //       return updatedOrders.sort((a, b) => {
+          //         const getTime = (order: Order) => {
+          //           if (order.createdAt instanceof Date) {
+          //             return order.createdAt.getTime();
+          //           }
+          //           if (
+          //             order.createdAt &&
+          //             typeof order.createdAt === "object" &&
+          //             "toDate" in order.createdAt
+          //           ) {
+          //             return (order.createdAt as any).toDate().getTime();
+          //           }
+          //           return new Date(order.createdAt as any).getTime();
+          //         };
+          //         return getTime(b) - getTime(a);
+          //       });
+          //     });
+
+          //     // Update seen orders - mark new orders as seen
+          //     newOrders.forEach((o) => {
+          //       if (o.id) {
+          //         seenOrderIdsRef.current.add(o.id);
+          //       }
+          //     });
+          //   }
+          //   // If no new orders, don't update state - leave existing orders on screen
+          // }
         },
         (error) => {
           console.error("Error in orders subscription:", error);
@@ -1327,93 +1378,106 @@ export default function Admin() {
               <div className="empty-state">Ingen ordrer endnu.</div>
             ) : (
               <div className="orders-list">
-                {orders.map((o) => (
-                  <div key={o.id} className="order-card">
-                    <div className="order-header">
-                      <div>
-                        <div className="order-name">{o.name}</div>
-                        <div className="order-meta">
-                          {o.method === "delivery"
-                            ? "🚴 Levering"
-                            : "🚗 Afhentning"}
-                          {" • "}
-                          {(() => {
-                            if (o.createdAt instanceof Date) {
-                              return o.createdAt.toLocaleString("da-DK");
-                            }
-                            if (
-                              o.createdAt &&
-                              typeof o.createdAt === "object" &&
-                              "toDate" in o.createdAt
-                            ) {
-                              return (o.createdAt as any)
-                                .toDate()
-                                .toLocaleString("da-DK");
-                            }
-                            // Handle string dates from localStorage
-                            return new Date(
-                              o.createdAt as string | Date,
-                            ).toLocaleString("da-DK");
-                          })()}
+                {orders
+                  .filter((o) => {
+                    // 1. If it's Cash, show it immediately
+                    if (o.paymentMethod === "cash") return true;
+
+                    // 2. If it's Card, ONLY show it if the paymentStatus is 'paid'
+                    // (Assuming you have a 'paymentStatus' field in your Firestore doc)
+                    if (o.paymentMethod === "card") {
+                      return o.paymentStatus === "paid";
+                    }
+
+                    return true; // Fallback for any other types
+                  })
+                  .map((o) => (
+                    <div key={o.id} className="order-card">
+                      <div className="order-header">
+                        <div>
+                          <div className="order-name">{o.name}</div>
+                          <div className="order-meta">
+                            {o.method === "delivery"
+                              ? "🚴 Levering"
+                              : "🚗 Afhentning"}
+                            {" • "}
+                            {(() => {
+                              if (o.createdAt instanceof Date) {
+                                return o.createdAt.toLocaleString("da-DK");
+                              }
+                              if (
+                                o.createdAt &&
+                                typeof o.createdAt === "object" &&
+                                "toDate" in o.createdAt
+                              ) {
+                                return (o.createdAt as any)
+                                  .toDate()
+                                  .toLocaleString("da-DK");
+                              }
+                              // Handle string dates from localStorage
+                              return new Date(
+                                o.createdAt as string | Date,
+                              ).toLocaleString("da-DK");
+                            })()}
+                          </div>
+                          <a href={`tel:${o.phone}`} className="order-phone">
+                            📞 {o.phone}
+                          </a>
+                          {o.address && (
+                            <div className="order-address">📍 {o.address}</div>
+                          )}
                         </div>
-                        <a href={`tel:${o.phone}`} className="order-phone">
-                          📞 {o.phone}
-                        </a>
-                        {o.address && (
-                          <div className="order-address">📍 {o.address}</div>
-                        )}
-                      </div>
-                      <div className="order-actions">
-                        <div className="order-total">
-                          DKK {o.total.toFixed(2)}
+                        <div className="order-actions">
+                          <div className="order-total">
+                            DKK {o.total.toFixed(2)}
+                          </div>
+                          <select
+                            value={o.status}
+                            onChange={(e) =>
+                              handleUpdateOrderStatus(
+                                o.id!,
+                                e.target.value as Order["status"],
+                              )
+                            }
+                            className="status-select"
+                          >
+                            <option value="pending">⏳ Afventer</option>
+                            <option value="paid">💳 Betalt</option>
+                            <option value="making">👨‍🍳 Tilbereder</option>
+                            <option value="ready">✅ Klar</option>
+                            <option value="collected">📦 Afhentet</option>
+                          </select>
                         </div>
-                        <select
-                          value={o.status}
-                          onChange={(e) =>
-                            handleUpdateOrderStatus(
-                              o.id!,
-                              e.target.value as Order["status"],
-                            )
-                          }
-                          className="status-select"
-                        >
-                          <option value="pending">⏳ Afventer</option>
-                          <option value="paid">💳 Betalt</option>
-                          <option value="making">👨‍🍳 Tilbereder</option>
-                          <option value="ready">✅ Klar</option>
-                          <option value="collected">📦 Afhentet</option>
-                        </select>
                       </div>
-                    </div>
-                    <div className="order-items">
-                      <strong>Varer:</strong>
-                      <ul className="order-item-list">
-                        {o.items.map((i: any) => (
-                          <li key={i.id}>
-                            <div className="order-item-list-header">
-                              <p>
-                                {i.qty} × {i.name}
-                              </p>
-                              <p>DKK {(i.price * i.qty).toFixed(2)}</p>
-                            </div>
-                            <ul className="item-ingredients-list">
-                              {i.selectedIngredients?.map(
-                                (ing: any, idx: number) => (
-                                  <li key={idx}>{ing.name}</li>
-                                ),
-                              )}
-                            </ul>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    {o.note && (
-                      <div className="order-note">
-                        <strong>Bemærkning:</strong> {o.note}
+                      <div className="order-items">
+                        <strong>Varer:</strong>
+                        <ul className="order-item-list">
+                          {o.items.map((i: any) => (
+                            <li key={i.id}>
+                              <div className="order-item-list-header">
+                                <p>
+                                  {i.qty} × {i.name}
+                                </p>
+                                <p>DKK {(i.price * i.qty).toFixed(2)}</p>
+                              </div>
+                              <ul className="item-ingredients-list">
+                                {i.selectedIngredients?.map(
+                                  (ing: any, idx: number) => (
+                                    <li key={idx}>{ing.name}</li>
+                                  ),
+                                )}
+                              </ul>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {o.note && (
+                        <div className="order-note">
+                          <strong>Bemærkning:</strong> {o.note}
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
           </section>
