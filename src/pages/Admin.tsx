@@ -787,7 +787,7 @@ export default function Admin() {
                 playNotificationAlert(); // Now it only dings for PAID card orders or CASH
               }
 
-              setOrders((prevOrders) => {
+              setOrders(() => {
                 // Use validVisibleOrders directly to ensure the list is always fresh/correct
                 // But we sort it to keep newest at top
                 return [...validVisibleOrders].sort((a, b) => {
